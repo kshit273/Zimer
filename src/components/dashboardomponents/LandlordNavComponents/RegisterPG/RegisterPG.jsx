@@ -274,7 +274,6 @@ const RegisterPG = ({setUser,setBar,coords}) => {
       
       setError("");
       setSuccess(`Your PG has been registered: ${res.data.RID}`);
-      setBar(0);
       
     } catch (err) {
       console.error("Registration failed", err);
