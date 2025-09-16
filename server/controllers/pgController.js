@@ -1,5 +1,7 @@
 const PG = require("../models/pgModel");
+const Invite = require("../models/inviteModel")
 const { generateRID } = require("../middleware/ridService");
+const crypto = require("crypto");
 
 // GET all PGs
 exports.getAllPGs = async (req, res) => {
@@ -172,3 +174,114 @@ exports.deletePG = async (req, res) => {
     res.status(500).json({ error: "Failed to delete PG" });
   }
 };
+
+// generate Token for tenant login into room
+exports.generateToken = async (req, res) => {
+  try {
+    const { PGID, roomId } = req.body;
+
+    // fetch PG using RID
+    const pg = await PG.findOne({ RID: PGID });
+    if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    const room = pg.rooms.find(r => r.roomId === roomId);
+    if (!room) return res.status(404).json({ error: "Room not found" });
+
+    // calculate capacity
+    let capacity;
+    if (room.roomType === "single") capacity = 1;
+    else if (room.roomType === "double") capacity = 2;
+    else if (room.roomType === "triple") capacity = 3;
+    else if (room.roomType === "quad") capacity = 4;
+    else capacity = Infinity; // "other" = unlimited tenants
+
+    const currentTenants = room.tenants.length;
+    const maxJoins = capacity === Infinity ? null : capacity - currentTenants;
+
+    if (maxJoins <= 0) {
+      return res.status(400).json({ error: "Room is full" });
+    }
+
+    const token = crypto.randomBytes(16).toString("hex");
+
+    const invite = new Invite({
+      token,
+      PGID: pg.RID,
+      roomId,
+      maxJoins,
+      expiresAt: new Date(Date.now() + 7*24*60*60*1000), // 7 days
+    });
+
+    await invite.save();
+
+    const inviteLink = `${process.env.BASE_URL}/join/${PGID}/${roomId}?token=${token}`;
+    res.json({ inviteLink });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Join the tenant into room
+exports.joinRoom = async (req, res) => {
+  try {
+    const { RID, roomId } = req.params;
+    const { tenantId } = req.body;
+    const { token } = req.query;
+
+    // 1. Validate invite token
+    const invite = await Invite.findOne({ roomId, token, expiresAt: { $gt: Date.now() } });
+    if (!invite) {
+      return res.status(400).json({ success: false, error: "Invalid or expired token" });
+    }
+
+    // 2. Find PG and room by RID
+    const pg = await PG.findOne({ RID });
+    if (!pg) {
+      return res.status(404).json({ success: false, error: "PG not found" });
+    }
+
+    const room = pg.rooms.find(r => r.roomId === roomId);
+    if (!room) {
+      return res.status(404).json({ success: false, error: "Room not found" });
+    }
+
+    // 3. Add tenant if space available
+    let capacity;
+    switch (room.roomType) {
+      case "single": capacity = 1; break;
+      case "double": capacity = 2; break;
+      case "triple": capacity = 3; break;
+      case "quad": capacity = 4; break;
+      default: capacity = Infinity; // "other"
+    }
+
+    if (room.tenants.length >= capacity) {
+      return res.status(400).json({ success: false, error: "Room is full" });
+    }
+
+    if (room.tenants.includes(tenantId)) {
+      return res.status(400).json({ success: false, error: "Already joined" });
+    }
+
+    room.tenants.push(tenantId);
+    await pg.save();
+
+    // 4. Decrement token uses
+    invite.usedCount += 1;
+    invite.usedBy.push(tenantId);
+    // If maxJoins is reached, delete the invite
+    if (invite.usedCount >= invite.maxJoins) {
+      await invite.deleteOne();
+    } else {
+      await invite.save();
+    }
+
+    res.json({ success: true, RID, roomId, tenantId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+

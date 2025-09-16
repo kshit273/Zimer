@@ -18,6 +18,7 @@ import Messenger from "./routes/Messenger";
 import Navbar from "./components/Navbar";
 import TenantDashboard from "./routes/TenantDashboard";
 import LandlordDashboard from "./routes/LandlordDashboard";
+import JoinRoom from "./routes/JoinRoom";
 
 axios.defaults.withCredentials = true;
 
@@ -152,6 +153,7 @@ function App() {
         />
         <Route path="/userlogin" element={<Userlogin setUser={setUser} />} />
         <Route path="/messenger" element={<Messenger />} />
+        <Route path="/join/:RID/:roomId" element={<JoinRoom user={user}/>} />
       </Routes>
     </>
   );

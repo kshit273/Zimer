@@ -29,17 +29,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // 🔗 All Routes
-app.use("/auth", authRoutes);
-app.use("/pgs", pgRoutes);
+app.use("/auth", authRoutes); // Done
+app.use("/pgs", pgRoutes); // Done
 app.use("/payment", paymentRoutes);
 app.use("/rewards", rewardRoutes);
 app.use("/referral", referralRoutes);
-app.use("/verification", verificationRoutes);
+app.use("/verification", verificationRoutes); // No need ig
 // app.use("/admin", adminRoutes); // enable later
-app.use("/user", userRoutes);
+app.use("/user", userRoutes); // Partially Done (To be taken care of later)
 app.use("/wishlist", wishlistRoutes);
-app.use("/geocode", geocodeRoutes);
-app.use("/uploads", express.static("public/uploads"));
+app.use("/geocode", geocodeRoutes); // Done
+app.use("/uploads", express.static("public/uploads")); 
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

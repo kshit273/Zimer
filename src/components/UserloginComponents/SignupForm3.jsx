@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const SignupForm3 = ({ setUser, handleSubmit, formData, setFormData }) => {
+const SignupForm3 = ({ redirectTo, setUser, handleSubmit, formData, setFormData }) => {
   const navigate = useNavigate();
 
   const handleRoleClick = async (role, path) => {
@@ -14,7 +14,7 @@ const SignupForm3 = ({ setUser, handleSubmit, formData, setFormData }) => {
       const success = await handleSubmit(updatedData); // should return true/false
       if (success && success.user) {
         setUser(success.user);
-        navigate(path);
+        navigate(redirectTo !== "/search" ? redirectTo : path);
       } else {
         alert("Signup failed, please try again");
       }

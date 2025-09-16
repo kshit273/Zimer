@@ -4,7 +4,7 @@ import SignupForm2 from "./SignupForm2";
 import SignupForm1 from "./signupForm1";
 import SignupForm3 from "./SignupForm3";
 
-const SignupComp = ({ onShowLogin, setUser, onSubmit }) => {
+const SignupComp = ({ redirectTo, onShowLogin, setUser, onSubmit }) => {
   const [signupStep, setSignupStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -51,6 +51,7 @@ const SignupComp = ({ onShowLogin, setUser, onSubmit }) => {
             />
           ) : signupStep == 3 ? (
             <SignupForm3
+              redirectTo={redirectTo}
               setUser={setUser}
               handleSubmit={handleSubmit}
               formData={formData}

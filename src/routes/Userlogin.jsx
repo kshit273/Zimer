@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import LoginComp from "../components/UserloginComponents/LoginComp";
 import SignupComp from "../components/UserloginComponents/SignupComp";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Userlogin = ({ setUser }) => {
   const [showLogin, setShowLogin] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirectTo = new URLSearchParams(location.search).get("redirect") || "/search";
 
   // Functions to pass to child components for toggling
   const handleShowLogin = () => setShowLogin(true);
@@ -28,8 +31,7 @@ const Userlogin = ({ setUser }) => {
       });
 
       alert("Signup successful! You can login now.");
-      // Return user data if your backend provides it
-      return { user: res.data.user }; // Make sure your backend returns user data
+      return { user: res.data.user }; 
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Signup failed");
@@ -50,7 +52,7 @@ const Userlogin = ({ setUser }) => {
 
       const role = res.data.user.role;
       {
-        role == `tenant` ? navigate(`/search`) : navigate(`/`);
+        role == `tenant` ? navigate(redirectTo) : navigate(`/`);
       }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
@@ -87,6 +89,7 @@ const Userlogin = ({ setUser }) => {
             />
           ) : (
             <SignupComp
+              redirectTo={redirectTo}
               onShowLogin={handleShowLogin}
               setUser={setUser}
               onSubmit={handleSignup}
