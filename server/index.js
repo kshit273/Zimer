@@ -11,7 +11,6 @@ const rewardRoutes = require("./routes/rewardRoutes");
 const referralRoutes = require("./routes/referralRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
 // const adminRoutes = require("./routes/adminRoutes"); // for later
-const userRoutes = require("./routes/userRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const geocodeRoutes = require("./routes/geocode");
 
@@ -36,7 +35,6 @@ app.use("/rewards", rewardRoutes);
 app.use("/referral", referralRoutes);
 app.use("/verification", verificationRoutes); // No need ig
 // app.use("/admin", adminRoutes); // enable later
-app.use("/user", userRoutes); // Partially Done (To be taken care of later)
 app.use("/wishlist", wishlistRoutes);
 app.use("/geocode", geocodeRoutes); // Done
 app.use("/uploads", express.static("public/uploads")); 
