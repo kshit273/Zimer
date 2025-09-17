@@ -73,7 +73,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
               No PG information available
             </h3>
             <p className="text-[#464646]">
-              Please check your connection or contact support if this persists.
+              Either you have not registered a PG or check your connection.
             </p>
           </div>
         </div>
