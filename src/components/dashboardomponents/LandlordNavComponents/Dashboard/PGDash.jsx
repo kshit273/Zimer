@@ -109,7 +109,6 @@ const PGDash = ({ pgData, loading, error }) => {
     } finally {
       setTenantDataLoading(false);
     }
-    console.log(roomsWithTenantData);
   };
 
   // Process rooms when pgData changes

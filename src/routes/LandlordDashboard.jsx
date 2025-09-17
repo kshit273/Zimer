@@ -14,6 +14,7 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
   const [pgError, setPgError] = useState(null);
   
   const [formData, setFormData] = useState({
+    _id : user?._id || "",
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     dob: user?.dob || "",
@@ -67,6 +68,7 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
         
         setFormData((prev) => ({
           ...prev,
+          _id : res.data._id || "",
           firstName: res.data.firstName || "",
           lastName: res.data.lastName || "",
           dob: res.data.dob || "",
@@ -148,7 +150,7 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
 
       <section id="tenantDash" className="relative z-2 pt-[30px]">
         <div className={`w-full flex justify-center `}>
-          <div className="w-[98%] h-full pb-[40px] bg-[#e1e1e1] rounded-[20px] drop-shadow-2xl drop-shadow-[#a5a5a5] flex flex-col items-center px-5">
+          <div className="w-[98%] min-h-[1200px] h-full pb-[40px] bg-[#e1e1e1] rounded-[20px] drop-shadow-2xl drop-shadow-[#a5a5a5] flex flex-col items-center px-5">
             <div className="w-full flex items-center justify-start py-5">
               <BackBtn />
             </div>

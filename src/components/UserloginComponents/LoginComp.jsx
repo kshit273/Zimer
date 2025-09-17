@@ -20,7 +20,6 @@ const LoginComp = ({ onSubmit, onShowSignup, setUser }) => {
   // handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
     try {
       onSubmit(formData);
       return true;

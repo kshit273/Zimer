@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 
 const authAndUserRoutes = require("./routes/authAndUserRoutes");
 const pgRoutes = require("./routes/pgRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const referralRoutes = require("./routes/referralRoutes");
@@ -30,6 +31,7 @@ app.use(cookieParser());
 // 🔗 All Routes
 app.use("/auth", authAndUserRoutes); // Done
 app.use("/pgs", pgRoutes); // Done
+app.use("/notifications", notificationRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/rewards", rewardRoutes);
 app.use("/referral", referralRoutes);

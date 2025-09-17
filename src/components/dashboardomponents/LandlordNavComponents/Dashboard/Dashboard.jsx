@@ -19,7 +19,7 @@ const Dashboard = ({ handlePGSelection,formData,pgData,loading,error,length }) =
             />
       </div>
       <div className="col-span-4">
-        <Dash3 />
+        {pgData ? <Dash3 pgId={pgData._id}/> : <p>Loading...</p>}
       </div>
     </div>
   );

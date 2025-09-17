@@ -1,78 +1,166 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import JoinReq from "../../TenantNavComponents/Dashboard/Notification/JoinReq";
 import BaseNotification from "../../TenantNavComponents/Dashboard/Notification/BaseNotification";
 import LeaveReq from "../../TenantNavComponents/Dashboard/Notification/LeaveReq";
 import RentPaidNotification from "../../TenantNavComponents/Dashboard/Notification/RentPaidNotification";
 
-const Dash3 = () => {
+const Dash3 = ({ pgId }) => {
   const [announcement, setAnnouncement] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
 
-  const lines = announcement.split("\n");
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:5000/notifications?pgId=${pgId}`,
+        { withCredentials: true }
+      );
+      setNotifications(response.data.notifications);
+     
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const notifications = [
-    {
-      msg: "Ajay Arora has sent a join request for room 101 , do you want to accept it ?",
-      date: "2025-04-18",
-      time: "11:15:00",
-    },
-    {
-      msg: "Ajay Arora has sent a join request for room 101 , do you want to accept it ?",
-      date: "2025-04-18",
-      time: "11:15:00",
-    },
-    {
-      msg: "Ajay Arora has sent a join request for room 101 , do you want to accept it ?",
-      date: "2025-04-18",
-      time: "11:15:00",
-    },
-    {
-      msg: "Ajay Arora has sent a join request for room 101 , do you want to accept it ?",
-      date: "2025-04-18",
-      time: "11:15:00",
-    },
-    {
-      msg: "Ajay Arora has sent a join request for room 101 , do you want to accept it ?",
-      date: "2025-04-18",
-      time: "11:15:00",
-    },
-  ];
+  useEffect(() => {
+    if (pgId) {
+      fetchNotifications();
+      // Refresh every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [pgId]);
+
+  // Send announcement
+  const handleSendAnnouncement = async () => {
+    if (!announcement.trim()) return;
+
+    try {
+      setSending(true);
+      await axios.post(
+        "http://localhost:5000/notifications/announcement",
+        {
+          message: announcement,
+          pgId: pgId,
+        },
+        { withCredentials: true }
+      );
+      setAnnouncement("");
+      fetchNotifications(); 
+    } catch (error) {
+      console.error("Error sending announcement:", error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Handle accept/reject for requests
+  const handleRequestAction = async (notificationId, action) => {
+    try {
+      await axios.patch(
+        `http://localhost:5000/notifications/${notificationId}/status`,
+        {
+          status: action,
+        },
+        { withCredentials: true }
+      );
+      fetchNotifications(); // Refresh after action
+    } catch (error) {
+      console.error("Error updating notification:", error);
+      alert(`Failed to ${action} request`);
+    }
+  };
+
+  // Render notification based on type
+  const renderNotification = (notification,i) => {
+
+    switch (notification.type) {
+      case "join_request":
+        return (
+          <JoinReq
+            key={notification._id}
+            data={notification}
+            onAccept={() => handleRequestAction(notification._id, "accepted")}
+            onReject={() => handleRequestAction(notification._id, "rejected")}
+          />
+        );
+      case "leave_request":
+        return (
+          <LeaveReq
+            key={notification._id}
+            data={notification}
+            onAccept={() => handleRequestAction(notification._id, "accepted")}
+            onReject={() => handleRequestAction(notification._id, "rejected")}
+          />
+        );
+      case "rent_paid":
+        return (
+          <RentPaidNotification key={notification._id} data={notification} />
+        );
+      case "announcement":
+        return <div
+                key={notification._id}
+                className={`mb-4 rounded-[20px] w-full cursor-pointer bg-[#e2e2e2]`}
+              >
+                <BaseNotification data={notification} />
+              </div>;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className=" p-4">
-      <div>
-        <p className="text-[24px] text-[#5c5c5c] font-medium mb-2">
-          Notifications
-        </p>
+    <div className="bg-[#d9d9d9] rounded-[35px] p-6 my-6">
+      <div className="">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-[24px] font-medium text-[#1a1a1a]">
+            Notifications
+          </h2>
+        </div>
       </div>
-      <div className="bg-[#e2e2e2] rounded-2xl p-4 w-full max-w-[600px] mx-auto flex flex-col my-8">
+
+      {/* Announcement Section - Only for Landlord */}
+      <div className="bg-[#e2e2e2] rounded-[20px] p-5 mb-6 shadow">
         <textarea
-          rows={4} // controls how many lines are visible
-          className="bg-transparent border border-[#bdbdbd] text-[#5c5c5c] text-[16px] px-3 py-2 rounded-lg resize-none outline-none focus:ring-2 focus:ring-[#d72638]"
+          className="w-full min-h-[120px] p-4 bg-[#d9d9d9] rounded-[15px] text-[16px] resize-none focus:outline-none focus:ring-2 focus:ring-[#ff0058]/20"
           placeholder="Type your announcement here..."
           value={announcement}
           onChange={(e) => setAnnouncement(e.target.value)}
         />
         <div className="flex justify-end mt-4">
-          <button className="bg-gradient-to-r from-[#ff0058] to-[#d72638] text-white text-[16px] font-medium px-10 py-2 rounded-full shadow transition hover:opacity-90">
-            Send
+          <button
+            onClick={handleSendAnnouncement}
+            disabled={sending || !announcement.trim()}
+            className="bg-gradient-to-r from-[#ff0058] to-[#d72638] text-white text-[16px] font-medium px-10 py-2 rounded-full shadow transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {sending ? "Sending..." : "Send"}
           </button>
         </div>
       </div>
 
+      {/* Notifications List */}
       <div className="relative">
         <div className="h-[520px] overflow-y-auto no-scrollbar flex flex-col items-center justify-start">
-          {notifications.length === 0 ? (
+          {loading ? (
+            <div className="text-[#5c5c5c] text-[18px] mt-4">
+              Loading notifications...
+            </div>
+          ) : notifications.length === 0 ? (
             <p className="text-[#5c5c5c] text-[18px] mt-4">
               No new notifications
             </p>
           ) : (
-            notifications.map((notification, index) => (
-              <div key={index} className="mb-4 rounded flex flex-col gap-4">
-                <JoinReq data={notification} />
-                <BaseNotification data={notification} />
-                <LeaveReq data={notification} />
-                <RentPaidNotification data={notification} />
-              </div>
-            ))
+            <div className="w-full flex flex-col ">
+              {notifications.map((notification) =>
+                renderNotification(notification)
+              )}
+            </div>
           )}
         </div>
         <div className="absolute bottom-0 left-0 w-full h-10 pointer-events-none bg-gradient-to-t from-[#d9d9d9] via-[#d9d9d9]/80 to-transparent"></div>
