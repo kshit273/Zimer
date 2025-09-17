@@ -7,6 +7,7 @@ const {
   verifyToken,
   updateUser,
   getUser,
+  getTenantsBatch
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -24,5 +25,6 @@ router.put(
   updateUser
 );
 router.get("/me", authMiddleware, getUser);
+router.post("/tenants-batch", getTenantsBatch);
 
 module.exports = router;

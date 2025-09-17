@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./db");
 const cookieParser = require("cookie-parser");
 
-const authRoutes = require("./routes/authRoutes");
+const authAndUserRoutes = require("./routes/authAndUserRoutes");
 const pgRoutes = require("./routes/pgRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // 🔗 All Routes
-app.use("/auth", authRoutes); // Done
+app.use("/auth", authAndUserRoutes); // Done
 app.use("/pgs", pgRoutes); // Done
 app.use("/payment", paymentRoutes);
 app.use("/rewards", rewardRoutes);

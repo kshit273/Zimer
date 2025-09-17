@@ -232,3 +232,44 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getTenantsBatch = async (req, res) => { // Fixed function name
+  try {
+    const { tenantIds } = req.body;
+
+    // Validate input
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "tenantIds array is required and cannot be empty"
+      });
+    }
+
+    // Fetch tenants by IDs (assuming you're using MongoDB/Mongoose)
+    const tenants = await User.find({
+      _id: { $in: tenantIds }
+    }).select('firstName lastName id phone'); 
+
+    // Check if any tenants were not found
+    const foundIds = tenants.map(tenant => tenant._id.toString());
+    const notFoundIds = tenantIds.filter(id => !foundIds.includes(id));
+    
+    if (notFoundIds.length > 0) {
+      console.warn(`Tenants not found: ${notFoundIds.join(', ')}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      tenants,
+      notFound: notFoundIds 
+    });
+
+  } catch (error) {
+    console.error("Error fetching tenants in batch:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch tenant data",
+      error: error.message
+    });
+  }
+};
