@@ -23,7 +23,7 @@ const LandlordDashComponents = ({
     case 0:
       component = (
         <DashboardComp 
-          setBar={setBar}
+          user={user}
           formData={formData} 
           ownedPGsData={ownedPGsData}
           loadingPGs={loadingPGs}

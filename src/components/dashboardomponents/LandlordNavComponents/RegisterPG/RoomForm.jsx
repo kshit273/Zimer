@@ -111,6 +111,18 @@ const RoomForm = ({ room, onChange, onRemove }) => {
         className="w-full p-2 bg-[#e2e2e2] rounded-lg mb-3"
       />
 
+      {/* Room security */}
+      <label className="block text-[#5c5c5c] font-medium mb-1">
+        Security deposit
+      </label>
+      <input
+        type="number"
+        name="security"
+        value={room.security}
+        onChange={handleChange}
+        className="w-full p-2 bg-[#e2e2e2] rounded-lg mb-3"
+      />
+
       {/* Availability */}
       <div className="flex items-center gap-4 my-4">
         <label>

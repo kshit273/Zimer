@@ -10,6 +10,7 @@ const {
   markAsRead,
   getUnreadCount,
   markAllAsRead,
+  acceptJoinRequest,
 } = require("../controllers/notificationController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -18,16 +19,17 @@ router.use(authMiddleware);
 
 // Create notifications
 router.post("/announcement", createAnnouncement);
-router.post("/join-request", createJoinRequest);
 router.post("/leave-request", createLeaveRequest);
 router.post("/rent-paid", createRentPaymentNotification);
+router.post('/join-request/:notificationId/accept', authMiddleware, acceptJoinRequest);
+router.post('/join-request', authMiddleware, createJoinRequest);
+router.patch('/:notificationId/status', authMiddleware, updateNotificationStatus);
 
 // Get notifications
 router.get("/", getNotifications);
 router.get("/unread-count", getUnreadCount);
 
 // Update notifications
-router.patch("/:id/status", updateNotificationStatus);
 router.patch("/:id/read",authMiddleware, markAsRead);
 router.patch("/mark-all-read", markAllAsRead);
 

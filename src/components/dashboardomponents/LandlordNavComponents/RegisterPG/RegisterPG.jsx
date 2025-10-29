@@ -64,6 +64,7 @@ const RegisterPG = ({setUser,setBar,coords}) => {
       roomType: "Select here",
       furnished: "",
       rent: "",
+      security:"",
       available: false,
       availableFrom: "",
       description: "",
@@ -253,7 +254,7 @@ const RegisterPG = ({setUser,setBar,coords}) => {
         
         // Update user with new PG RID
         const updateRes = await axios.put(
-          "http://localhost:5000/user/update",
+          "http://localhost:5000/auth/update-landlord-pgs",
           {
             ownedPGs: [...currentOwnedPGs, res.data.RID]
           },

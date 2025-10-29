@@ -1,6 +1,6 @@
 import React from "react";
 
-const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }) => {
+const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length, residingPG }) => {
   // Loading state
   if (loading) {
     return (
@@ -101,6 +101,13 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
     );
   }
 
+  //changing the format of date from ISO to letters
+  const isoDate = pgData.joinFrom;
+  const date = new Date(isoDate);
+
+  // Format to "Month YYYY"
+  const formattedDate = date.toLocaleString("en-US", { month: "long", year: "numeric" });
+
   // Main component render (success state)
   return (
     <div className="flex flex-col gap-5">
@@ -108,7 +115,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
         {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}{" "}
         Dashboard
       </p>
-      <div className="flex gap-2">
+      <div className={`flex gap-2 ${!residingPG ? `blur pointer-events-none`:``}`}>
         {length > 1 ? <div className="flex items-center">
           <button className="flex items-center justify-center w-[35px] h-[35px] bg-[#464646] rounded-full hover:bg-[#333] transition-colors" 
           onClick={() => handlePGSelection(-1)}>
@@ -169,8 +176,8 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
               <div className="flex gap-5">
                 <p>PG owner</p>
                 <p className="font-light">
-                  {formData.firstName && formData.lastName 
-                    ? `${formData.firstName} ${formData.lastName}` 
+                  {pgData.ownerFirstName && pgData.ownerLastName
+                    ? `${pgData.ownerFirstName} ${pgData.ownerLastName}` 
                     : "Owner information not available"}
                 </p>
               </div>
@@ -183,7 +190,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
               {formData.role === "tenant" ? (
                 <div className="flex gap-5">
                   <p>Current Rent</p>
-                  <p className="font-light">$400</p>
+                  <p className="font-light">₹ {pgData.rent || "Rent not available"}</p>
                 </div>
               ) : (
                 <div className="flex gap-5">
@@ -197,7 +204,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
               {formData.role === "tenant" ? (
                 <div className="flex gap-5">
                   <p>Room no.</p>
-                  <p className="font-light">105</p>
+                  <p className="font-light">{pgData.room}</p>
                 </div>
               ) : (
                 <div className="flex gap-5">
@@ -212,7 +219,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length }
             </div>
             
             {formData.role === "tenant" && (
-              <p className="font-light italic px-2">staying since may 2025</p>
+              <p className="font-light italic px-2">staying since {formattedDate}</p>
             )}
           </div>
         </div>

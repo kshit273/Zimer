@@ -6,10 +6,30 @@ import Logout from "../components/Logout";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const TenantDashboard = ({ user, setUser }) => {
+const TenantDashboard = ({ user, setUser, coords }) => {
   const [bar, setBar] = useState(0);
+  const [residingPG, setresidingPG] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [currentPGData, setCurrentPGData] = useState({
+    LID: "",
+    RID: "",
+    address:"",
+    plan:"",
+    rent:0,
+    room:0,
+    joinFrom:"",
+    coverPhoto:"",
+    pgName:"",
+    payments:[],
+    ownerFirstName:"",
+    ownerLastName:"",
+    ownerPhone:""
+  });
+  const [loadingPGs, setLoadingPGs] = useState(false);
+  const [pgError, setPgError] = useState(null);
+  
   const [formData, setFormData] = useState({
+    _id: user?._id || "",
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     dob: user?.dob || "",
@@ -19,7 +39,9 @@ const TenantDashboard = ({ user, setUser }) => {
     role: user?.role || "",
     profilePicture: user?.profilePicture || "",
     password: "",
+    currentPG: user?.currentPG || "", 
   });
+
 
   const tenantNavList = [
     "Dashboard",
@@ -32,6 +54,7 @@ const TenantDashboard = ({ user, setUser }) => {
   ];
   
   const navigate = useNavigate();
+  
   const handleLogOut = async () => {
     try {
       const res = await axios.post(
@@ -50,14 +73,18 @@ const TenantDashboard = ({ user, setUser }) => {
       console.error("Logout failed:", err.response?.data || err.message);
     }
   };
+
+  // Fetch user data including currentPG
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res = await axios.get("http://localhost:5000/auth/me", {
           withCredentials: true,
         });
+        
         setFormData((prev) => ({
           ...prev,
+          _id: res.data._id || "",
           firstName: res.data.firstName || "",
           lastName: res.data.lastName || "",
           dob: res.data.dob || "",
@@ -66,14 +93,135 @@ const TenantDashboard = ({ user, setUser }) => {
           phone: res.data.phone || "",
           role: res.data.role || "",
           profilePicture: res.data.profilePicture || "",
+          currentPG: res.data.currentPG || "",
         }));
+        
+        // Update user state with fresh data
+        if (setUser) {
+          setUser(res.data);
+        }
+
+        // Update residing PG state (if applicable)
+        if (res.data.currentPG) {
+          setresidingPG(true);
+        } else {
+          setresidingPG(false);
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [setUser]);
+
+  useEffect(() => {
+  const fetchCurrentPGData = async () => {
+    setLoadingPGs(true);
+    setPgError(null);
+    
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/pgs/${formData.currentPG}`,
+        { withCredentials: true }
+      );
+      const pgData = response.data;
+
+      // Find the room and tenant data for current user
+      let userRoomData = null;
+      let userTenantData = null;
+      
+      for (const room of pgData.rooms) {
+        const tenant = room.tenants.find(t => t.tenantId === formData._id || t.tenantId?._id === formData._id);
+        if (tenant) {
+          userRoomData = room;
+          userTenantData = tenant;
+          break;
+        }
+      }
+
+      if (userRoomData && userTenantData) {
+        setCurrentPGData({
+          LID: pgData.LID || "",
+          RID: pgData.RID || "",
+          address: pgData.address || "",
+          plan: pgData.plan || "",
+          rent: userRoomData.rent || 0,
+          room: userRoomData.roomId || "",
+          joinFrom: userTenantData.joinDate || "",
+          coverPhoto: pgData.coverPhoto || "",
+          pgName:pgData.pgName || "",
+          payments: userTenantData.payments || []
+        });
+      } else {
+        console.warn("User not found in any room");
+        setCurrentPGData({
+          LID: "",
+          RID: "",
+          address: "",
+          plan: "",
+          rent: 0,
+          room: "",
+          joinFrom: "",
+          payments: []
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching current PG data:", error);
+      setPgError("Failed to load PG data");
+      setCurrentPGData({
+        LID: "",
+        RID: "",
+        address: "",
+        plan: "",
+        rent: 0,
+        room: "",
+        joinFrom: "",
+        payments: []
+      });
+    } finally {
+      setLoadingPGs(false);
+    }
+  };
+
+  if (formData.currentPG) {
+    fetchCurrentPGData();
+  }
+}, [formData.currentPG, formData._id]);
+
+  useEffect(() => {
+  const fetchOwnerData = async () => {
+    if (!currentPGData.LID) return;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/auth/tenants-batch",
+        { tenantIds: [currentPGData.LID] },
+        { withCredentials: true }
+      );
+
+      const { tenants } = response.data;
+
+      if (tenants && tenants.length > 0) {
+        const ownerInfo = tenants[0]; // assuming one ID = one tenant
+
+        setCurrentPGData((prev) => ({
+          ...prev,
+          ownerFirstName: ownerInfo.firstName || "",
+          ownerLastName: ownerInfo.lastName || "",
+          ownerPhone: ownerInfo.phone || ""
+        }));
+      } else {
+        console.warn("No tenant found for given LID");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching owner data:", error);
+    }
+  };
+
+  fetchOwnerData();
+}, [currentPGData.LID]);
+
   return (
     <>
       <div className="absolute top-[-20px] left-[-20px] z-1 md:w-[512px] w-[256px]  md:h-[560px] h-[280px] pointer-events-none">
@@ -85,7 +233,7 @@ const TenantDashboard = ({ user, setUser }) => {
 
       <section id="tenantDash" className="relative z-2 pt-[30px]">
         <div className={`w-full flex justify-center `}>
-          <div className="w-[98%] h-full pb-[40px] bg-[#e1e1e1] rounded-[20px] drop-shadow-2xl drop-shadow-[#a5a5a5] flex flex-col items-center px-5">
+          <div className="w-[98%] min-h-[1200px] h-full pb-[40px] bg-[#e1e1e1] rounded-[20px] drop-shadow-2xl drop-shadow-[#a5a5a5] flex flex-col items-center px-5">
             <div className="w-full flex items-center justify-start py-5">
               <BackBtn />
             </div>
@@ -97,6 +245,12 @@ const TenantDashboard = ({ user, setUser }) => {
                   bar={bar}
                   formData={formData}
                   setFormData={setFormData}
+                  coords={coords}
+                  setBar={setBar}
+                  PGData={currentPGData}
+                  loadingPGs={loadingPGs}
+                  pgError={pgError}
+                  residingPG={residingPG}
                 />
               </div>
               <div className="w-[15%] min-w-[250px] flex flex-col items-center sticky top-[30px]">

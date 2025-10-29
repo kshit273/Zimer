@@ -10,7 +10,8 @@ const Dash2 = ({ handlePGSelection, formData,pgData,loading,error,length }) => {
             length={length}
             loading={loading} 
             error={error}
-            handlePGSelection={handlePGSelection} />
+            handlePGSelection={handlePGSelection}
+            residingPG={true} />
         <div className="flex items-center justify-center">
           <PlanDetails months={11} days={25} searches={8175} />
         </div>

@@ -7,7 +7,9 @@ const {
   verifyToken,
   updateUser,
   getUser,
-  getTenantsBatch
+  getTenantsBatch,
+  updateLandlordPGs,
+  clearTenantPG
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -24,7 +26,9 @@ router.put(
   upload.single("profilePicture"),
   updateUser
 );
+router.post("/clear-pg", clearTenantPG);
 router.get("/me", authMiddleware, getUser);
 router.post("/tenants-batch", getTenantsBatch);
+router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs);
 
 module.exports = router;

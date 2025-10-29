@@ -92,6 +92,7 @@ const transformFormData = (formData, LID, files = {}) => {
       roomId: r.id?.toString() || i.toString(),
       roomType: r.roomType?.toLowerCase() || '', 
       rent: Number(r.rent) || 0,
+      security: r.security || r.rent,
       furnished: r.furnished?.toLowerCase() || '', 
       amenities: r.features || [],
       photos: organizedFiles[`roomPhotos_${i}`]
@@ -165,6 +166,58 @@ exports.updatePG = async (req, res) => {
   }
 };
 
+exports.removeTenantsFromRoom = async (req, res) => {
+  try {
+    const { PGID, roomId, tenantIds } = req.body;
+
+    // Validate input
+    if (!PGID || !roomId || !tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({ 
+        error: "PGID, roomId, and tenantIds array are required" 
+      });
+    }
+
+    const pg = await PG.findOne({ RID: PGID });
+    
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Find the room in the PG
+    const roomIndex = pg.rooms.findIndex(room => room.roomId === roomId);
+    
+    if (roomIndex === -1) {
+      return res.status(404).json({ error: "Room not found in PG" });
+    }
+
+    // Get initial tenant count
+    const initialCount = pg.rooms[roomIndex].tenants.length;
+
+    // Remove tenants from the room's tenants array
+    pg.rooms[roomIndex].tenants = pg.rooms[roomIndex].tenants.filter(
+      tenant => !tenantIds.includes(tenant.tenantId.toString())
+    );
+
+    const removedCount = initialCount - pg.rooms[roomIndex].tenants.length;
+
+    // Save the updated PG
+    await pg.save();
+
+    res.status(200).json({
+      message: `Successfully removed ${removedCount} tenant(s) from room ${roomId}`,
+      removedCount: removedCount,
+      remainingTenants: pg.rooms[roomIndex].tenants.length
+    });
+
+  } catch (err) {
+    console.error("Error removing tenants from room:", err);
+    res.status(500).json({ 
+      error: "Failed to remove tenants from room",
+      details: err.message 
+    });
+  }
+};
+
 // DELETE PG
 exports.deletePG = async (req, res) => {
   try {
@@ -223,21 +276,26 @@ exports.generateToken = async (req, res) => {
   }
 };
 
-// Join the tenant into room
-exports.joinRoom = async (req, res) => {
+exports.validateInvite = async (req, res) => {
   try {
     const { RID, roomId } = req.params;
-    const { tenantId } = req.body;
     const { token } = req.query;
+    console.log(token);
 
     // 1. Validate invite token
-    const invite = await Invite.findOne({ roomId, token, expiresAt: { $gt: Date.now() } });
+    const invite = await Invite.findOne({ 
+      roomId, 
+      token, 
+      expiresAt: { $gt: Date.now() },
+      revoked: false 
+    });
+    
     if (!invite) {
       return res.status(400).json({ success: false, error: "Invalid or expired token" });
     }
 
     // 2. Find PG and room by RID
-    const pg = await PG.findOne({ RID });
+    const pg = await PG.findOne({ RID }).populate('LID');
     if (!pg) {
       return res.status(404).json({ success: false, error: "PG not found" });
     }
@@ -247,41 +305,31 @@ exports.joinRoom = async (req, res) => {
       return res.status(404).json({ success: false, error: "Room not found" });
     }
 
-    // 3. Add tenant if space available
+    // 3. Check room capacity
     let capacity;
     switch (room.roomType) {
       case "single": capacity = 1; break;
       case "double": capacity = 2; break;
       case "triple": capacity = 3; break;
       case "quad": capacity = 4; break;
-      default: capacity = Infinity; // "other"
+      default: capacity = Infinity;
     }
 
     if (room.tenants.length >= capacity) {
       return res.status(400).json({ success: false, error: "Room is full" });
     }
 
-    if (room.tenants.includes(tenantId)) {
-      return res.status(400).json({ success: false, error: "Already joined" });
-    }
-
-    room.tenants.push(tenantId);
-    await pg.save();
-
-    // 4. Decrement token uses
-    invite.usedCount += 1;
-    invite.usedBy.push(tenantId);
-    // If maxJoins is reached, delete the invite
-    if (invite.usedCount >= invite.maxJoins) {
-      await invite.deleteOne();
-    } else {
-      await invite.save();
-    }
-
-    res.json({ success: true, RID, roomId, tenantId });
+    res.json({ 
+      success: true, 
+      pg: pg,
+      room: room,
+      availableSpots: capacity - room.tenants.length
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: "Server error" });
   }
 };
+
+
 

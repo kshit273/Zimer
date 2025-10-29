@@ -2,7 +2,7 @@ import React from "react";
 import PaymentHistoryCard from "./PaymentHistoryCard";
 import PaymentCollectionHistoryCard from "../../LandlordNavComponents/Dashboard/PaymentCollectionHistoryCard";
 
-const PaymentAbout = ({ formData }) => {
+const PaymentAbout = ({ formData, residingPG }) => {
   const pncHistory = [
     {
       rent: 400,
@@ -80,7 +80,7 @@ const PaymentAbout = ({ formData }) => {
       </div>
 
       {/* Payment history */}
-      <div className="flex flex-col mt-6">
+      <div className={`flex flex-col mt-6 ${!residingPG ? `blur pointer-events-none`:``}`}>
         <div className="text-lg font-normal my-3 text-[23px]">
           Payment and cashback history
         </div>

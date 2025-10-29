@@ -1,3 +1,4 @@
+// MonthlyRentStatus.jsx
 import React from "react";
 
 // Helpers
@@ -32,11 +33,9 @@ const getColorFromStartCycle = (start) => {
   const y = today.getFullYear();
   const m = today.getMonth();
 
-  // Anchor for current month (clamped to month length)
   const dimCurrent = daysInMonth(y, m);
   const currentAnchor = new Date(y, m, Math.min(anchorDay, dimCurrent));
 
-  // If today's before this month's anchor, use previous month's anchor
   let cycleStart;
   if (currentAnchor <= today) {
     cycleStart = currentAnchor;
@@ -61,50 +60,36 @@ const getColorFromStartCycle = (start) => {
   }
 };
 
-const MonthlyRentStatus = ({ start, dates }) => {
+const MonthlyRentStatus = ({ start, paidMonths, residingPG }) => {
   const today = new Date();
   const currentMonth = today.getMonth();
   const startMonth = new Date(start).getMonth();
 
-  // Unique paid months
-  const monthsPaid = [...new Set(dates.map((d) => new Date(d).getMonth()))];
-
   const months = [
-    "jan",
-    "feb",
-    "mar",
-    "apr",
-    "may",
-    "jun",
-    "jul",
-    "aug",
-    "sep",
-    "oct",
-    "nov",
-    "dec",
+    "jan", "feb", "mar", "apr", "may", "jun",
+    "jul", "aug", "sep", "oct", "nov", "dec",
   ];
 
   return (
-    <div className="p-4 bg-[#e2e2e2] rounded-[20px] max-w-sm">
+    <div className={`p-4 bg-[#e2e2e2] rounded-[20px] max-w-sm ${!residingPG ? `blur pointer-events-none` : ``}`}>
       <p className="font-medium text-[24px] text-[#5c5c5c] mb-4">
         Monthly rent status
       </p>
       <div className="grid grid-cols-4 gap-3">
         {months.map((month, index) => {
           const isCurrentMonth = index === currentMonth;
-          const isPaid = monthsPaid.includes(index);
+          const isPaid = paidMonths.includes(index);
 
           let bgColor = "#d9d9d9";
           let textColor = "#444";
 
           if (isPaid) {
-            bgColor = "#61C428"; // green
+            bgColor = "#61C428";
             textColor = "#e8e8e8";
           } else if (isCurrentMonth) {
-            bgColor = getColorFromStartCycle(start); // gradient
+            bgColor = getColorFromStartCycle(start);
             textColor = "#e8e8e8";
           } else if (index >= startMonth && index < currentMonth) {
-            // Between start and current, unpaid → red
             bgColor = "#d72638";
             textColor = "#e8e8e8";
           }

@@ -14,19 +14,29 @@ const roomSchema = new mongoose.Schema(
     },
     tenants: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // tenant user
-      },
+        tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        joinDate: { type: Date, default: Date.now },
+        leaveDate: { type: Date },
+        payments: [
+          {
+            month: { type: String, required: true }, 
+            amount: { type: Number, required: true }, 
+            paidOn: { type: Date, default: Date.now } 
+          }
+        ]
+      }
     ],
     rent: { type: Number, required: true },
     furnished: { type: String, enum: ["fully", "no", "semi"], default: "no", required: true },
     amenities: [String], // ["AC", "Attached Bathroom", "Balcony"]
     photos: [String],
+    security:{type: Number},
     availableFrom: { type: Date },
     description: { type: String },
   },
   { _id: false } // rooms don’t need their own ObjectId
 );
+
 
 // Main PG Schema
 const pgSchema = new mongoose.Schema(

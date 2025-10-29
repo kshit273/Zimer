@@ -10,37 +10,79 @@ const JoinRoom = ({ user }) => {
   const token = searchParams.get("token");
   const navigate = useNavigate();
   const [showOverlay, setShowOverlay] = useState(false);
+  const [pgData, setPgData] = useState(null);
+  const [roomData, setRoomData] = useState(null);
 
   useEffect(() => {
     if (!user) {
       // redirect to login and pass redirect back path
       navigate(`/userlogin?redirect=/join/${RID}/${roomId}?token=${token}`);
     } else {
+      // Fetch PG and room data when user is logged in
+      fetchPGData();
       setShowOverlay(true);
     }
   }, [user, RID, roomId, token, navigate]);
 
-  const handleSend = async (security, acceptedTerms) => {
+  const fetchPGData = async () => {
+    try {
+      // First validate the invite token and get PG data
+      const response = await axios.get(
+        `http://localhost:5000/pgs/validate-invite/${RID}/${roomId}`,
+        {
+          params: { token },
+          withCredentials: true,
+        }
+      );
+      
+      if (response.data.success) {
+        setPgData(response.data.pg);
+        setRoomData(response.data.room);
+      } else {
+        alert("Invalid or expired invitation link");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error validating invite:", error);
+      alert("Invalid or expired invitation link");
+      navigate("/");
+    }
+  };
+
+  const handleSend = async (security, acceptedTerms, moveInDate) => {
+    console.log(user);
     if (!security || !acceptedTerms) {
       alert("You must deposit security and accept terms.");
       return;
     }
 
+    if (!moveInDate) {
+      alert("Please select a move-in date.");
+      return;
+    }
+
     try {
+      // Send join request notification instead of directly joining
       const res = await axios.post(
-        `http://localhost:5000/pgs/join/${RID}/${roomId}`,
-        { tenantId: user.id },
+        `http://localhost:5000/notifications/join-request`,
+        { 
+          pgId: pgData._id,
+          roomNumber: roomData.roomNumber || roomId,
+          message: `${user.name} wants to join room ${roomData.roomNumber || roomId}`,
+          moveInDate: moveInDate,
+          roomId: roomId,
+          token: token // Include token for later verification
+        },
         {
           withCredentials: true,
-          params: { token }, // invite token in query string
         }
       );
 
       if (res.data.success) {
-        alert("You have successfully joined the PG!");
-        navigate(`/pg/${RID}`);
+        alert("Join request sent to landlord! You will be notified once approved.");
+        navigate("/"); // Redirect to home or dashboard
       } else {
-        alert(res.data.error || "Failed to join");
+        alert(res.data.error || "Failed to send join request");
       }
     } catch (err) {
       console.error("JoinRoom error:", err.response?.data || err.message);
@@ -50,10 +92,12 @@ const JoinRoom = ({ user }) => {
 
   return (
     <>
-      {showOverlay && (
+      {showOverlay && pgData && roomData && (
         <LoginRequestPage
           onSend={handleSend}
           onCancel={() => navigate("/")}
+          pgData={pgData}
+          roomData={roomData}
         />
       )}
     </>

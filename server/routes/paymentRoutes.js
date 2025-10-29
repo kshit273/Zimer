@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 const {
-  initiatePayment,
   getPaymentStatus,
   confirmPayment,
+  payRent,
+  getPaymentHistory,
 } = require("../controllers/paymentController");
 
-router.post("/initiate", initiatePayment);
 router.get("/status/:id", getPaymentStatus);
 router.post("/confirm", confirmPayment);
+router.post("/initiate", authMiddleware, payRent);
+router.get("/history/:pgId/:roomId",getPaymentHistory);
 
 module.exports = router;

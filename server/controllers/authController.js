@@ -148,6 +148,39 @@ exports.logout = (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
+exports.clearTenantPG = async (req, res) => {
+  try {
+    const { tenantIds } = req.body;
+
+    // Validate input
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({ 
+        error: "tenantIds array is required" 
+      });
+    }
+
+    // Clear currentPG field for all selected tenants
+    const updateResult = await User.updateMany(
+      { _id: { $in: tenantIds } },
+      { $set: { currentPG: "" } }
+    );
+
+    console.log(`Updated ${updateResult.modifiedCount} users`);
+
+    res.status(200).json({
+      message: `Successfully cleared PG for ${updateResult.modifiedCount} tenant(s)`,
+      modifiedCount: updateResult.modifiedCount
+    });
+
+  } catch (err) {
+    console.error("Error clearing tenant PG:", err);
+    res.status(500).json({ 
+      error: "Failed to clear tenant PG",
+      details: err.message 
+    });
+  }
+};
+
 exports.verifyToken = (req, res) => {
   const token = req.cookies.token; // 👈 read cookie
   if (!token)
@@ -233,7 +266,7 @@ exports.getUser = async (req, res) => {
   }
 };
 
-exports.getTenantsBatch = async (req, res) => { // Fixed function name
+exports.getTenantsBatch = async (req, res) => { 
   try {
     const { tenantIds } = req.body;
 
@@ -269,6 +302,74 @@ exports.getTenantsBatch = async (req, res) => { // Fixed function name
     res.status(500).json({
       success: false,
       message: "Failed to fetch tenant data",
+      error: error.message
+    });
+  }
+};
+
+exports.updateLandlordPGs = async (req, res) => {
+  try {
+    const { ownedPGs } = req.body;
+    const userId = req.user.id; // From authMiddleware
+
+    // Validate input
+    if (!ownedPGs || !Array.isArray(ownedPGs)) {
+      return res.status(400).json({
+        success: false,
+        message: "ownedPGs must be an array"
+      });
+    }
+
+    // Find the user and check if they exist
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if user has landlord role
+    if (user.role !== "landlord") {
+      return res.status(403).json({
+        success: false,
+        message: "Only landlords can own PGs"
+      });
+    }
+
+    // Update the ownedPGs array
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { 
+        $set: { ownedPGs: ownedPGs }
+      },
+      { 
+        new: true, // Return updated document
+        runValidators: true // Run schema validation
+      }
+    ).select('-password'); // Exclude password from response
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Failed to update user"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Landlord PGs updated successfully",
+      data: {
+        user: updatedUser,
+        ownedPGs: updatedUser.ownedPGs
+      }
+    });
+
+  } catch (error) {
+    console.error("Error updating landlord PGs:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
       error: error.message
     });
   }

@@ -5,7 +5,7 @@ import BaseNotification from "../../TenantNavComponents/Dashboard/Notification/B
 import LeaveReq from "../../TenantNavComponents/Dashboard/Notification/LeaveReq";
 import RentPaidNotification from "../../TenantNavComponents/Dashboard/Notification/RentPaidNotification";
 
-const Dash3 = ({ pgId }) => {
+const Dash3 = ({ user, pgId }) => {
   const [announcement, setAnnouncement] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,29 @@ const Dash3 = ({ pgId }) => {
     }
   };
 
-  // Handle accept/reject for requests
+  // Handle accept/reject for join requests
+  const handleJoinRequestAction = async (notificationId, action) => {
+    try {
+      const endpoint = action === "accepted" 
+        ? `http://localhost:5000/notifications/join-request/${notificationId}/accept`
+        : `http://localhost:5000/notifications/${notificationId}/status`;
+
+      if (action === "accepted") {
+        // Use the special accept endpoint that handles room joining
+        await axios.post(endpoint, {}, { withCredentials: true });
+      } else {
+        // Use the regular status update for rejection
+        await axios.patch(endpoint, { status: action }, { withCredentials: true });
+      }
+      
+      fetchNotifications(); // Refresh after action
+    } catch (error) {
+      console.error("Error updating join request:", error);
+      alert(error.response?.data?.error || `Failed to ${action} request`);
+    }
+  };
+
+  // Handle accept/reject for other requests (leave requests, etc.)
   const handleRequestAction = async (notificationId, action) => {
     try {
       await axios.patch(
@@ -78,16 +100,16 @@ const Dash3 = ({ pgId }) => {
   };
 
   // Render notification based on type
-  const renderNotification = (notification,i) => {
-
+  const renderNotification = (notification, i) => {
     switch (notification.type) {
       case "join_request":
         return (
           <JoinReq
             key={notification._id}
             data={notification}
-            onAccept={() => handleRequestAction(notification._id, "accepted")}
-            onReject={() => handleRequestAction(notification._id, "rejected")}
+            user={user}
+            onAccept={() => handleJoinRequestAction(notification._id, "accepted")}
+            onReject={() => handleJoinRequestAction(notification._id, "rejected")}
           />
         );
       case "leave_request":
@@ -104,12 +126,14 @@ const Dash3 = ({ pgId }) => {
           <RentPaidNotification key={notification._id} data={notification} />
         );
       case "announcement":
-        return <div
-                key={notification._id}
-                className={`mb-4 rounded-[20px] w-full cursor-pointer bg-[#e2e2e2]`}
-              >
-                <BaseNotification data={notification} />
-              </div>;
+        return (
+          <div
+            key={notification._id}
+            className={`mb-4 rounded-[20px] w-full cursor-pointer `}
+          >
+            <BaseNotification data={notification} id={user._id}/>
+          </div>
+        );
       default:
         return null;
     }
@@ -156,7 +180,7 @@ const Dash3 = ({ pgId }) => {
               No new notifications
             </p>
           ) : (
-            <div className="w-full flex flex-col ">
+            <div className="w-full flex flex-col gap-2">
               {notifications.map((notification) =>
                 renderNotification(notification)
               )}

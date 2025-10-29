@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Dashboard from "./Dashboard";
 import PGDash from "./PGDash";
 
-const DashboardComp = ({setBar, formData, ownedPGsData, loadingPGs, pgError }) => {
+const DashboardComp = ({user, formData, ownedPGsData, loadingPGs, pgError }) => {
   const [selectedPGIndex, setSelectedPGIndex] = useState(0);
   
   // Get the currently selected PG data
@@ -24,6 +24,7 @@ const DashboardComp = ({setBar, formData, ownedPGsData, loadingPGs, pgError }) =
   return (
     <div className="w-full flex flex-col gap-4">
           <Dashboard 
+            user={user}
             formData={formData} 
             pgData={currentPGData} 
             loading={loadingPGs} 

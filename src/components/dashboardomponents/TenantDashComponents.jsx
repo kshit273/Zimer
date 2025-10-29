@@ -6,11 +6,30 @@ import ViewLegalDocs from "./TenantNavComponents/ViewLegalDocs/ViewLegalDocs";
 import ReferAndEarn from "./TenantNavComponents/ReferAndEarn/ReferAndEarn";
 import LeavePG from "./TenantNavComponents/LeavePG/LeavePG";
 
-const TenantDashComponents = ({ user,setUser, bar, formData, setFormData }) => {
+const TenantDashComponents = ({ 
+  setBar, 
+  user, 
+  setUser, 
+  bar, 
+  formData, 
+  setFormData, 
+  coords,
+  PGData,
+  loadingPGs,
+  pgError,
+  residingPG
+ }) => {
   let component;
   switch (bar) {
     case 0:
-      component = <DashboardComp formData={formData} />;
+      component = <DashboardComp 
+          user={user}
+          formData={formData} 
+          PGData={PGData}
+          loadingPGs={loadingPGs}
+          pgError={pgError}
+          residingPG={residingPG}
+        />;
       break;
     case 1:
       component = (

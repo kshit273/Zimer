@@ -1,7 +1,9 @@
 import React from "react";
 
-const JoinReq = ({ data }) => {
-  const dateTime = new Date(`${data.date}T${data.time}`);
+const JoinReq = ({ user, data, onAccept, onReject }) => {
+  const dateTime = new Date(data.createdAt);
+
+  const isSender = user.id === data.sender._id;
 
   // Format date nicely (e.g., "22 October 2025")
   const formattedDate = dateTime.toLocaleDateString("en-US", {
@@ -16,35 +18,87 @@ const JoinReq = ({ data }) => {
     minute: "2-digit",
     hour12: true,
   });
+
+  // Format move-in date if available
+  const moveInDate = data.metadata?.moveInDate 
+    ? new Date(data.metadata.moveInDate).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "Not specified";
+
   return (
-    <div className="bg-[#e2e2e2] rounded-[20px] p-4">
-      <div className="flex flex-col justify-center gap-2 ">
-        <div className="flex flex-col gap-0.5">
-          <p className="text-[19px] text-[#49C800] font-medium">Join request</p>
-          <p className="text-[15px] text-[#5c5c5c] font-medium">{data.msg}</p>
+    <div className={`${isSender?`bg-[#b52f2f]`:`bg-[#e2e2e2]`} rounded-[20px] p-4 mb-4`}>
+      <div className="flex flex-col justify-center gap-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-[19px] text-[#49C800] font-medium">Join Request</p>
+          <p className="text-[15px] text-[#1a1a1a] font-medium">
+            {data.metadata?.tenantName || "Unknown User"}
+          </p>
+          <p className="text-[14px] text-[#5c5c5c]">{data.message}</p>
+          
+          {/* Additional details */}
+          <div className="mt-2 space-y-1">
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Room:</span> {data.metadata?.roomNumber || "N/A"}
+            </p>
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Email:</span> {data.metadata?.tenantEmail || "N/A"}
+            </p>
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Phone:</span> {data.metadata?.tenantPhone || "N/A"}
+            </p>
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Move-in Date:</span> {moveInDate}
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button className="rounded-[20px] px-6 py-1 bg-[#49c800]">
-            <img
-              src="../images/whitetick.png"
-              alt=""
-              className="h-[15px] w-[15px]"
-            />
-          </button>
-          <button className="rounded-[20px] px-6 py-1 bg-[#d72638]">
-            <img
-              src="../images/cross.png"
-              alt=""
-              className="h-[15px] w-[15px]"
-            />
-          </button>
-        </div>
+
+        {/* Action buttons - only show if status is pending */}
+        {data.status === "pending" && (
+          <div className="flex gap-2">
+            <button 
+              onClick={onAccept}
+              className="rounded-[20px] px-6 py-2 bg-[#49c800] hover:bg-[#3db300] transition-colors"
+            >
+              <img
+                src="../images/whitetick.png"
+                alt="Accept"
+                className="h-[15px] w-[15px]"
+              />
+            </button>
+            <button 
+              onClick={onReject}
+              className="rounded-[20px] px-6 py-2 bg-[#d72638] hover:bg-[#c41e30] transition-colors"
+            >
+              <img
+                src="../images/cross.png"
+                alt="Reject"
+                className="h-[15px] w-[15px]"
+              />
+            </button>
+          </div>
+        )}
+
+        {/* Status indicator for processed requests */}
+        {data.status !== "pending" && (
+          <div className="flex items-center gap-2">
+            <span className={`text-[14px] font-medium ${
+              data.status === "accepted" ? "text-[#49c800]" : "text-[#d72638]"
+            }`}>
+              {data.status === "accepted" ? "✓ Accepted" : "✗ Rejected"}
+            </span>
+          </div>
+        )}
       </div>
-      <div className="flex justify-between text-[12px] text-gray-700 mt-4">
+
+      <div className="flex justify-between text-[12px] text-gray-700 mt-4 pt-2 border-t border-gray-300">
         <span>{formattedDate}</span>
         <span>{formattedTime}</span>
       </div>
     </div>
   );
 };
+
 export default JoinReq;

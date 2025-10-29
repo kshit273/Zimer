@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BaseNotification from "./Notification/BaseNotification";
 
-const Notifications = () => {
+const Notifications = ({user}) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -33,35 +33,34 @@ const Notifications = () => {
     return () => clearInterval(interval);
   }, []);
 
-// ✅ Mark notification as read
-const markAsRead = async (id) => {
-  try {
-    const res = await axios.patch(
-      `http://localhost:5000/notifications/${id}/read`,
-      {},
-      { withCredentials: true }
-    );
+  // ✅ Mark notification as read
+  const markAsRead = async (id) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:5000/notifications/${id}/read`,
+        {},
+        { withCredentials: true }
+      );
 
-    // ✅ Access the _id or $oid property of the ObjectId
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n._id === id
-          ? {
-              ...n,
-              recipients: n.recipients.map((recipient) =>
-                (recipient.recipientId._id || recipient.recipientId.$oid || recipient.recipientId.toString()) === userId
-                  ? { ...recipient, isRead: true }
-                  : recipient
-              )
-            }
-          : n
-      )
-    );
-  } catch (error) {
-    console.error("Error marking notification as read:", error);
-  }
-};
-
+      // ✅ Access the _id or $oid property of the ObjectId
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === id
+            ? {
+                ...n,
+                recipients: n.recipients.map((recipient) =>
+                  (recipient.recipientId._id || recipient.recipientId.$oid || recipient.recipientId.toString()) === userId
+                    ? { ...recipient, isRead: true }
+                    : recipient
+                )
+              }
+            : n
+        )
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   return (
     <div className="h-full p-4">
@@ -80,23 +79,13 @@ const markAsRead = async (id) => {
               No new notifications
             </p>
           ) : (
-            notifications.map((notification) => {
-            // Debug logging
-            console.log("Notification ID:", notification._id);
-            console.log("UserId:", userId);
-            console.log("Recipients:", notification.recipients);
-            
-            const currentRecipient = notification.recipients.find(recipient => recipient.recipientId === userId);
-            console.log("Current recipient:", currentRecipient);
-            console.log("Is read:", currentRecipient?.isRead);
-
-            return (
+            notifications.map((notification) => (
               <div
                 key={notification._id}
                 className="mb-4 rounded-[20px] w-full cursor-pointer bg-[#e2e2e2] relative"
                 onClick={() => markAsRead(notification._id)}
               >
-                <BaseNotification data={notification} />
+                <BaseNotification id={user.id} data={notification} />
                 
                 {/* Red bubble for unread notifications */}
                 {!notification.recipients.find(recipient => {
@@ -104,13 +93,12 @@ const markAsRead = async (id) => {
                   return recipientIdStr === userId;
                 })?.isRead && (
                   <div 
-                    className="absolute top-[-1px] right-[0px] w-5 h-5 rounded-full "
+                    className="absolute top-[0px] right-[0px] w-5 h-5 rounded-full "
                     style={{ backgroundColor: '#d72638' }}
                   />
                 )}
               </div>
-            )
-          })
+            ))
                     )}
         </div>
 

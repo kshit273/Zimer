@@ -1,6 +1,7 @@
 const Notification = require("../models/notificationModel");
 const User = require("../models/userModel");
 const PG = require("../models/pgModel");
+const Invite = require("../models/inviteModel");
 
 // Create announcement (landlord only)
 exports.createAnnouncement = async (req, res) => {
@@ -8,14 +9,14 @@ exports.createAnnouncement = async (req, res) => {
     const { message, pgId } = req.body;
     const landlordId = req.user.id;
 
-    // ✅ Verify landlord owns this PG
-    const pg = await PG.findOne({ _id: pgId, LID: landlordId });
+    // ✅ Verify landlord owns this PG - find by RID
+    const pg = await PG.findOne({ RID: pgId, LID: landlordId });
     if (!pg) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
     // ✅ Collect all tenant IDs from all rooms
-    const tenantIds = pg.rooms.flatMap((room) => room.tenants);
+    const tenantIds = pg.rooms.flatMap((room) => room.tenants.map(tenant => tenant.tenantId));
     console.log("Tenant IDs:", tenantIds);
 
     if (tenantIds.length === 0) {
@@ -29,15 +30,15 @@ exports.createAnnouncement = async (req, res) => {
     // ✅ Prepare recipients array
     const recipients = tenantIds.map((tenantId) => ({
       recipientId: tenantId,
-      isRead: false, // initially unread
+      isRead: false,
     }));
 
-    // ✅ Create announcement notification
+    // ✅ Create announcement notification - use RID instead of _id
     const notification = await Notification.create({
       type: "announcement",
       sender: landlordId,
       recipients,
-      pg: pgId,
+      pg: pg.RID, // Changed from pgId to pg.RID
       message,
     });
 
@@ -53,48 +54,76 @@ exports.createAnnouncement = async (req, res) => {
   }
 };
 
-
-// Create join request (tenant)
+// createJoinRequest 
 exports.createJoinRequest = async (req, res) => {
   try {
-    const { pgId, roomNumber, message, moveInDate } = req.body;
+    const { pgId, roomNumber, message, moveInDate, roomId, token } = req.body;
     const tenantId = req.user.id;
 
-    // Get PG details with landlord
-    const pg = await PG.findById(pgId).populate("landlord");
+    // Validate the invite token
+    const invite = await Invite.findOne({ 
+      roomId, 
+      token, 
+      expiresAt: { $gt: Date.now() },
+      revoked: false 
+    });
+    
+    if (!invite) {
+      return res.status(400).json({ error: "Invalid or expired invitation" });
+    }
+
+    // Get PG details with landlord - find by RID
+    const pg = await PG.findOne({ RID: pgId }).populate("LID");
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Get room details
+    const room = pg.rooms.find(r => r.roomId === roomId);
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Check if tenant is already in this room
+    if (room.tenants.includes(tenantId)) {
+      return res.status(400).json({ error: "You are already in this room" });
     }
 
     // Get tenant details
     const tenant = await User.findById(tenantId);
 
-    // Check if join request already exists
+    // Check if join request already exists for this specific room
     const existingRequest = await Notification.findOne({
       sender: tenantId,
-      pg: pgId,
+      pg: pgId, // pgId is already RID
       type: "join_request",
       status: "pending",
+      "metadata.roomId": roomId,
     });
 
     if (existingRequest) {
-      return res.status(400).json({ error: "Join request already pending" });
+      return res.status(400).json({ error: "Join request already pending for this room" });
     }
 
-    // Create join request notification
+    // Create join request notification - use RID
     const notification = await Notification.create({
       type: "join_request",
       sender: tenantId,
-      recipient: pg.landlord._id,
-      pg: pgId,
-      message: message || `${tenant.name} has sent a join request for room ${roomNumber}`,
+      recipients: [{
+        recipientId: pg.LID._id,
+        isRead: false
+      }],
+      pg: pg.RID, // Use RID instead of _id
+      message: message || `${tenant.firstName} ${tenant.lastName} has sent a join request for room ${roomNumber}`,
       status: "pending",
       metadata: {
         roomNumber,
-        tenantName: tenant.name,
+        roomId: roomId,
+        tenantName: `${tenant.firstName} ${tenant.lastName}`,
         tenantEmail: tenant.email,
         tenantPhone: tenant.phone,
         moveInDate,
+        inviteToken: token,
       },
     });
 
@@ -109,14 +138,147 @@ exports.createJoinRequest = async (req, res) => {
   }
 };
 
+// acceptJoinRequest 
+exports.acceptJoinRequest = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const landlordId = req.user.id;
+
+    // Find the notification and populate pg by RID
+    const notification = await Notification.findById(notificationId)
+      .populate('sender');
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found" });
+    }
+
+    if (notification.type !== "join_request") {
+      return res.status(400).json({ error: "Invalid notification type" });
+    }
+
+    // Get PG by RID
+    const pg = await PG.findOne({ RID: notification.pg });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Verify landlord owns this PG
+    if (pg.LID.toString() !== landlordId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Validate the stored invite token
+    const invite = await Invite.findOne({
+      roomId: notification.metadata.roomId,
+      token: notification.metadata.inviteToken,
+      revoked: false
+    });
+
+    if (!invite) {
+      notification.status = "rejected";
+      await notification.save();
+      return res.status(400).json({ error: "Invitation has expired or been revoked" });
+    }
+
+    // Get the room and check capacity
+    const room = pg.rooms.find(r => r.roomId === notification.metadata.roomId);
+    
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Check room capacity
+    let capacity;
+    switch (room.roomType) {
+      case "single": capacity = 1; break;
+      case "double": capacity = 2; break;
+      case "triple": capacity = 3; break;
+      case "quad": capacity = 4; break;
+      default: capacity = Infinity;
+    }
+
+    if (room.tenants.length >= capacity) {
+      notification.status = "rejected";
+      await notification.save();
+      return res.status(400).json({ error: "Room is now full" });
+    }
+
+    // Check if tenant is already in the room
+    const existingTenant = room.tenants.find(tenant => 
+      tenant.tenantId.toString() === notification.sender._id.toString()
+    );
+
+    if (existingTenant) {
+      notification.status = "accepted";
+      await notification.save();
+      return res.json({ success: true, message: "Tenant already in room" });
+    }
+
+    // Add tenant to room
+    room.tenants.push({
+      tenantId: notification.sender._id,
+      joinDate: new Date()
+    });
+    await pg.save();
+
+    // Update tenant's currentPG
+    await User.findByIdAndUpdate(notification.sender._id, {
+      currentPG: pg.RID, // Use RID
+      $push: {
+        rentalHistory: {
+          RID: pg.RID,
+          roomId: notification.metadata.roomId,
+          rent: room.rent,
+          joinedFrom: new Date(),
+        }
+      }
+    });
+
+    // Update invite usage
+    invite.usedCount += 1;
+    invite.usedBy.push(notification.sender._id);
+    
+    if (invite.usedCount >= invite.maxJoins) {
+      await invite.deleteOne();
+    } else {
+      await invite.save();
+    }
+
+    // Update notification status
+    notification.status = "accepted";
+    await notification.save();
+
+    // Create a success notification for the tenant - use RID
+    await Notification.create({
+      type: "announcement",
+      sender: landlordId,
+      recipients: [{
+        recipientId: notification.sender._id,
+        isRead: false
+      }],
+      pg: pg.RID, // Use RID instead of _id
+      message: `Welcome to ${pg.pgName}! Your join request for room ${notification.metadata.roomNumber} has been accepted.`,
+      status: "unread",
+    });
+
+    res.json({
+      success: true,
+      message: "Join request accepted and tenant added to room",
+    });
+  } catch (error) {
+    console.error("Accept join request error:", error);
+    res.status(500).json({ error: "Failed to accept join request" });
+  }
+};
+
 // Create leave request (tenant)
 exports.createLeaveRequest = async (req, res) => {
   try {
     const { pgId, roomNumber, reason, moveOutDate } = req.body;
     const tenantId = req.user.id;
 
-    // Get PG details
-    const pg = await PG.findById(pgId);
+    // Get PG details by RID
+    const pg = await PG.findOne({ RID: pgId });
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
     }
@@ -124,17 +286,20 @@ exports.createLeaveRequest = async (req, res) => {
     // Get tenant details
     const tenant = await User.findById(tenantId);
 
-    // Create leave request notification
+    // Create leave request notification - use RID
     const notification = await Notification.create({
       type: "leave_request",
       sender: tenantId,
-      recipient: pg.landlord,
-      pg: pgId,
-      message: `${tenant.name} has requested to leave room ${roomNumber}`,
+      recipients: [{
+        recipientId: pg.LID,
+        isRead: false
+      }],
+      pg: pg.RID, // Use RID
+      message: `${tenant.firstName} ${tenant.lastName} has requested to leave room ${roomNumber}`,
       status: "pending",
       metadata: {
         roomNumber,
-        tenantName: tenant.name,
+        tenantName: `${tenant.firstName} ${tenant.lastName}`,
         reason,
         moveOutDate,
       },
@@ -157,26 +322,29 @@ exports.createRentPaymentNotification = async (req, res) => {
     const { pgId, amount, paymentId, month, year } = req.body;
     const tenantId = req.user.id;
 
-    // Get PG and tenant details
-    const pg = await PG.findById(pgId);
+    // Get PG and tenant details by RID
+    const pg = await PG.findOne({ RID: pgId });
     const tenant = await User.findById(tenantId);
 
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
     }
 
-    // Create rent paid notification
+    // Create rent paid notification - use RID
     const notification = await Notification.create({
       type: "rent_paid",
       sender: tenantId,
-      recipient: pg.landlord,
-      pg: pgId,
-      message: `${tenant.name} has paid rent of ₹${amount} for ${month}/${year}`,
+      recipients: [{
+        recipientId: pg.LID,
+        isRead: false
+      }],
+      pg: pg.RID, // Use RID
+      message: `${tenant.firstName} ${tenant.lastName} has paid rent of ₹${amount} for ${month}/${year}`,
       status: "unread",
       metadata: {
         amount,
         paymentId,
-        tenantName: tenant.name,
+        tenantName: `${tenant.firstName} ${tenant.lastName}`,
       },
     });
 
@@ -197,27 +365,38 @@ exports.getNotifications = async (req, res) => {
     const userId = req.user.id;
     const { type, status, pgId } = req.query;
 
-    // Query notifications where the user is either sender or one of the recipients
     const query = {
       $or: [
-        { sender: userId },
-        { "recipients.recipientId": userId } // match if user is in recipients array
+        { 
+          sender: userId,
+          type: { $ne: "join_request" }
+        },
+        { "recipients.recipientId": userId }
       ]
     };
 
     if (type) query.type = type;
     if (status) query.status = status;
-    if (pgId) query.pg = pgId;
+    if (pgId) query.pg = pgId; // pgId is now RID string
 
     const notifications = await Notification.find(query)
       .populate("sender", "firstName lastName email")
-      .populate("recipients.recipientId", "firstName lastName email") // populate each recipient
-      .populate("pg", "pgName")
+      .populate("recipients.recipientId", "firstName lastName email")
       .sort({ createdAt: -1 });
+
+    // Manually populate PG data since it's now a string reference
+    const populatedNotifications = await Promise.all(
+      notifications.map(async (notif) => {
+        const notifObj = notif.toObject();
+        const pgData = await PG.findOne({ RID: notif.pg }).select('pgName RID');
+        notifObj.pg = pgData;
+        return notifObj;
+      })
+    );
 
     res.json({
       success: true,
-      notifications,
+      notifications: populatedNotifications,
       userId
     });
   } catch (error) {
@@ -238,8 +417,12 @@ exports.updateNotificationStatus = async (req, res) => {
       return res.status(404).json({ error: "Notification not found" });
     }
 
-    // Only recipient can update status for requests
-    if (notification.recipient.toString() !== userId) {
+    // Check if user is in recipients
+    const isRecipient = notification.recipients.some(
+      r => r.recipientId.toString() === userId
+    );
+
+    if (!isRecipient) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -255,24 +438,23 @@ exports.updateNotificationStatus = async (req, res) => {
     notification.status = status;
     await notification.save();
 
+    // Get PG by RID for additional operations
+    const pg = await PG.findOne({ RID: notification.pg });
+
     // If join request is accepted, add tenant to PG
-    if (
-      notification.type === "join_request" &&
-      status === "accepted"
-    ) {
-      await PG.findByIdAndUpdate(notification.pg, {
-        $addToSet: { tenants: notification.sender },
-      });
+    if (notification.type === "join_request" && status === "accepted" && pg) {
+      // This logic should be in acceptJoinRequest function
     }
 
     // If leave request is accepted, remove tenant from PG
-    if (
-      notification.type === "leave_request" &&
-      status === "accepted"
-    ) {
-      await PG.findByIdAndUpdate(notification.pg, {
-        $pull: { tenants: notification.sender },
-      });
+    if (notification.type === "leave_request" && status === "accepted" && pg) {
+      const room = pg.rooms.find(r => r.roomNumber === notification.metadata.roomNumber);
+      if (room) {
+        room.tenants = room.tenants.filter(
+          t => t.tenantId.toString() !== notification.sender.toString()
+        );
+        await pg.save();
+      }
     }
 
     res.json({
@@ -307,7 +489,6 @@ exports.markAsRead = async (req, res) => {
       return res.status(404).json({ error: "Notification not found" });
     }
 
-    // Check if the user was actually in the recipients
     const userInRecipients = notification.recipients.some(
       (recipient) => recipient.recipientId.toString() === userId
     );
@@ -331,20 +512,20 @@ exports.getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Get user's PGs for announcements
-    const userPGs = await PG.find({ tenants: userId });
-    const pgIds = userPGs.map((pg) => pg._id);
-
+    // Get user's current PG
+    const user = await User.findById(userId).select('currentPG');
+    
     const count = await Notification.countDocuments({
       $or: [
         {
-          recipient: userId,
-          isRead: false,
+          "recipients.recipientId": userId,
+          "recipients.isRead": false,
         },
         {
           type: "announcement",
-          pg: { $in: pgIds },
-          "readBy.user": { $ne: userId },
+          pg: user.currentPG, // currentPG is now RID
+          "recipients.recipientId": userId,
+          "recipients.isRead": false,
         },
       ],
     });
@@ -365,8 +546,9 @@ exports.markAllAsRead = async (req, res) => {
     const userId = req.user.id;
 
     await Notification.updateMany(
-      { recipient: userId, isRead: false },
-      { isRead: true }
+      { "recipients.recipientId": userId, "recipients.isRead": false },
+      { $set: { "recipients.$[recipient].isRead": true } },
+      { arrayFilters: [{ "recipient.recipientId": userId }] }
     );
 
     res.json({

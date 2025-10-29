@@ -41,22 +41,33 @@ const PGDash = ({ pgData, loading, error }) => {
   const processRoomsWithTenantData = async (rooms) => {
     setTenantDataLoading(true);
     setTenantDataError(null);
-    
+
     try {
       // Collect all unique tenant IDs from all rooms (but keep room relationship)
       const allTenantIds = [];
-      const roomTenantMap = {}; // Map to track which tenants belong to which room
-      
+      const roomTenantMap = {}; // roomIndex -> tenantId[]
+
       rooms.forEach((room, roomIndex) => {
-        roomTenantMap[roomIndex] = room.tenants || [];
-        if (room.tenants && room.tenants.length > 0) {
-          allTenantIds.push(...room.tenants);
+        // extract just tenantId from each tenant object
+        const tenantIds = (room.tenants || [])
+          .map(t => t.tenantId)
+          .filter(Boolean); 
+        roomTenantMap[roomIndex] = tenantIds;
+
+        if (tenantIds.length > 0) {
+          allTenantIds.push(...tenantIds);
         }
       });
 
-      // Remove duplicates for API call efficiency
-      const uniqueTenantIds = [...new Set(allTenantIds)];
-      
+      // Remove duplicates for API efficiency
+      const uniqueTenantIds = [
+        ...new Set(
+          allTenantIds
+            .filter(id => id) // only keep defined ids
+            .map(id => id.toString())
+        )
+      ];
+
       if (uniqueTenantIds.length === 0) {
         // No tenants to fetch
         const roomsWithEmptyTenants = rooms.map(room => ({
@@ -69,37 +80,44 @@ const PGDash = ({ pgData, loading, error }) => {
 
       // Fetch all tenant data in batch
       const tenantDataArray = await fetchTenantsInBatch(uniqueTenantIds);
-      
-      // Create a map for quick lookup
+
+      // Create a lookup map for quick tenant data access
       const tenantDataMap = {};
       tenantDataArray.tenants.forEach(tenant => {
-        tenantDataMap[tenant._id || tenant.id] = tenant;
+        tenantDataMap[tenant._id.toString()] = tenant;
       });
 
       // Map tenant data back to their respective rooms
       const roomsWithData = rooms.map((room, roomIndex) => {
-        const roomTenantIds = roomTenantMap[roomIndex];
-        
-        if (!roomTenantIds || roomTenantIds.length === 0) {
+        const tenantIds = roomTenantMap[roomIndex];
+
+        if (!tenantIds || tenantIds.length === 0) {
           return { ...room, tenants: [] };
         }
 
-        // Get tenant data for this specific room's tenant IDs
-        const roomTenants = roomTenantIds
-          .map(tenantId => tenantDataMap[tenantId])
-          .filter(tenant => tenant !== undefined); // Filter out any missing tenant data
+        // Merge tenant data with room tenant info (keeping payments, joinDate, etc.)
+        const roomTenants = room.tenants.map(roomTenant => {
+          const tenantData = tenantDataMap[roomTenant.tenantId.toString()];
+          if (tenantData) {
+            return {
+              ...roomTenant, // Keep original tenant info (joinDate, payments, etc.)
+              tenantDetails: tenantData // Add fetched tenant details
+            };
+          }
+          return roomTenant;
+        }).filter(tenant => tenant.tenantDetails); // Only keep tenants with valid data
 
         return {
           ...room,
           tenants: roomTenants
         };
       });
-      
+
       setRoomsWithTenantData(roomsWithData);
     } catch (error) {
       console.error("Error processing tenant data:", error);
       setTenantDataError("Failed to load tenant information");
-      
+
       // Fallback: set rooms with empty tenant arrays
       const fallbackRooms = rooms.map(room => ({
         ...room,
@@ -186,16 +204,20 @@ const PGDash = ({ pgData, loading, error }) => {
         {roomsWithTenantData.map((room, index) => (
           <div key={room.roomId || index} className="mb-4 break-inside-avoid">
             <RoomTemp
-              type={room.roomType}
-              roomNumber={index + 101}
-              rent={room.rent || 0}
-              securityDeposit={room.rent || 0}
+              roomId={room.roomId}
+              roomType={room.roomType}
               tenants={room.tenants || []}
-              roomID={room.roomId}
+              rent={room.rent}
+              furnished={room.furnished}
+              amenities={room.amenities || []}
+              photos={room.photos || []}
+              security={room.security}
+              availableFrom={room.availableFrom}
+              description={room.description}
               PGID={pgData.RID}
             />
           </div>
-            ))}
+        ))}
       </div>
     </div>
   );

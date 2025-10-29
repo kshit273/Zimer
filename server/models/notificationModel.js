@@ -29,7 +29,7 @@ const notificationSchema = new mongoose.Schema(
       },
     ],
     pg: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,  
       ref: "PG",
       required: true,
     },
@@ -50,8 +50,7 @@ const notificationSchema = new mongoose.Schema(
     metadata: {
       roomNumber: String,
       roomId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Room",
+        type: String
       },
       amount: Number,
       paymentId: String,
@@ -60,6 +59,7 @@ const notificationSchema = new mongoose.Schema(
       tenantPhone: String,
       moveInDate: Date,
       moveOutDate: Date,
+      inviteToken: String,
       reason: String,
     },
   },
