@@ -7,7 +7,7 @@ const Dashboard = ({ formData, user, pgData, loading, error, residingPG }) => {
   return (
     <div className="w-full grid grid-cols-14 gap-4 bg-[#d9d9d9] p-4 rounded-[20px]">
       <div className="col-span-4">
-        <Dash1 formData={formData} residingPG={residingPG}/>
+        <Dash1 pgData={pgData} formData={formData} residingPG={residingPG}/>
       </div>
       <div className="col-span-6">
         <Dash2 formData={formData} 

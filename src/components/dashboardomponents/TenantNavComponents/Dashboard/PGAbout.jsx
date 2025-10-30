@@ -178,7 +178,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length, 
                 <p className="font-light">
                   {pgData.ownerFirstName && pgData.ownerLastName
                     ? `${pgData.ownerFirstName} ${pgData.ownerLastName}` 
-                    : "Owner information not available"}
+                    : `${formData.firstName} ${formData.lastName}` }
                 </p>
               </div>
               
