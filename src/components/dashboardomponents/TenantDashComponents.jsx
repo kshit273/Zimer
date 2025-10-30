@@ -7,6 +7,7 @@ import ReferAndEarn from "./TenantNavComponents/ReferAndEarn/ReferAndEarn";
 import LeavePG from "./TenantNavComponents/LeavePG/LeavePG";
 
 const TenantDashComponents = ({ 
+  rentalHistory,
   setBar, 
   user, 
   setUser, 
@@ -42,7 +43,7 @@ const TenantDashComponents = ({
       );
       break;
     case 2:
-      component = <RoomsHistory />;
+      component = <RoomsHistory rentalHistory={rentalHistory}/>;
       break;
     case 3:
       component = <ViewLegalDocs />;
