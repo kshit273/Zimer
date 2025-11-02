@@ -1,5 +1,5 @@
 import React from "react";
-import SavedPGTemp from "../Dashboard/SavedPGTemp";
+import RoomsHistoryTemp from "../RoomsHistory/RoomsHistoryTemp";
 
 const RoomsHistory = ({rentalHistory}) => {
   return (
@@ -10,7 +10,7 @@ const RoomsHistory = ({rentalHistory}) => {
       <div className="flex flex-col gap-4">
         {rentalHistory.map((pg, i) => (
           <div className="w-full" key={i}>
-            <SavedPGTemp data={pg} />
+            <RoomsHistoryTemp data={pg} />
           </div>
         ))}
       </div>

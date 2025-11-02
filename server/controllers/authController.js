@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const Referral = require("../models/referralModel");
 const bcrypt = require("bcrypt");
+const pgModel = require("../models/pgModel");
 
 exports.signup = async (req, res) => {
   try {
@@ -302,6 +303,66 @@ exports.getTenantsBatch = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch tenant data",
+      error: error.message
+    });
+  }
+};
+
+exports.getSavedPGs = async(req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id; // Get userId from authenticated user
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "User not authenticated" 
+      });
+    }
+
+    // Find user and get savedPGs
+    const user = await User.findById(userId).select('savedPGs');
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
+    }
+
+    // Fetch the full PG details
+    const savedPGDetails = await pgModel.find({ 
+      RID: { $in: user.savedPGs } 
+    });
+
+    // Fetch landlord details for each PG
+    const pgsWithLandlordInfo = await Promise.all(
+      savedPGDetails.map(async (pg) => {
+        // Find landlord by LID
+        const landlord = await User.findById(pg.LID).select('firstName lastName');
+        
+        // Convert mongoose document to plain object and add landlord info
+        const pgObject = pg.toObject();
+        pgObject.landlordName = landlord 
+          ? `${landlord.firstName} ${landlord.lastName}`.trim()
+          : 'Unknown';
+        pgObject.landlordFirstName = landlord?.firstName || '';
+        pgObject.landlordLastName = landlord?.lastName || '';
+        
+        return pgObject;
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: pgsWithLandlordInfo,
+      count: pgsWithLandlordInfo.length
+    });
+
+  } catch (error) {
+    console.error("Error fetching saved PGs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch saved PGs",
       error: error.message
     });
   }

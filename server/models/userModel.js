@@ -60,6 +60,9 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
+    //Saved PGs list
+    savedPGs:[{ type: String }],
+
     // Tenant PG details
     rentalHistory: [
       {

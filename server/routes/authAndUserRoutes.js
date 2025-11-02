@@ -9,6 +9,7 @@ const {
   getUser,
   getTenantsBatch,
   updateLandlordPGs,
+  getSavedPGs,
   clearTenantPG
 } = require("../controllers/authController");
 
@@ -29,6 +30,7 @@ router.put(
 router.post("/clear-pg", clearTenantPG);
 router.get("/me", authMiddleware, getUser);
 router.post("/tenants-batch", getTenantsBatch);
+router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs);
 
 module.exports = router;

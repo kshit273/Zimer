@@ -1,6 +1,6 @@
 import React from "react";
 
-const SavedPGTemp = ({ data }) => {
+const RoomsHistoryTemp = ({ data }) => {
   let formattedDate = "Unknown Date"; // default fallback
 
   if (data?.joinDate) {
@@ -59,8 +59,13 @@ const SavedPGTemp = ({ data }) => {
           </div>
         </div>
       </div>
+      <div className="flex flex-col items-start justify-end">
+        <div className="p-4 pb-0 pl-0 rounded-full text-[#464646]">
+          Joined from {formattedDate}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default SavedPGTemp;
+export default RoomsHistoryTemp;

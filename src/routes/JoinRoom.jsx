@@ -12,6 +12,7 @@ const JoinRoom = ({ user }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [pgData, setPgData] = useState(null);
   const [roomData, setRoomData] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -19,6 +20,7 @@ const JoinRoom = ({ user }) => {
       navigate(`/userlogin?redirect=/join/${RID}/${roomId}?token=${token}`);
     } else {
       // Fetch PG and room data when user is logged in
+      fetchCurrentUserData();
       fetchPGData();
       setShowOverlay(true);
     }
@@ -49,8 +51,21 @@ const JoinRoom = ({ user }) => {
     }
   };
 
+  const fetchCurrentUserData = async () => {
+    try{
+      const res = await axios.get("http://localhost:5000/auth/me", {
+        withCredentials: true,
+      });
+
+      setCurrentUserData(res.data);
+
+    }catch(error){
+      console.error("Error fetching current user:", error);
+    }
+  }
+
   const handleSend = async (security, acceptedTerms, moveInDate) => {
-    console.log(user);
+    // console.log(user);
     if (!security || !acceptedTerms) {
       alert("You must deposit security and accept terms.");
       return;
@@ -60,6 +75,8 @@ const JoinRoom = ({ user }) => {
       alert("Please select a move-in date.");
       return;
     }
+
+
 
     try {
       // Send join request notification instead of directly joining
@@ -92,13 +109,22 @@ const JoinRoom = ({ user }) => {
 
   return (
     <>
-      {showOverlay && pgData && roomData && (
-        <LoginRequestPage
-          onSend={handleSend}
-          onCancel={() => navigate("/")}
-          pgData={pgData}
-          roomData={roomData}
-        />
+      {!currentUserData ? (
+        <div className="p-4 bg-[#e2e2e2]">Loading user data...</div>
+      ) : !currentUserData.currentPG ? (
+        showOverlay && pgData && roomData && (
+          <LoginRequestPage
+            onSend={handleSend}
+            onCancel={() => navigate("/")}
+            pgData={pgData}
+            roomData={roomData}
+          />
+        )
+      ) : (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"><div className="p-4 bg-[#e2e2e2]">
+          You are already in a PG. Leave your current PG to join a new one.
+        </div></div>
+        
       )}
     </>
   );

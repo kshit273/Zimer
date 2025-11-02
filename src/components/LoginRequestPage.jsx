@@ -7,61 +7,68 @@ const LoginRequestPage = ({ onSend, onCancel, pgData, roomData }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Join PG Request</h2>
-
-        {/* PG + Room Info */}
-        {pgData && roomData && (
-          <div className="mb-4 text-sm text-gray-700">
-            <p><span className="font-semibold">PG:</span> {pgData.pgName}</p>
-            <p><span className="font-semibold">Room:</span> {roomData.roomType} (ID: {roomData.roomId})</p>
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={security}
-              onChange={() => setSecurity(!security)}
-            />
-            I have deposited security.
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={terms}
-              onChange={() => setTerms(!terms)}
-            />
-            I have read and agree to Terms & Conditions.
-          </label>
-
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Preferred Move-in Date:</span>
-            <input
-              type="date"
-              value={moveInDate}
-              onChange={(e) => setMoveInDate(e.target.value)}
-              className="border rounded px-2 py-1"
-            />
-          </label>
+      <div className="flex gap-10 bg-white p-0 rounded-[30px] w-265 shadow-lg">
+        <div>
+          <img src={`http://localhost:5000${pgData.coverPhoto}`} alt="" className="rounded-[30px] m-2"/>
         </div>
+        <div className="p-6 pl-0 pb-0 w-250">
+          <h2 className="text-[25px] font-medium mb-4 text-[#464646]">Join PG Request</h2>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 rounded"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSend(security, terms, moveInDate)}
-            className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
-            disabled={!terms || !moveInDate} // ensure at least T&C + date selected
-          >
-            Send
-          </button>
+          {/* PG + Room Info */}
+          {pgData && roomData && (
+            <div className="mb-4 text-[15px] text-gray-700">
+              <p>{pgData.pgName}</p>
+              <p>{roomData.roomType} room</p>
+              <p>Room ID: {roomData.roomId}</p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <div><label className="flex items-center gap-2 text-[18px] text-[#464646]">
+              <input
+                type="checkbox"
+                checked={security}
+                onChange={() => setSecurity(!security)}
+              />
+              I have deposited security.
+            </label>
+
+            <label className="flex items-center gap-2 text-[18px] text-[#464646]">
+              <input
+                type="checkbox"
+                checked={terms}
+                onChange={() => setTerms(!terms)}
+              />
+              I have read and agree to Terms & Conditions.
+            </label></div>
+            
+
+            <label className="flex flex-col gap-1">
+              <span className="text-[15px] font-medium">Preferred Move-in Date:</span>
+              <input
+                type="date"
+                value={moveInDate}
+                onChange={(e) => setMoveInDate(e.target.value)}
+                className="border rounded px-2 py-1"
+              />
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 bg-gray-300 rounded-[10px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onSend(security, terms, moveInDate)}
+              className="px-6 py-2 bg-[#d72638] text-white rounded-[10px] disabled:opacity-50"
+              disabled={!terms || !moveInDate} // ensure at least T&C + date selected
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
