@@ -331,5 +331,224 @@ exports.validateInvite = async (req, res) => {
   }
 };
 
+// ============================================
+// REVIEW RELATED CONTROLLERS
+// ============================================
 
+// POST - Add a review to a PG
+exports.addReview = async (req, res) => {
+  try {
+    const { pgId } = req.params;
+    const { reviewText, ratings } = req.body;
+    const userId = req.user.id; // From authentication middleware
 
+    // Validate input
+    if (!reviewText || !ratings) {
+      return res.status(400).json({ error: "Review text and ratings are required" });
+    }
+
+    // Validate ratings structure
+    const requiredRatings = ['community', 'value', 'location', 'food', 'landlord'];
+    for (const key of requiredRatings) {
+      if (!ratings[key] || ratings[key] < 1 || ratings[key] > 5) {
+        return res.status(400).json({ error: `Invalid rating for ${key}. Must be between 1-5` });
+      }
+    }
+
+    // Validate review text length
+    if (reviewText.trim().length < 10) {
+      return res.status(400).json({ error: "Review must be at least 10 characters long" });
+    }
+
+    if (reviewText.length > 2000) {
+      return res.status(400).json({ error: "Review must not exceed 2000 characters" });
+    }
+
+    // Find the PG
+    const pg = await PG.findOne({ RID: pgId });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Check if user has already reviewed this PG
+    const existingReview = pg.reviews.find(
+      review => review.userId.toString() === userId
+    );
+    if (existingReview) {
+      return res.status(400).json({ error: "You have already reviewed this PG" });
+    }
+
+    // Calculate overall rating (average of all ratings)
+    const overallRating = (
+      ratings.community +
+      ratings.value +
+      ratings.location +
+      ratings.food +
+      ratings.landlord
+    ) / 5;
+
+    // Create new review
+    const newReview = {
+      userId,
+      reviewText: reviewText.trim(),
+      ratings,
+      overallRating: parseFloat(overallRating.toFixed(1)),
+    };
+
+    // Add review to PG
+    pg.reviews.push(newReview);
+
+    // Recalculate average ratings
+    pg.calculateAverageRatings();
+
+    // Save the PG
+    await pg.save();
+
+    res.status(201).json({
+      message: "Review added successfully",
+      review: newReview,
+      averageRatings: pg.averageRatings,
+      totalReviews: pg.totalReviews,
+    });
+  } catch (err) {
+    console.error("Error adding review:", err);
+    res.status(500).json({ error: "Failed to add review", details: err.message });
+  }
+};
+
+// GET - Get all reviews for a PG
+exports.getReviews = async (req, res) => {
+  try {
+    const { PGID } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const pg = await PG.findOne({ RID: PGID }).select('reviews averageRatings totalReviews pgName');
+    
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Sort reviews by most recent first
+    const sortedReviews = pg.reviews.sort((a, b) => b.createdAt - a.createdAt);
+
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedReviews = sortedReviews.slice(startIndex, endIndex);
+
+    res.json({
+      pgName: pg.pgName,
+      averageRatings: pg.averageRatings,
+      totalReviews: pg.totalReviews,
+      reviews: paginatedReviews,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(sortedReviews.length / limit),
+        totalReviews: sortedReviews.length,
+        limit: parseInt(limit),
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching reviews:", err);
+    res.status(500).json({ error: "Failed to fetch reviews", details: err.message });
+  }
+};
+
+// PUT - Update a review
+exports.updateReview = async (req, res) => {
+  try {
+    const { PGID, reviewId } = req.params;
+    const { reviewText, ratings } = req.body;
+    const userId = req.user.id;
+
+    const pg = await PG.findOne({ RID: PGID });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    const review = pg.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // Check if the user is the owner of the review
+    if (review.userId.toString() !== userId) {
+      return res.status(403).json({ error: "You can only edit your own review" });
+    }
+
+    // Update review fields
+    if (reviewText) {
+      if (reviewText.trim().length < 10) {
+        return res.status(400).json({ error: "Review must be at least 10 characters long" });
+      }
+      review.reviewText = reviewText.trim();
+    }
+    
+    if (ratings) {
+      const requiredRatings = ['community', 'value', 'location', 'food', 'landlord'];
+      for (const key of requiredRatings) {
+        if (ratings[key] && (ratings[key] < 1 || ratings[key] > 5)) {
+          return res.status(400).json({ error: `Invalid rating for ${key}` });
+        }
+      }
+      review.ratings = ratings;
+      review.overallRating = parseFloat(
+        ((ratings.community + ratings.value + ratings.location + ratings.food + ratings.landlord) / 5).toFixed(1)
+      );
+    }
+
+    // Recalculate average ratings
+    pg.calculateAverageRatings();
+
+    await pg.save();
+
+    res.json({
+      message: "Review updated successfully",
+      review,
+      averageRatings: pg.averageRatings,
+    });
+  } catch (err) {
+    console.error("Error updating review:", err);
+    res.status(500).json({ error: "Failed to update review", details: err.message });
+  }
+};
+
+// DELETE - Delete a review
+exports.deleteReview = async (req, res) => {
+  try {
+    const { PGID, reviewId } = req.params;
+    const userId = req.user.id;
+
+    const pg = await PG.findOne({ RID: PGID });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    const review = pg.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // Check if the user is the owner of the review
+    if (review.userId.toString() !== userId) {
+      return res.status(403).json({ error: "You can only delete your own review" });
+    }
+
+    // Remove review
+    pg.reviews.pull(reviewId);
+
+    // Recalculate average ratings
+    pg.calculateAverageRatings();
+
+    await pg.save();
+
+    res.json({
+      message: "Review deleted successfully",
+      averageRatings: pg.averageRatings,
+      totalReviews: pg.totalReviews,
+    });
+  } catch (err) {
+    console.error("Error deleting review:", err);
+    res.status(500).json({ error: "Failed to delete review", details: err.message });
+  }
+};
