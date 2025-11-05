@@ -11,13 +11,14 @@ const {
   removeTenantsFromRoom,
   addReview,
   getReviews,
+  updateReview,
 } = require("../controllers/pgController");
 const upload = require("../middleware/upload");
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/:pgId/reviews", authMiddleware,addReview);
 router.get("/:pgId/reviews",getReviews);
-router.put("/:pgId/reviews/:reviewId",addReview);
+router.put("/:pgId/reviews/:reviewId",authMiddleware,updateReview);
 router.delete("/:pgId/reviews/:reviewId",addReview);
 router.get("/", getAllPGs);
 router.get("/:pgId", getPGById);

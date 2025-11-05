@@ -419,10 +419,10 @@ exports.addReview = async (req, res) => {
 // GET - Get all reviews for a PG
 exports.getReviews = async (req, res) => {
   try {
-    const { PGID } = req.params;
+    const { pgId } = req.params;
     const { page = 1, limit = 10 } = req.query;
 
-    const pg = await PG.findOne({ RID: PGID }).select('reviews averageRatings totalReviews pgName');
+    const pg = await PG.findOne({ RID: pgId }).select('reviews averageRatings totalReviews pgName');
     
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
@@ -457,11 +457,11 @@ exports.getReviews = async (req, res) => {
 // PUT - Update a review
 exports.updateReview = async (req, res) => {
   try {
-    const { PGID, reviewId } = req.params;
+    const { pgId, reviewId } = req.params;
     const { reviewText, ratings } = req.body;
     const userId = req.user.id;
 
-    const pg = await PG.findOne({ RID: PGID });
+    const pg = await PG.findOne({ RID: pgId });
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
     }

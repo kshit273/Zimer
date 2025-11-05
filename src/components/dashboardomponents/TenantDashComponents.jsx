@@ -52,7 +52,7 @@ const TenantDashComponents = ({
       component = <ReferAndEarn />;
       break;
     case 5:
-      component = <LeavePG />;
+      component = <LeavePG roomNumber={PGData.room} pgId={PGData.RID} currentUserId={formData._id}/>;
       break;
     default:
       component = <DashboardComp />;

@@ -82,9 +82,33 @@ const Dash3 = ({ user, pgId }) => {
     }
   };
 
+  
+  // Handle accept/reject for leave requests
+  const handleLeaveRequestAction = async (notificationId, action) => {
+    try {
+      const endpoint = action === "accepted" 
+        ? `http://localhost:5000/notifications/leave-request/${notificationId}/accept`
+        : `http://localhost:5000/notifications/${notificationId}/status`;
+
+      if (action === "accepted") {
+        // Use the special accept endpoint that handles tenant removal
+        await axios.post(endpoint, {}, { withCredentials: true });
+      } else {
+        // Use the regular status update for rejection
+        await axios.patch(endpoint, { status: action }, { withCredentials: true });
+      }
+      
+      fetchNotifications(); // Refresh after action
+    } catch (error) {
+      console.error("Error updating leave request:", error);
+      alert(error.response?.data?.error || `Failed to ${action} request`);
+    }
+  };
+
   // Handle accept/reject for other requests (leave requests, etc.)
   const handleRequestAction = async (notificationId, action) => {
     try {
+      console.log(notificationId);
       await axios.patch(
         `http://localhost:5000/notifications/${notificationId}/status`,
         {
@@ -117,8 +141,9 @@ const Dash3 = ({ user, pgId }) => {
           <LeaveReq
             key={notification._id}
             data={notification}
-            onAccept={() => handleRequestAction(notification._id, "accepted")}
-            onReject={() => handleRequestAction(notification._id, "rejected")}
+            user={user}
+            onAccept={() => handleLeaveRequestAction(notification._id, "accepted")}
+            onReject={() => handleLeaveRequestAction(notification._id, "rejected")}
           />
         );
       case "rent_paid":

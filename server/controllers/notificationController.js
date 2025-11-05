@@ -316,6 +316,108 @@ exports.createLeaveRequest = async (req, res) => {
   }
 };
 
+// acceptLeaveRequest 
+exports.acceptLeaveRequest = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const landlordId = req.user.id;
+
+    // Find the notification and populate sender
+    const notification = await Notification.findById(notificationId).populate('sender');
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found" });
+    }
+
+    if (notification.type !== "leave_request") {
+      return res.status(400).json({ error: "Invalid notification type" });
+    }
+
+    // Get PG by RID
+    const pg = await PG.findOne({ RID: notification.pg });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    // Verify landlord owns this PG
+    if (pg.LID.toString() !== landlordId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Check if already processed
+    if (notification.status !== "pending") {
+      return res.status(400).json({ error: "Leave request already processed" });
+    }
+
+    // Find the room and remove tenant
+    const room = pg.rooms.find(r => r.roomId === notification.metadata.roomNumber);
+    
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Check if tenant exists in room
+    const tenantIndex = room.tenants.findIndex(
+      tenant => tenant.tenantId.toString() === notification.sender._id.toString()
+    );
+
+    if (tenantIndex === -1) {
+      notification.status = "accepted";
+      await notification.save();
+      return res.json({ 
+        success: true, 
+        message: "Tenant already removed from room" 
+      });
+    }
+
+    // Remove tenant from room
+    room.tenants.splice(tenantIndex, 1);
+    await pg.save();
+
+    // Update tenant's currentPG and rental history
+    const tenant = await User.findById(notification.sender._id);
+    if (tenant && tenant.currentPG === pg.RID) {
+      // Update the rental history end date
+      const historyIndex = tenant.rentalHistory.findIndex(
+        history => history.RID === pg.RID && !history.leftOn
+      );
+      
+      if (historyIndex !== -1) {
+        tenant.rentalHistory[historyIndex].leftOn = new Date();
+      }
+
+      // Clear currentPG
+      tenant.currentPG = null;
+      await tenant.save();
+    }
+
+    // Update notification status
+    notification.status = "accepted";
+    await notification.save();
+
+    // Create a confirmation notification for the tenant
+    await Notification.create({
+      type: "announcement",
+      sender: landlordId,
+      recipients: [{
+        recipientId: notification.sender._id,
+        isRead: false
+      }],
+      pg: pg.RID,
+      message: `Your leave request for room ${notification.metadata.roomNumber} at ${pg.pgName} has been accepted. We wish you all the best!`,
+      status: "unread",
+    });
+
+    res.json({
+      success: true,
+      message: "Leave request accepted and tenant removed from room",
+    });
+  } catch (error) {
+    console.error("Accept leave request error:", error);
+    res.status(500).json({ error: "Failed to accept leave request" });
+  }
+};
+
 // Create rent payment notification
 exports.createRentPaymentNotification = async (req, res) => {
   try {
@@ -408,11 +510,11 @@ exports.getNotifications = async (req, res) => {
 // Update notification status (accept/reject requests)
 exports.updateNotificationStatus = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { notificationId } = req.params;
     const { status } = req.body;
     const userId = req.user.id;
 
-    const notification = await Notification.findById(id);
+    const notification = await Notification.findById(notificationId);
     if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }

@@ -11,6 +11,7 @@ const {
   getUnreadCount,
   markAllAsRead,
   acceptJoinRequest,
+  acceptLeaveRequest, 
 } = require("../controllers/notificationController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -22,6 +23,7 @@ router.post("/announcement", createAnnouncement);
 router.post("/leave-request", createLeaveRequest);
 router.post("/rent-paid", createRentPaymentNotification);
 router.post('/join-request/:notificationId/accept', authMiddleware, acceptJoinRequest);
+router.post('/leave-request/:notificationId/accept', authMiddleware, acceptLeaveRequest);
 router.post('/join-request', authMiddleware, createJoinRequest);
 router.patch('/:notificationId/status', authMiddleware, updateNotificationStatus);
 
