@@ -17,9 +17,6 @@ const interpolateColor = (color1, color2, factor) => {
 const daysInMonth = (year, monthIndex) =>
   new Date(year, monthIndex + 1, 0).getDate();
 
-/**
- * Color for current month based on days since the most recent cycle start
- */
 const getColorFromStartCycle = (start) => {
   const green = "#61C428";
   const yellow = "#dfdf1a";
@@ -61,52 +58,64 @@ const getColorFromStartCycle = (start) => {
 };
 
 const MonthlyRentStatus = ({ start, paidMonths, residingPG }) => {
+  // console.log(start)
+  // console.log(paidMonths)
+  // console.log(residingPG)
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const startMonth = new Date(start).getMonth();
+  const currentMonth = today.toLocaleString("en-US", { month: "long", year: "numeric" });
+  const startMonth = new Date(start).toLocaleString("en-US", { month: "long", year: "numeric" });
 
   const months = [
-    "jan", "feb", "mar", "apr", "may", "jun",
-    "jul", "aug", "sep", "oct", "nov", "dec",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
 
+return (
+  <div className={`p-4 bg-[#e2e2e2] rounded-[20px] max-w-sm ${!residingPG ? `blur pointer-events-none` : ``}`}>
+    <p className="font-medium text-[24px] text-[#5c5c5c] mb-4">
+      Monthly rent status
+    </p>
+    <div className="grid grid-cols-4 gap-3">
+      {months.map((month, index) => {
+  const formattedMonth = `${month} ${today.getFullYear()}`;
+  const isCurrentMonth = formattedMonth === currentMonth;
+  const isPaid = paidMonths.includes(formattedMonth);
+
+  let bgColor = "#d9d9d9";
+  let textColor = "#444";
+
+  const monthDate = new Date(`${month} ${today.getFullYear()}`);
+  const startDate = new Date(start);
+  const startMonthIndex = startDate.getMonth();
+
+  // Only consider months starting from the joining month
+  if (index >= startMonthIndex) {
+    if (isPaid) {
+      bgColor = "#61C428"; // Green for paid
+      textColor = "#e8e8e8";
+    } else if (isCurrentMonth) {
+      bgColor = "#d72638"; // Red for current unpaid
+      textColor = "#e8e8e8";
+    } else if (monthDate < today) {
+      bgColor = "#d72638"; // Red for past unpaid
+      textColor = "#e8e8e8";
+    }
+  }
+
   return (
-    <div className={`p-4 bg-[#e2e2e2] rounded-[20px] max-w-sm ${!residingPG ? `blur pointer-events-none` : ``}`}>
-      <p className="font-medium text-[24px] text-[#5c5c5c] mb-4">
-        Monthly rent status
-      </p>
-      <div className="grid grid-cols-4 gap-3">
-        {months.map((month, index) => {
-          const isCurrentMonth = index === currentMonth;
-          const isPaid = paidMonths.includes(index);
-
-          let bgColor = "#d9d9d9";
-          let textColor = "#444";
-
-          if (isPaid) {
-            bgColor = "#61C428";
-            textColor = "#e8e8e8";
-          } else if (isCurrentMonth) {
-            bgColor = getColorFromStartCycle(start);
-            textColor = "#e8e8e8";
-          } else if (index >= startMonth && index < currentMonth) {
-            bgColor = "#d72638";
-            textColor = "#e8e8e8";
-          }
-
-          return (
-            <div
-              key={month}
-              className="w-[75px] h-[75px] rounded-[12px] flex items-center justify-center font-normal capitalize cursor-default"
-              style={{ backgroundColor: bgColor, color: textColor }}
-            >
-              {month}
-            </div>
-          );
-        })}
-      </div>
+    <div
+      key={month}
+      className="w-[75px] h-[75px] rounded-[12px] flex items-center justify-center font-normal capitalize cursor-default"
+      style={{ backgroundColor: bgColor, color: textColor }}
+    >
+      {month.slice(0, 3).toLowerCase()}
     </div>
   );
+})}
+
+    </div>
+  </div>
+);
 };
 
 export default MonthlyRentStatus;
