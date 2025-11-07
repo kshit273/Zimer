@@ -49,7 +49,11 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
   const isRoomFull = tenants.length >= roomCapacity;
 
   const getCurrentMonthPaymentStatus = (tenant) => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentDate = new Date();
+    const currentMonth = currentDate.toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
     const currentPayment = tenant.payments?.find(payment => payment.month === currentMonth);
     
     if (currentPayment) {
