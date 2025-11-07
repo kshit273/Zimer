@@ -64,49 +64,45 @@ const JoinRoom = ({ user }) => {
     }
   }
 
-  const handleSend = async (security, acceptedTerms, moveInDate) => {
-    // console.log(user);
-    if (!security || !acceptedTerms) {
-      alert("You must deposit security and accept terms.");
-      return;
-    }
+const handleSend = async (security, acceptedTerms, moveInDate) => {
+  if (!security || !acceptedTerms) {
+    alert("You must deposit security and accept terms.");
+    return;
+  }
 
-    if (!moveInDate) {
-      alert("Please select a move-in date.");
-      return;
-    }
+  if (!moveInDate) {
+    alert("Please select a move-in date.");
+    return;
+  }
 
-
-
-    try {
-      // Send join request notification instead of directly joining
-      const res = await axios.post(
-        `http://localhost:5000/notifications/join-request`,
-        { 
-          pgId: pgData._id,
-          roomNumber: roomData.roomNumber || roomId,
-          message: `${user.name} wants to join room ${roomData.roomNumber || roomId}`,
-          moveInDate: moveInDate,
-          roomId: roomId,
-          token: token // Include token for later verification
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (res.data.success) {
-        alert("Join request sent to landlord! You will be notified once approved.");
-        navigate("/"); // Redirect to home or dashboard
-      } else {
-        alert(res.data.error || "Failed to send join request");
+  try {
+    // Send join request notification
+    const res = await axios.post(
+      `http://localhost:5000/notifications/join-request`,
+      { 
+        pgId: RID, // ✅ Use RID param from URL
+        roomNumber: roomData.roomNumber, // ✅ Add roomNumber
+        message: `${currentUserData.firstName} ${currentUserData.lastName} wants to join room ${roomData.roomId}`, // ✅ Use currentUserData
+        moveInDate: moveInDate,
+        roomId: roomData.roomId, // ✅ Use roomId
+        token: token
+      },
+      {
+        withCredentials: true,
       }
-    } catch (err) {
-      console.error("JoinRoom error:", err.response?.data || err.message);
-      alert(err.response?.data?.error || "Server error");
-    }
-  };
+    );
 
+    if (res.data.success) {
+      alert("Join request sent to landlord! You will be notified once approved.");
+      navigate("/");
+    } else {
+      alert(res.data.error || "Failed to send join request");
+    }
+  } catch (err) {
+    console.error("JoinRoom error:", err.response?.data || err.message);
+    alert(err.response?.data?.error || "Server error");
+  }
+};
   return (
     <>
       {!currentUserData ? (

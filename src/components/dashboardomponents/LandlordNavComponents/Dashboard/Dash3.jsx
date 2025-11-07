@@ -106,22 +106,22 @@ const Dash3 = ({ user, pgId }) => {
   };
 
   // Handle accept/reject for other requests (leave requests, etc.)
-  const handleRequestAction = async (notificationId, action) => {
-    try {
-      console.log(notificationId);
-      await axios.patch(
-        `http://localhost:5000/notifications/${notificationId}/status`,
-        {
-          status: action,
-        },
-        { withCredentials: true }
-      );
-      fetchNotifications(); // Refresh after action
-    } catch (error) {
-      console.error("Error updating notification:", error);
-      alert(`Failed to ${action} request`);
-    }
-  };
+  // const handleRequestAction = async (notificationId, action) => {
+  //   try {
+  //     console.log(notificationId);
+  //     await axios.patch(
+  //       `http://localhost:5000/notifications/${notificationId}/status`,
+  //       {
+  //         status: action,
+  //       },
+  //       { withCredentials: true }
+  //     );
+  //     fetchNotifications(); // Refresh after action
+  //   } catch (error) {
+  //     console.error("Error updating notification:", error);
+  //     alert(`Failed to ${action} request`);
+  //   }
+  // };
 
   // Render notification based on type
   const renderNotification = (notification, i) => {

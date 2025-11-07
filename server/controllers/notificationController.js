@@ -57,7 +57,7 @@ exports.createAnnouncement = async (req, res) => {
 // createJoinRequest 
 exports.createJoinRequest = async (req, res) => {
   try {
-    const { pgId, roomNumber, message, moveInDate, roomId, token } = req.body;
+    const { pgId, message, moveInDate, roomId, token } = req.body;
     const tenantId = req.user.id;
 
     // Validate the invite token
@@ -114,10 +114,9 @@ exports.createJoinRequest = async (req, res) => {
         isRead: false
       }],
       pg: pg.RID, // Use RID instead of _id
-      message: message || `${tenant.firstName} ${tenant.lastName} has sent a join request for room ${roomNumber}`,
+      message: message || `${tenant.firstName} ${tenant.lastName} has sent a join request for room ${roomId}`,
       status: "pending",
       metadata: {
-        roomNumber,
         roomId: roomId,
         tenantName: `${tenant.firstName} ${tenant.lastName}`,
         tenantEmail: tenant.email,
@@ -257,7 +256,7 @@ exports.acceptJoinRequest = async (req, res) => {
         isRead: false
       }],
       pg: pg.RID, // Use RID instead of _id
-      message: `Welcome to ${pg.pgName}! Your join request for room ${notification.metadata.roomNumber} has been accepted.`,
+      message: `Welcome to ${pg.pgName}! Your join request for room ${notification.metadata.roomId} has been accepted.`,
       status: "unread",
     });
 
