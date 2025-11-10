@@ -6,26 +6,19 @@ import ZTRS from "./ZTRS";
 
 // Helper function to calculate sequential paid months
 const calculateSequentialPaidMonths = (joinDate, payments) => {
+  console.log("joinDate:", joinDate);
+  console.log("payments:", payments);
+  
   if (!joinDate || !Array.isArray(payments) || payments.length === 0) {
     return [];
   }
 
-  const startMonth = new Date(joinDate).getMonth();
-  const paidMonths = [];
-  
-  // Sort payments by date to ensure chronological order
-  const sortedPayments = [...payments]
-    .filter(p => p?.paidOn)
-    .sort((a, b) => new Date(a.paidOn) - new Date(b.paidOn));
+  // Extract the month strings from payments
+  const paidMonths = payments
+    .filter(p => p?.month)
+    .map(p => p.month);
 
-  // Add months sequentially starting from join month
-  let currentMonthToAdd = startMonth;
-  
-  for (let i = 0; i < sortedPayments.length; i++) {
-    paidMonths.push(currentMonthToAdd);
-    currentMonthToAdd = (currentMonthToAdd + 1) % 12;
-  }
-
+  console.log("paidMonths:", paidMonths);
   return paidMonths;
 };
 
