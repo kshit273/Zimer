@@ -12,7 +12,7 @@ const PlanCard = ({ title, price, list, priBg, secBg, line }) => {
           ? `h-[700px] w-[475px]`
           : isSmallScreen
           ? `h-[400px] w-[250px]`
-          : `h-[885px] w-[600px]`
+          : `h-[1055px] w-[600px]`
       }  rounded-[20px] `}
     >
       <div

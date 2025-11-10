@@ -8,7 +8,7 @@ const about = [
       },
       {
         subheading: "Smart Matching",
-        para: "Discover rooms that perfectly match your lifestyle, preferences, and budget using our intelligent match system.",
+        para: "Discover rooms that perfectly match your lifestyle, preferences, and budget using our intelligent matching system.",
       },
       {
         subheading: "Community Ratings & Reviews",
@@ -22,7 +22,7 @@ const about = [
     inner: [
       {
         subheading: "Search Your Area",
-        para: "Enter your preferred location and filter by your needs—budget, amenities, and roommate preferences.",
+        para: "Enter your preferred location and filter by your needs, budget and amenities.",
       },
       {
         subheading: "Get Matched",
@@ -30,7 +30,7 @@ const about = [
       },
       {
         subheading: "Connect & Move Ins",
-        para: "Chat with verified hosts, schedule visits, and finalize your stay—everything within Zimer.",
+        para: "Connect with verified hosts, schedule visits, and book your room—everything within Zimer.",
       },
     ],
     imgpath: "./images/abt-imgs/room2.png",
@@ -65,13 +65,13 @@ const tenantFeatureCards = [
   {
     titleStart: "Earn ",
     titleMid: "gauranteed cashback",
-    titleEnd: " with Every Payment",
+    titleEnd: " with Every Payment*",
     img: "./images/feature-imgs/money.png",
   },
   {
-    titleStart: "Only ",
+    titleStart: "",
     titleMid: "Verified",
-    titleEnd: " PGs Listed",
+    titleEnd: " room Listings",
     img: "./images/feature-imgs/shield.png",
   },
   {
@@ -92,7 +92,7 @@ const landlordFeatureCards = [
   {
     titleStart: "Boost Your ",
     titleMid: " Earnings with Premium ",
-    titleEnd: "PG Listing",
+    titleEnd: "room Listings",
     img: "./images/feature-imgs/coinstack.png",
   },
   {
@@ -104,7 +104,7 @@ const landlordFeatureCards = [
   {
     titleStart: "Get ",
     titleMid: "Verified Tenants",
-    titleEnd: " Only",
+    titleEnd: " by ZTRS",
     img: "./images/feature-imgs/tenant.png",
   },
   {
@@ -119,6 +119,18 @@ const landlordFeatureCards = [
     titleEnd: " Your PGs to the Right Audience",
     img: "./images/feature-imgs/megaphone.png",
   },
+  {
+    titleStart: "Keep record of everything using the ",
+    titleMid: "Dashboard",
+    titleEnd: "",
+    img: "./images/feature-imgs/dash.png",
+  },
+  {
+    titleStart: "Get your own ",
+    titleMid: "Call support ",
+    titleEnd: "team for the tenants",
+    img: "./images/feature-imgs/callSupport.png",
+  },
 ];
 
 const basicList = ["List your PG on Zimer for FREE"];
@@ -128,6 +140,9 @@ const popularList = [
   "Gauranted cashback for tenants",
   "Rewards for tenants",
   "We will handle student payment records",
+  "Get your own Call Support for tenants",
+  "Get a dashboard to keep record of payments",
+  "Zimer Tenant Reliability Score (ZTRS) to know tenant's previous history",
 ];
 
 const premiumList = [
@@ -135,9 +150,12 @@ const premiumList = [
   "Gauranted cashback for tenants",
   "Rewards for tenants",
   "We will handle student payment records",
+  "Get a dashboard to keep record of payments",
+  "Zimer Tenant Reliability Score (ZTRS) to know tenant's previous history",
   "Premium badges for your PG",
   "Priority listings (PGs with badges are ranked higher and verified thoroughly)",
   "Run targeted ads if your PG rank higher",
+  "Get your own Call Support for tenants",
 ];
 
 const testimonials = [

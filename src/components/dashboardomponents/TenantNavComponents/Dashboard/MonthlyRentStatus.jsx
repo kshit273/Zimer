@@ -58,9 +58,9 @@ const getColorFromStartCycle = (start) => {
 };
 
 const MonthlyRentStatus = ({ start, paidMonths, residingPG }) => {
-  // console.log(start)
-  // console.log(paidMonths)
-  // console.log(residingPG)
+  console.log(start)
+  console.log(paidMonths)
+  console.log(residingPG)
   const today = new Date();
   const currentMonth = today.toLocaleString("en-US", { month: "long", year: "numeric" });
   const startMonth = new Date(start).toLocaleString("en-US", { month: "long", year: "numeric" });
