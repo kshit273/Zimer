@@ -2,21 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import Like from "../components/Like";
 import { useMediaQuery } from "react-responsive";
 
-const RoomCard = ({
-  RID,
-  head,
-  imgPath,
-  desc,
-  isVerified,
-  review,
-  isPremium,
-  isPremiumSlider,
-}) => {
+const RoomCard = ({pgData, isPremiumSlider}) => {
   const isMedScreen = useMediaQuery({ minWidth: 801, maxWidth: 1024 });
   const isSmallScreen = useMediaQuery({ maxWidth: 800 });
   const [islikeHovered, setIsLikeHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isMoreClicked, setMoreClicked] = useState(false);
+
+  // console.log(pgData)
 
   const moreRef = useRef();
 
@@ -56,7 +49,7 @@ const RoomCard = ({
         } flex items-center justify-center relative`}
       >
         <img
-          src={imgPath}
+          src={`http://localhost:5000${pgData.coverPhoto}`}
           alt=""
           className={
             isMedScreen
@@ -75,7 +68,7 @@ const RoomCard = ({
               : `m-[20px]`
           }`}
         >
-          {isVerified ? (
+          {pgData.plan == 'popular' ? (
             <div
               className={`${
                 isMedScreen
@@ -99,7 +92,7 @@ const RoomCard = ({
               </p>
             </div>
           ) : null}
-          {isPremium ? (
+          {pgData.plan == 'premium' ? (
             <div
               className={`flex ${
                 isMedScreen
@@ -148,7 +141,7 @@ const RoomCard = ({
             isPremiumSlider ? `text-[#c0c0c0]` : `text-[#1a1a1a]`
           } `}
         >
-          {head}
+          {pgData.pgName}
         </p>
       </div>
       <div className="flex justify-between">
@@ -162,7 +155,7 @@ const RoomCard = ({
                 : `text-[17px] text-[#919191]`
             } `}
           >
-            {desc}
+            {pgData.description}
           </p>
           <div
             className={`flex items-center ${
@@ -170,7 +163,7 @@ const RoomCard = ({
             }`}
           >
             {[...Array(5)].map((_, i) =>
-              i < review ? (
+              i < pgData.averageRatings.overall ? (
                 <img
                   key={i}
                   src="/images/star-filled.png"
@@ -277,7 +270,7 @@ const RoomCard = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     navigator.clipboard.writeText(
-                      window.location.origin + `/pg/${RID}`
+                      window.location.origin + `/pgData/${RID}`
                     );
                     setMoreClicked(false);
                   }}
@@ -290,7 +283,7 @@ const RoomCard = ({
                   } hover:bg-[#cacaca] p-[5px] rounded-[5px] cursor-pointer duration-300`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    const shareUrl = `https://wa.me/?text=Check%20out%20this%20PG:%20${window.location.origin}/pg/${RID}`;
+                    const shareUrl = `https://wa.me/?text=Check%20out%20this%20pgData:%20${window.location.origin}/pgData/${RID}`;
                     window.open(shareUrl, "_blank");
                     setMoreClicked(false);
                   }}

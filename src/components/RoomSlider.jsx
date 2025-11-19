@@ -9,8 +9,9 @@ const RoomSlider = ({ list, heading, onRoomClick, desc, cityName }) => {
   const scrollRef = useRef();
   const navigate = useNavigate();
 
+  // console.log(list)
+
   const handleHeadingClick = () => {
-    console.log(cityName);
     navigate(`/search/${cityName}`);
   };
 
@@ -20,7 +21,7 @@ const RoomSlider = ({ list, heading, onRoomClick, desc, cityName }) => {
   const [isRightHovered, setIsRightHovered] = useState(false);
   const [isLeftHovered, setIsLeftHovered] = useState(false);
 
-  // Scroll handler
+  // Scroll handler 
   const scroll = (direction) => {
     if (scrollRef.current) {
       const scrollAmount = 700;
@@ -107,35 +108,16 @@ const RoomSlider = ({ list, heading, onRoomClick, desc, cityName }) => {
           style={{ scrollBehavior: "smooth" }}
         >
           {list.map(
-            ({
-              RID,
-              head,
-              imgPath,
-              desc,
-              isVerified,
-              isLiked,
-              review,
-              isPremium,
-            }) => (
+            (pg) => (
               <div
-                key={head}
+                key={pg.RID}
                 onClick={() => {
-                  onRoomClick && onRoomClick(RID);
-                  handleCardClick(RID);
+                  onRoomClick && onRoomClick(pg.RID);
+                  handleCardClick(pg.RID);
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <RoomCard
-                  RID={RID}
-                  key={head}
-                  head={head}
-                  imgPath={imgPath}
-                  desc={desc}
-                  isVerified={isVerified}
-                  isLiked={isLiked}
-                  review={review}
-                  isPremium={isPremium}
-                />
+                <RoomCard pgData={pg} isPremiumSlider={false}/>
               </div>
             )
           )}
