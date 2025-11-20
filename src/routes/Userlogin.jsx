@@ -30,7 +30,6 @@ const Userlogin = ({ setUser }) => {
         withCredentials: true,
       });
 
-      alert("Signup successful! You can login now.");
       return { user: res.data.user }; 
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);

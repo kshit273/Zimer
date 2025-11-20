@@ -8,7 +8,7 @@ const PlanDetails = ({ months = 11, days = 25, searches = 8175 }) => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="bg-[#E2E2E2] rounded-[20px] p-6 flex flex-col gap-2 w-full max-w-[700px] mt-4">
+    <div className="bg-[#E2E2E2] rounded-[30px] p-6 flex flex-col gap-2 w-full mt-4">
       {/* Top Row */}
       <div className="flex justify-between items-center mb-2">
         <span className="text-[28px] font-medium text-[#5c5c5c]">

@@ -4,11 +4,9 @@ const SignupForm3 = ({ redirectTo, setUser, handleSubmit, formData, setFormData 
   const navigate = useNavigate();
 
   const handleRoleClick = async (role, path) => {
-    console.log("Form submitted ...");
 
     const updatedData = { ...formData, role: role };
     setFormData(updatedData);
-    console.log(updatedData);
 
     try {
       const success = await handleSubmit(updatedData); // should return true/false

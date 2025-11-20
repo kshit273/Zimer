@@ -27,8 +27,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cityName, setCityName] = useState(null);
-  const [nearbyPGs, setNearbyPGs] = useState([]);
-  const [cityCode, setCityCode] = useState(null);
+  // const [nearbyPGs, setNearbyPGs] = useState([]);
+  // const [cityCode, setCityCode] = useState(null);
 
   const location = useLocation();
 
@@ -83,12 +83,12 @@ function App() {
 
           if (nearestCity) {
             setCityName(nearestCity.name);
-            setCityCode(nearestCity.code);
+            // setCityCode(nearestCity.code);
 
-            const filteredPGs = Houses.filter((pg) =>
-              pg.RID.startsWith(nearestCity.code)
-            );
-            setNearbyPGs(filteredPGs);
+            // const filteredPGs = Houses.filter((pg) =>
+            //   pg.RID.startsWith(nearestCity.code)
+            // );
+            // setNearbyPGs(filteredPGs);
           } else {
             console.log("No matching city found");
           }
@@ -139,7 +139,7 @@ function App() {
         <Route path="/" element={<Home user={user} />} />
         <Route
           path="/search/*"
-          element={<Search cityName={cityName} nearbyPGs={nearbyPGs} />}
+          element={<Search cityName={cityName} />}
         />
         <Route path="/pg/:RID" element={<PgInfo />} />
         <Route path="/search/:search_keyword" element={<SearchResults />} />

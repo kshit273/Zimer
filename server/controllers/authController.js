@@ -4,6 +4,204 @@ const User = require("../models/userModel");
 const Referral = require("../models/referralModel");
 const bcrypt = require("bcrypt");
 const pgModel = require("../models/pgModel");
+const crypto = require("crypto");
+const mongoose = require("mongoose");
+
+const otpStore = new Map();
+
+const sendWhatsAppOTP = async (phoneNumber, otp) => {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const client = require("twilio")(accountSid, authToken);
+
+  try {
+    await client.messages.create({
+      body: `Your OTP for password reset is: ${otp}. Valid for 10 minutes.`,
+      from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`, // e.g., whatsapp:+14155238886
+      to: `whatsapp:${phoneNumber}`, // User's phone with country code
+    });
+    return true;
+  } catch (error) {
+    console.error("WhatsApp send error:", error);
+    throw error;
+  }
+};
+
+exports.sendOtp = async(req,res) =>{
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email",
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+
+    // Store OTP with expiry (10 minutes)
+    otpStore.set(email, {
+      otp,
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+      attempts: 0,
+    });
+
+    // Send OTP via WhatsApp
+    await sendWhatsAppOTP(user.phone, otp);
+
+    // For development/testing - log OTP (REMOVE IN PRODUCTION)
+    console.log(`OTP for ${email}: ${otp}`);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to your registered mobile number",
+    });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP. Please try again later.",
+    });
+  }
+}
+
+exports.verifyOtp = async(req,res) =>{
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Check if OTP exists
+    const otpData = otpStore.get(email);
+
+    if (!otpData) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired or not found. Please request a new one.",
+      });
+    }
+
+    // Check if OTP expired
+    if (Date.now() > otpData.expiresAt) {
+      otpStore.delete(email);
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
+    // Check attempt limit
+    if (otpData.attempts >= 3) {
+      otpStore.delete(email);
+      return res.status(400).json({
+        success: false,
+        message: "Too many failed attempts. Please request a new OTP.",
+      });
+    }
+
+    // Verify OTP
+    if (otpData.otp !== otp) {
+      otpData.attempts += 1;
+      otpStore.set(email, otpData);
+      return res.status(400).json({
+        success: false,
+        message: `Invalid OTP. ${3 - otpData.attempts} attempts remaining.`,
+      });
+    }
+
+    // OTP verified successfully
+    // Mark as verified but keep in store for password reset
+    otpData.verified = true;
+    otpStore.set(email, otpData);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify OTP. Please try again.",
+    });
+  }
+}
+
+exports.resetPassword = async(req,res) =>{
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and new password are required",
+      });
+    }
+
+    // Validate password strength
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Check if OTP was verified
+    const otpData = otpStore.get(email);
+
+    if (!otpData || !otpData.verified) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP verification required before resetting password",
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update password (will be hashed by pre-save middleware)
+    user.password = newPassword;
+    await user.save();
+
+    // Clear OTP from store
+    otpStore.delete(email);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to reset password. Please try again.",
+    });
+  }
+}
 
 exports.signup = async (req, res) => {
   try {
@@ -85,6 +283,7 @@ exports.signup = async (req, res) => {
     res.status(500).json({ error: "Signup failed" });
   }
 };
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -368,6 +567,78 @@ exports.getSavedPGs = async(req, res) => {
   }
 };
 
+exports.postSavedPGs = async(req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id; // Get userId from authenticated user
+    const { RID } = req.body; // Get RID from request body
+    
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "User not authenticated" 
+      });
+    }
+
+    if (!RID) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "PG ID (RID) is required" 
+      });
+    }
+
+    // Check if PG exists
+    const pgExists = await pgModel.findOne({ RID });
+    if (!pgExists) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "PG not found" 
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId).select('savedPGs');
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
+    }
+
+    // Check if PG is already saved
+    const pgIndex = user.savedPGs.indexOf(RID);
+    let message = '';
+    
+    if (pgIndex > -1) {
+      // PG is already saved, remove it
+      user.savedPGs.splice(pgIndex, 1);
+      message = "PG removed from saved list";
+    } else {
+      // PG is not saved, add it
+      user.savedPGs.push(RID);
+      message = "PG added to saved list";
+    }
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: message,
+      savedPGs: user.savedPGs,
+      count: user.savedPGs.length
+    });
+
+  } catch (error) {
+    console.error("Error updating saved PGs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update saved PGs",
+      error: error.message
+    });
+  }
+};
+
 exports.updateLandlordPGs = async (req, res) => {
   try {
     const { ownedPGs } = req.body;
@@ -432,6 +703,59 @@ exports.updateLandlordPGs = async (req, res) => {
       success: false,
       message: "Internal server error",
       error: error.message
+    });
+  }
+};
+
+exports.getLandlordData = async (req, res) => {
+  try {
+    const { lid } = req.params;
+
+    // Validate LID format (MongoDB ObjectId)
+    if (!mongoose.Types.ObjectId.isValid(lid)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid landlord ID format",
+      });
+    }
+
+    // Find the landlord by ID
+    const landlord = await User.findById(lid).select(
+      "firstName lastName email phone profilePicture role ownedPGs"
+    );
+
+    if (!landlord) {
+      return res.status(404).json({
+        success: false,
+        message: "Landlord not found",
+      });
+    }
+
+    // Verify the user is actually a landlord
+    if (landlord.role !== "landlord") {
+      return res.status(403).json({
+        success: false,
+        message: "User is not a landlord",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: landlord._id,
+        name: `${landlord.firstName} ${landlord.lastName || ""}`.trim(),
+        email: landlord.email,
+        phone: landlord.phone,
+        profilePicture: landlord.profilePicture,
+        ownedPGs: landlord.ownedPGs,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching landlord data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch landlord data",
+      error: error.message,
     });
   }
 };

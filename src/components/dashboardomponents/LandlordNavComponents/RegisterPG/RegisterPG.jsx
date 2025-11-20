@@ -370,6 +370,25 @@ const fullAddress = addressParts.join(", ");
         />
       </div>
 
+      {/* Location Details */}
+      <div className="p-4 rounded-lg">
+        <p className="block text-[20px] text-[#5c5c5c] font-medium">Location</p>
+        
+        <MapPreview
+          address={fullAddress}
+          pincode={formData.address.pin}
+          onLocationSelect={(pos) =>
+            setFormData((prev) => ({ ...prev, location: [pos.lat, pos.lng] }))
+          }
+          onAddressSelect={(addr) =>
+            setFormData((prev) => ({
+              ...prev,
+              address: { ...prev.address, ...addr },
+            }))
+          }
+        />
+        </div>
+
       {/* Address Details */}
       <div className=" p-4 rounded-lg ">
         <p className="block text-[20px] text-[#5c5c5c] font-medium">Address Details</p>
@@ -467,27 +486,6 @@ const fullAddress = addressParts.join(", ");
           />
         )}
 
-      </div>
-
-      {/* Location Details */}
-      <div className="p-4 rounded-lg">
-        <p className="block text-[20px] text-[#5c5c5c] font-medium">Location</p>
-
-        <MapPreview
-          address={fullAddress}
-          pincode={formData.address.pin}
-          onLocationSelect={(pos) =>
-            setFormData((prev) => ({ ...prev, location: [pos.lat, pos.lng] }))
-          }
-          onAddressSelect={(addr) =>
-            setFormData((prev) => ({
-              ...prev,
-              address: { ...prev.address, ...addr },
-            }))
-          }
-        />
-
-        
       </div>
 
       {/* Features */}

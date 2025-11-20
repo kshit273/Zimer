@@ -4,7 +4,7 @@ import FindRoom from "../../sections/FindRoom.jsx";
 import PgInfo from "../../sections/PgInfo.jsx";
 import SearchResults from "../../sections/SearchResults.jsx";
 
-const Search = ({ cityName, nearbyPGs }) => {
+const Search = ({ cityName }) => {
   const [activeRID, setActiveRID] = useState(null);
   return (
     <>
@@ -28,7 +28,6 @@ const Search = ({ cityName, nearbyPGs }) => {
               activeRID={activeRID}
               setActiveRID={setActiveRID}
               cityName={cityName}
-              nearbyPGs={nearbyPGs}
             />
           }
         />

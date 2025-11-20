@@ -66,7 +66,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length, 
             "Dashboard"
           }
         </p>
-        <div className="flex items-center justify-center h-[300px] bg-[#e8e8e8] rounded-[30px]">
+        <div className="flex items-center justify-center h-[300px] bg-[#e2e2e2] rounded-[30px]">
           <div className="text-center p-6">
             <div className="text-yellow-500 text-6xl mb-4">📋</div>
             <h3 className="text-lg font-semibold text-yellow-700 mb-2">

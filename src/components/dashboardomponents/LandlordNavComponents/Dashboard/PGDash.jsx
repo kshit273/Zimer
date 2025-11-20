@@ -142,8 +142,8 @@ const PGDash = ({ pgData, loading, error }) => {
   // Handle case where pgData is not available
   if (!pgData || !pgData.rooms) {
     return (
-      <div className="w-full bg-[#d9d9d9] p-4 rounded-[20px]">
-        <div className="text-[28px] font-medium text-[#5c5c5c]">
+      <div className="w-full flex items-center justify-center bg-[#d9d9d9] p-4 rounded-[20px] min-h-[300px]">
+        <div className="text-[24px] font-medium text-[#5c5c5c]">
           No PG data available
         </div>
       </div>
@@ -194,7 +194,7 @@ const PGDash = ({ pgData, loading, error }) => {
 
   // Main render with tenant data
   return (
-    <div className="w-full bg-[#d9d9d9] p-4 rounded-[20px]">
+    <div className="w-full bg-[#d9d9d9] p-4 rounded-[20px] ">
       <div className="text-[28px] font-medium text-[#5c5c5c]">
         Rooms in {pgData.pgName || "PG"}
       </div>

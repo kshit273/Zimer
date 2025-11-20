@@ -552,3 +552,61 @@ exports.deleteReview = async (req, res) => {
     res.status(500).json({ error: "Failed to delete review", details: err.message });
   }
 };
+
+// GET room by roomId
+exports.getRoomById = async (req, res) => {
+  try {
+    const { pgId, roomId } = req.params;
+    
+    const pg = await PG.findOne({ RID: pgId });
+    
+    if (!pg) {
+      return res.status(404).json({ message: 'PG not found' });
+    }
+    
+    const room = pg.rooms.find(r => r.roomId === roomId);
+    
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+    
+    res.json(room);
+  } catch (error) {
+    console.error('Error fetching room:', error);
+    res.status(500).json({ message: 'Server error', details: error.message });
+  }
+};
+
+// PATCH - Update room availability
+exports.updateRoomAvailability = async (req, res) => {
+  try {
+    const { pgId, roomId } = req.params;
+    const { availableFrom } = req.body;
+    
+    const pg = await PG.findOne({ RID: pgId });
+    
+    if (!pg) {
+      return res.status(404).json({ message: 'PG not found' });
+    }
+    
+    // Find the room in the rooms array
+    const room = pg.rooms.find(r => r.roomId === roomId);
+    
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+    
+    // Update the availableFrom field
+    room.availableFrom = availableFrom;
+    
+    await pg.save();
+    
+    res.json({ 
+      message: 'Availability updated successfully', 
+      room 
+    });
+  } catch (error) {
+    console.error('Error updating availability:', error);
+    res.status(500).json({ message: 'Server error', details: error.message });
+  }
+};

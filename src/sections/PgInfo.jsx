@@ -2,14 +2,12 @@ import MapComp from "../components/MapComp";
 import OwnerCard from "../components/OwnerCard";
 import PgReview from "../components/PgReview";
 import ShowRooms from "../components/ShowRooms";
-import { Houses } from "../constants/Houses";
 import Footer from "./Footer";
-import { Details } from "../constants/PgData";
-import { services, Services } from "../constants/Services";
+import { services } from "../constants/Services";
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import axios from "axios";
 
 const PgInfo = () => {
   const { RID } = useParams();
@@ -18,26 +16,105 @@ const PgInfo = () => {
   const [zoomImg, setZoomImg] = useState(null);
   const [zoomImgIndex, setZoomImgIndex] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // API data states
+  const [pgData, setPgData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const house = Houses.find((item) => item.RID === RID);
-  const details = Details.find((item) => item.RID === RID);
-  const PgServices = Services.find((item) => item.RID === RID);
+  // Fetch PG data from API
+  useEffect(() => {
+    const fetchPgData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:5000/pgs/${RID}`, {
+          withCredentials: true,
+        });
+        setPgData(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching PG data:", err);
+        setError("Failed to load PG data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (RID) {
+      fetchPgData();
+    }
+  }, [RID]);
+
+  // Check if PG is already saved on component mount
+  useEffect(() => {
+    checkIfSaved();
+  }, [RID]);
+
+  const checkIfSaved = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/auth/saved-pgs", {
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        const savedPGs = response.data.data;
+        const isCurrentPgSaved = savedPGs.some((pg) => pg.RID === RID);
+        setIsSaved(isCurrentPgSaved);
+      }
+    } catch (error) {
+      console.error("Error checking saved status:", error);
+    }
+  };
+
+  const handleSavePG = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await axios.post(
+        "http://localhost:5000/auth/saved-pgs",
+        { RID },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setIsSaved(!isSaved);
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error saving PG:", error);
+      if (error.response?.status === 401) {
+        alert("Please login to save PGs");
+        navigate("/login");
+      } else {
+        alert(error.response?.data?.message || "Failed to save PG");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleNext = () => {
-    if (!details?.imgPaths || zoomImgIndex === null) return;
-    if (zoomImgIndex < details.imgPaths.length - 1) {
+    if (!pgData?.otherPhotos || zoomImgIndex === null) return;
+    if (zoomImgIndex < pgData.otherPhotos.length - 1) {
       const nextIndex = zoomImgIndex + 1;
       setZoomImgIndex(nextIndex);
-      setZoomImg(details.imgPaths[nextIndex]);
+      setZoomImg(pgData.otherPhotos[nextIndex]);
     }
   };
 
   const handlePrev = () => {
-    if (!details?.imgPaths || zoomImgIndex === null) return;
+    if (!pgData?.otherPhotos || zoomImgIndex === null) return;
     if (zoomImgIndex > 0) {
       const prevIndex = zoomImgIndex - 1;
       setZoomImgIndex(prevIndex);
-      setZoomImg(details.imgPaths[prevIndex]);
+      setZoomImg(pgData.otherPhotos[prevIndex]);
     }
   };
 
@@ -71,23 +148,29 @@ const PgInfo = () => {
     } else {
       const scrollY = document.body.dataset.scrollY || "0";
 
-      // Reset styles first!
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.left = "";
       document.body.style.right = "";
       document.body.style.width = "";
 
-      // Now scroll back to where user was
       window.scrollTo(0, parseInt(scrollY));
       delete document.body.dataset.scrollY;
     }
   }, [isOverlayOpen]);
 
-  if (!house) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-2xl text-gray-600">Loading PG details...</p>
+      </div>
+    );
+  }
+
+  if (error || !pgData) {
     return (
       <div className="text-center text-lg text-red-500 pt-10">
-        PG not found.
+        {error || "PG not found."}
       </div>
     );
   }
@@ -108,45 +191,33 @@ const PgInfo = () => {
           <div className="grid grid-cols-5 grid-rows-2 gap-8  p-4 rounded-2xl w-[95%] h-[800px]">
             <div className="col-span-3 row-span-2 rounded-2xl overflow-hidden ">
               <img
-                src={`/images/PgInfoImgs/${RID}/mainImg.jpg`}
+                src={`http://localhost:5000${pgData.coverPhoto}`}
                 alt="Main"
                 className="w-full h-full object-cover rounded-2xl"
               />
             </div>
-            <div className="col-span-1 row-span-1 rounded-2xl overflow-hidden ">
-              <img
-                src={`/images/PgInfoImgs/${RID}/img1.jpg`}
-                alt="img1"
-                className="w-full h-full object-cover rounded-2xl"
-              />
-            </div>
-            <div className="col-span-1 row-span-1 rounded-2xl overflow-hidden ">
-              <img
-                src={`/images/PgInfoImgs/${RID}/img2.jpg`}
-                alt="img2"
-                className="w-full h-full object-cover rounded-2xl"
-              />
-            </div>
-            <div className="col-span-1 row-span-1 rounded-2xl overflow-hidden ">
-              <img
-                src={`/images/PgInfoImgs/${RID}/img3.jpg`}
-                alt="img3"
-                className="w-full h-full object-cover rounded-2xl"
-              />
-            </div>
-            <div className="col-span-1 row-span-1 rounded-2xl overflow-hidden  relative">
-              <img
-                src={`/images/PgInfoImgs/${RID}/img4.jpg`}
-                alt="img4"
-                className="w-full h-full object-cover rounded-2xl"
-              />
-              <button
-                onClick={() => setIsOverlayOpen(true)}
-                className="absolute bottom-3 right-3 bg-white bg-opacity-80 px-4 py-2 rounded-full shadow text-sm font-medium flex items-center gap-2 cursor-pointer"
+            {pgData.otherPhotos?.slice(0, 4).map((photo, index) => (
+              <div
+                key={index}
+                className={`col-span-1 row-span-1 rounded-2xl overflow-hidden ${
+                  index === 3 ? "relative" : ""
+                }`}
               >
-                Show all photos
-              </button>
-            </div>
+                <img
+                  src={`http://localhost:5000${photo}`}
+                  alt={`img${index + 1}`}
+                  className="w-full h-full object-cover rounded-2xl"
+                />
+                {index === 3 && (
+                  <button
+                    onClick={() => setIsOverlayOpen(true)}
+                    className="absolute bottom-3 right-3 bg-white bg-opacity-80 px-4 py-2 rounded-full shadow text-sm font-medium flex items-center gap-2 cursor-pointer"
+                  >
+                    Show all photos
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
         <div className="flex gap-[60px] justify-between">
@@ -154,10 +225,10 @@ const PgInfo = () => {
             <div className="leftInfo ml-[60px] max-w-[1300px] w-full">
               <div className="main ">
                 <div className="head text-[45px] font-medium text-[#1a1a1a] mb-[5px]">
-                  {house?.head || details?.PgName || "PG Info"}
+                  {pgData.pgName}
                 </div>
                 <div className="address font-normal text-[22px] w-[500px] text-[#2a2a2a] ">
-                  {details?.Address}
+                  {pgData.address}
                 </div>
                 <div className="rating mb-[40px] flex items-center gap-[10px]">
                   <div className="stars flex items-center gap-1 py-[8px]">
@@ -165,7 +236,7 @@ const PgInfo = () => {
                       <img
                         key={i}
                         src={
-                          i < Math.round(house?.review ?? 0)
+                          i < Math.round(pgData.averageRatings?.overall ?? 0)
                             ? "/images/star-filled.png"
                             : "/images/star-empty.png"
                         }
@@ -175,12 +246,22 @@ const PgInfo = () => {
                     ))}
                   </div>
                   <div className="ratingNumber text-[20px] text-[#4d4d4d] flex items-center justify-center pt-[5px] font-medium">
-                    <p>({house.review})</p>
+                    <p>({pgData.averageRatings?.overall || 0})</p>
                   </div>
                 </div>
                 <div className="buttons flex gap-[15px]">
-                  <button className="h-[60px] w-[240px] bg-gradient-to-r from-[#d72638] to-[#ff0084] text-[20px] text-white font-medium rounded-full shadow">
-                    Save for later
+                  <button
+                    onClick={handleSavePG}
+                    disabled={isLoading}
+                    className={`h-[60px] w-[240px] text-[20px] text-white font-medium rounded-full shadow transition-all ${
+                      isSaved
+                        ? "bg-gradient-to-r from-[#28a745] to-[#20c997]"
+                        : "bg-gradient-to-r from-[#d72638] to-[#ff0084]"
+                    } ${
+                      isLoading ? "opacity-50 cursor-not-allowed" : ""
+                    } hover:scale-105`}
+                  >
+                    {isLoading ? "Processing..." : isSaved ? "Saved ✓" : "Save for later"}
                   </button>
                   <button className="h-[60px] w-[60px] bg-[#d9d9d9] rounded-full flex items-center justify-center">
                     <img
@@ -194,40 +275,64 @@ const PgInfo = () => {
               <div className="desc flex flex-col gap-[5px] mt-[30px]">
                 <div className="head text-[35px] font-medium">Description</div>
                 <div className="para text-[19px] text-[#6c6c6c] ">
-                  {house.description}
+                  {pgData.description}
                 </div>
               </div>
-              <div className="desc flex flex-col gap-[5px] mt-[30px]">
-                <div className="head text-[35px] font-medium ">
-                  Things to be kept in mind
+              {pgData.rules && pgData.rules.length > 0 && (
+                <div className="desc flex flex-col gap-[5px] mt-[30px]">
+                  <div className="head text-[35px] font-medium ">
+                    Things to be kept in mind
+                  </div>
+                  <div className="para flex flex-col gap-[10px]">
+                    {pgData.rules.map((rule, idx) => (
+                      <div className="flex gap-[10px] items-center" key={idx}>
+                        <div className="h-[10px] w-[10px] rounded-full bg-[#1a1a1a]"></div>
+                        <div className="text-[19px] text-[#6c6c6c]">{rule}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="para flex flex-col gap-[10px]">
-                  {house.extras.map((prop, idx) => (
-                    <div className="flex gap-[10px] items-center" key={idx}>
-                      <div className="h-[10px] w-[10px] rounded-full bg-[#1a1a1a]"></div>
-                      <div className="text-[19px] text-[#6c6c6c]">{prop}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="services mt-[30px]">
-                <div className="head text-[35px] font-medium">
-                  Services provided
-                </div>
-                {(() => {
-                  const matchedServices = PgServices.services
-                    .map((service) => services.find((s) => s.name === service))
-                    .filter(Boolean)
-                    .slice(0, 10);
+              )}
+              {pgData.amenities && pgData.amenities.length > 0 && (
+                <div className="services mt-[30px]">
+                  <div className="head text-[35px] font-medium">
+                    Services provided
+                  </div>
+                  {(() => {
+                    const matchedServices = pgData.amenities
+                      .map((amenity) => services.find((s) => s.name === amenity))
+                      .filter(Boolean)
+                      .slice(0, 10);
 
-                  if (matchedServices.length <= 4) {
+                    if (matchedServices.length <= 4) {
+                      return (
+                        <div className="flex flex-col gap-y-5 mt-[20px] max-w-[400px]">
+                          {matchedServices.map((matchedService, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-[15px]"
+                            >
+                              <img
+                                src={
+                                  matchedService.imgPath.startsWith("./")
+                                    ? matchedService.imgPath.replace("./", "/")
+                                    : matchedService.imgPath
+                                }
+                                alt={matchedService.name}
+                                className="h-[35px] w-[35px]"
+                              />
+                              <div className="text-[#6c6c6c] text-[19px]">
+                                {matchedService.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
                     return (
-                      <div className="flex flex-col gap-y-5 mt-[20px] max-w-[400px]">
+                      <div className="grid grid-cols-2 gap-x-10 gap-y-5 mt-[20px] max-w-[400px]">
                         {matchedServices.map((matchedService, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-[15px]"
-                          >
+                          <div key={idx} className="flex items-center gap-[15px]">
                             <img
                               src={
                                 matchedService.imgPath.startsWith("./")
@@ -244,38 +349,18 @@ const PgInfo = () => {
                         ))}
                       </div>
                     );
-                  }
-                  return (
-                    <div className="grid grid-cols-2 gap-x-10 gap-y-5 mt-[20px] max-w-[400px]">
-                      {matchedServices.map((matchedService, idx) => (
-                        <div key={idx} className="flex items-center gap-[15px]">
-                          <img
-                            src={
-                              matchedService.imgPath.startsWith("./")
-                                ? matchedService.imgPath.replace("./", "/")
-                                : matchedService.imgPath
-                            }
-                            alt={matchedService.name}
-                            className="h-[35px] w-[35px]"
-                          />
-                          <div className="text-[#6c6c6c] text-[19px]">
-                            {matchedService.name}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
+                  })()}
+                </div>
+              )}
             </div>
 
             <div className="rooms ml-[60px] mt-[30px]">
-              <ShowRooms RID={RID} />
+              <ShowRooms RID={RID} pgData={pgData} />
             </div>
           </div>
           <div className="rightInfo min-w-[565px] max-w-[565px]">
             <div className="sticky top-[150px] flex flex-col gap-[20px]">
-              <OwnerCard RID={RID} />
+              <OwnerCard LID={pgData?.LID} />
               <MapComp RID={RID} />
             </div>
           </div>
@@ -302,14 +387,12 @@ const PgInfo = () => {
                   >
                     ✕
                   </button>
-                  {details?.imgPaths?.length > 0 && (
+                  {pgData?.otherPhotos?.length > 0 && (
                     <div className="grid grid-cols-3 gap-4 mt-9 auto-rows-[310px]">
-                      {details.imgPaths.map((img, i) => (
+                      {[pgData.coverPhoto, ...pgData.otherPhotos].filter(Boolean).map((img, i) => (
                         <img
                           key={i}
-                          src={
-                            img.startsWith("./") ? img.replace("./", "/") : img
-                          }
+                          src={`http://localhost:5000${img}`}
                           alt={`pg-img-${i}`}
                           className={`w-full h-full object-cover rounded-lg cursor-pointer ${
                             i === 0 ? "col-span-2 row-span-2" : ""
@@ -344,7 +427,7 @@ const PgInfo = () => {
                   <button
                     onClick={handleNext}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/70 hover:bg-white text-black px-3 py-2 rounded-full shadow-md"
-                    disabled={zoomImgIndex === details.imgPaths.length - 1}
+                    disabled={zoomImgIndex === (pgData.otherPhotos?.length || 0)}
                   >
                     →
                   </button>

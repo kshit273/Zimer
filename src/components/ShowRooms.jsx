@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { Details } from "../constants/PgData";
+import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import PgRoomComp from "../components/PgRoomComp";
+import axios from "axios";
 
-const ShowRooms = ({ RID }) => {
+const ShowRooms = ({ RID, pgData: propPgData = null }) => {
   const filters = ["Price", "Single room", "Shared room", "Available"];
 
   const priceRange = [
@@ -18,6 +17,37 @@ const ShowRooms = ({ RID }) => {
   const [showPriceOverlay, setShowPriceOverlay] = useState(false);
   const [selectedPriceIdx, setSelectedPriceIdx] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  
+  // API data states
+  const [pgData, setPgData] = useState(propPgData);
+  const [loading, setLoading] = useState(!propPgData);
+
+  // Fetch PG data from API only when prop not provided
+  useEffect(() => {
+    if (propPgData) {
+      setPgData(propPgData);
+      setLoading(false);
+      return;
+    }
+
+    const fetchPgData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:5000/pgs/${RID}`, {
+          withCredentials: true,
+        });
+        setPgData(response.data);
+      } catch (err) {
+        console.error("Error fetching PG data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (RID) {
+      fetchPgData();
+    }
+  }, [RID, propPgData]);
 
   const toggleIdx = (idx) => {
     if (idx === filters.indexOf("Single room")) {
@@ -57,8 +87,6 @@ const ShowRooms = ({ RID }) => {
     ...filtersWithIdx.filter((f) => !f.selected),
   ];
 
-  const Data = Details.find((data) => data.RID === RID);
-
   const isSingleRoomFilterActive = activeIdxs.includes(
     filters.indexOf("Single room")
   );
@@ -77,25 +105,29 @@ const ShowRooms = ({ RID }) => {
     { min: 10001, max: Infinity },
   ];
 
-  let filteredRooms = Data.Rooms;
+  // Filter rooms based on active filters
+  let filteredRooms = pgData?.rooms || [];
+  
   if (isSingleRoomFilterActive) {
-    filteredRooms = Data.Rooms.filter(
-      (room) => room.Type.toLowerCase() === "single"
+    filteredRooms = filteredRooms.filter(
+      (room) => room.roomType?.toLowerCase() === "single"
     );
   } else if (isSharedRoomFilterActive) {
-    filteredRooms = Data.Rooms.filter(
-      (room) => room.Type.toLowerCase() !== "single"
+    filteredRooms = filteredRooms.filter(
+      (room) => room.roomType?.toLowerCase() !== "single"
     );
   }
 
   if (isAvailableFilterActive) {
-    filteredRooms = filteredRooms.filter((room) => room.AvailFrom !== 0);
+    filteredRooms = filteredRooms.filter(
+      (room) => room.availableFrom && new Date(room.availableFrom) <= new Date()
+    );
   }
 
   if (isPriceFilterActive && selectedPriceIdx !== null) {
     const { min, max } = priceRangeFilters[selectedPriceIdx];
     filteredRooms = filteredRooms.filter(
-      (room) => Number(room.Rent) >= min && Number(room.Rent) <= max
+      (room) => Number(room.rent) >= min && Number(room.rent) <= max
     );
   }
 
@@ -112,6 +144,23 @@ const ShowRooms = ({ RID }) => {
       window.scrollTo(0, parseInt(scrollY));
     }
   }, [selectedRoom]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <p className="text-xl text-gray-600">Loading rooms...</p>
+      </div>
+    );
+  }
+
+  if (!pgData || !pgData.rooms || pgData.rooms.length === 0) {
+    return (
+      <div>
+        <div className="head text-[35px] font-medium">Rooms</div>
+        <p className="text-gray-600 mt-4">No rooms available.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -168,41 +217,49 @@ const ShowRooms = ({ RID }) => {
           )}
         </div>
         <div className="grid grid-cols-3 auto-rows-auto max-w-[850px] gap-[30px] mt-[30px]">
-          {filteredRooms.map((Room, idx) => (
-            <div key={idx} onClick={() => setSelectedRoom(idx)}>
-              <div className="">
-                <img
-                  src={`/images/PgInfoImgs/${RID}/${Room.RoomNo}/mainImg.jpg`}
-                  alt={Room.RoomNo}
-                  className={`w-[250px] h-[250px] object-cover rounded-[20px] cursor-pointer${
-                    Room.AvailFrom === 0
-                      ? "grayscale brightness-45 opacity-60"
-                      : ""
-                  }`}
-                />
-              </div>
-              <div className="flex justify-between mt-[10px] max-w-[250px]">
-                <div className="left">
-                  <div className="roomnum text-[#1a1a1a] text-[28px] font-medium">
-                    Room {Room.RoomNo}
+          {filteredRooms.map((room, idx) => {
+            // Calculate average rating from tenants or use a default
+            const rating = room.rating || 4.0;
+            const isAvailable = room.availableFrom && new Date(room.availableFrom) <= new Date();
+            
+            return (
+              <div key={room.roomId || idx} onClick={() => setSelectedRoom(idx)}>
+                <div className="">
+                  <img
+                    src={
+                      room.photos && room.photos[0]
+                        ? `http://localhost:5000${room.photos[0]}`
+                        : `/images/PgInfoImgs/${RID}/${room.roomId}/mainImg.jpg`
+                    }
+                    alt={room.roomId}
+                    className={`w-[250px] h-[250px] object-cover rounded-[20px] cursor-pointer${
+                      !isAvailable ? " grayscale brightness-45 opacity-60" : ""
+                    }`}
+                  />
+                </div>
+                <div className="flex justify-between mt-[10px] max-w-[250px]">
+                  <div className="left">
+                    <div className="roomnum text-[#1a1a1a] text-[28px] font-medium">
+                      Room {room.roomId}
+                    </div>
+                    <div className="price text-[#1a1a1a] text-[19px]">
+                      ₹{room.rent}/mo
+                    </div>
                   </div>
-                  <div className="price text-[#1a1a1a] text-[19px]">
-                    ₹{Room.Rent}/mo
+                  <div className="right flex flex-col gap-[10px]">
+                    <div className="rating flex items-center justify-end gap-[7px] text-[#464646] text-[18px]">
+                      <img
+                        src="/images/star-filled.png"
+                        alt="rating"
+                        className="w-[15px] h-[15px]"
+                      />
+                      <p>{rating.toFixed(1)}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="right flex flex-col gap-[10px]">
-                  <div className="rating flex items-center justify-end gap-[7px] text-[#464646] text-[18px]">
-                    <img
-                      src="/images/star-filled.png"
-                      alt="rating"
-                      className="w-[15px] h-[15px]"
-                    />
-                    <p>{Room.Rating}</p>
-                  </div>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

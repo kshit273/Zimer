@@ -39,7 +39,7 @@ export const cityAreaMap = {
       { code: "PAT", name: "Pataudi Road" },
     ],
   },
-  "248001": {
+  "248003": {
     city: "Dehradun",
     areas: [
       { code: "DIT", name: "DIT University area" },

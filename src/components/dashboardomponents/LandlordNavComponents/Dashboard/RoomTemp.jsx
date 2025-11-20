@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import RoomAvailabilityToggleComp from './RoomAvailabilityToggleComp';
 
 const handleInviteLink = async (roomId, PGID) => {
   const API_BASE = "http://localhost:5000"; // backend port
@@ -47,6 +48,16 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
   
   const roomCapacity = getRoomCapacity(roomType);
   const isRoomFull = tenants.length >= roomCapacity;
+
+  // --- NEW: compute if availableFrom is today (date-only comparison) ---
+  const isAvailableToday = (() => {
+    if (!availableFrom) return false;
+    const a = new Date(availableFrom);
+    const t = new Date();
+    return a.getFullYear() === t.getFullYear() &&
+           a.getMonth() === t.getMonth() &&
+           a.getDate() === t.getDate();
+  })();
 
   const getCurrentMonthPaymentStatus = (tenant) => {
     const currentDate = new Date();
@@ -157,9 +168,11 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
             Room {roomId}
           </p>
           <div className="flex gap-4">
-            {!isRoomFull && (
-              <button 
-                className="p-2.5 rounded-[12px] bg-[#cdcdcd] cursor-pointer" 
+            
+            {/* show invite/copy link button only when: room not full, availableFrom set AND availableFrom is today */}
+            {!isRoomFull && availableFrom && isAvailableToday && (
+              <button
+                className="p-2.5 rounded-[12px] bg-[#cdcdcd] cursor-pointer"
                 onClick={() => handleInviteLink(roomId, PGID)}
               >
                 <img
@@ -169,6 +182,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
                 />
               </button>
             )}
+
             {isEmpty ? (
               <button className="p-2.5 rounded-[12px] bg-[#49C800]">
                 <img
@@ -178,7 +192,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
                 />
               </button>
             ) : (
-              <button 
+              <button
                 className="bg-[#d72638] p-2 pl-3 pt-2.5 rounded-[12px] cursor-pointer"
                 onClick={removeTenants}
               >
@@ -315,11 +329,21 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
           </div>
         )}
         
-        {availableFrom && isEmpty && (
+        {isEmpty && (
           <div className="mt-4">
-            <p className="text-[16px] text-[#5c5c5c]">
-              Available from: {new Date(availableFrom).toLocaleDateString()}
-            </p>
+            {availableFrom ? (
+              <p className="text-[16px] text-[#5c5c5c]">
+                Available from: {new Date(availableFrom).toLocaleDateString()}
+              </p>
+            ) : (
+              <>
+              <p className="text-[16px] text-[#ff6b6b]">
+                Availability date not set
+              </p>
+               <RoomAvailabilityToggleComp pgId={PGID} roomId={roomId} />
+              </>
+              
+            )}
           </div>
         )}
       </div>

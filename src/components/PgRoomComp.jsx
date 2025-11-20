@@ -3,7 +3,8 @@ import Calander from "../components/Calander.jsx";
 import RoomFeatures from "./RoomFeatures.jsx";
 
 const PgRoomComp = ({ room, onClose, RID }) => {
-  const images = room.images;
+  console.log(room)
+  const images = room.photos;
   const [current, setCurrent] = useState(0);
 
   const next = () => setCurrent((prev) => (prev + 1) % images.length);
@@ -39,10 +40,10 @@ const PgRoomComp = ({ room, onClose, RID }) => {
             </button>
 
             <img
-              src={images[current]}
+              src={`http://localhost:5000${images[current]}`}
               alt={`room-${current + 1}`}
               className={`h-full w-full object-cover rounded-[10px] ${
-                room.AvailFrom === 0 ? `grayscale brightness-45 opacity-60` : ``
+                room.availableFrom === 0 ? `grayscale brightness-45 opacity-60` : ``
               }`}
             />
 
@@ -73,16 +74,16 @@ const PgRoomComp = ({ room, onClose, RID }) => {
           </div>
           <div className="flex-1 flex-col gap-[20px]">
             <div className="w-full flex justify-start font-medium text-[35px] ml-[10px] mb-[10px]">
-              Room {room.RoomNo}
+              Room {room.roomId}
             </div>
             <div className="ml-[10px] mb-[30px] text-[#757575] font-medium">
-              {room.desc}
+              {room.description}
             </div>
             <div className="calender">
-              <Calander date={room.AvailFrom} />
+              <Calander date={room.availableFrom} />
             </div>
             <div className="features ">
-              <RoomFeatures features={room.features} />
+              <RoomFeatures features={room.amenities} />
             </div>
 
             <div className="flex gap-4 mt-6 ">
@@ -98,7 +99,7 @@ const PgRoomComp = ({ room, onClose, RID }) => {
               <div className=" h-[40px] w-[130px] bg-gradient-to-r from-[#d72638] to-[#ff0084]  rounded-full grid items-center justify-center">
                 <div className=" h-[35px] w-[125px] bg-[#e8e8e8] rounded-full grid items-center justify-center">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d72638] to-[#ff007f] font-medium text-[14px]">
-                    ₹{room.Rent}/month
+                    ₹{room.rent}/month
                   </span>
                 </div>
               </div>

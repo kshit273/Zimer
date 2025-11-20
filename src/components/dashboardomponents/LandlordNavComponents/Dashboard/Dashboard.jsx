@@ -19,7 +19,17 @@ const Dashboard = ({ user, handlePGSelection, formData, pgData, loading, error, 
             />
       </div>
       <div className="col-span-4">
-        {pgData ? <Dash3 pgId={pgData.RID} user={user}/> : <p>Loading...</p>}
+        {pgData ? <Dash3 pgId={pgData.RID} user={user}/> : <div className="flex flex-col gap-2 bg-[#d9d9d9] rounded-[35px] p-6 ">
+                                                              <div className="flex justify-between items-center mb-4">
+                                                                <h2 className="text-[24px] font-medium text-[#1a1a1a]">
+                                                                  Notifications
+                                                                </h2>
+                                                              </div>
+                                                              <div className="flex justify-center items-center mb-4 pt-8" >
+                                                                <p className="text-gray-500">No notification found</p>
+                                                              </div>
+                                                          </div>
+          }
       </div>
     </div>
   );

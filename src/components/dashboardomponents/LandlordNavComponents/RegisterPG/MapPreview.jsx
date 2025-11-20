@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 
@@ -97,9 +98,6 @@ const MapPreview = ({ address, pincode, onLocationSelect, onAddressSelect }) => 
                     }
                     if (comp.types.includes("administrative_area_level_1")) {
                       state = comp.long_name;
-                    }
-                    if (comp.types.includes("postal_code")) {
-                      pin = comp.long_name;
                     }
                   });
 
