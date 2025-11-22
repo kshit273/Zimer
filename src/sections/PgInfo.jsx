@@ -17,7 +17,33 @@ const PgInfo = () => {
   const [zoomImgIndex, setZoomImgIndex] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  // copy-to-clipboard state for share button
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const link = window.location.href; // current full URL (or use `${window.location.origin}/pg/${RID}`)
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = link;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+      alert("Failed to copy link");
+    }
+  };
+
   // API data states
   const [pgData, setPgData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -260,14 +286,23 @@ const PgInfo = () => {
                       isLoading ? "opacity-50 cursor-not-allowed" : ""
                     } hover:scale-105`}
                   >
-                    {isLoading ? "Processing..." : isSaved ? "Saved ✓" : "Save for later"}
+                    {isLoading ? "Processing..." : isSaved ? "Saved" : "Save for later"}
                   </button>
-                  <button className="h-[60px] w-[60px] bg-[#d9d9d9] rounded-full flex items-center justify-center">
+                  <button
+                    onClick={handleShare}
+                    title="Copy PG link"
+                    className="h-[60px] w-[60px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
+                  >
                     <img
                       src="/images/send.png"
                       alt="share"
                       className="h-[25px] w-[25px]"
                     />
+                    {copied && (
+                      <span className="absolute -top-8 right-1 text-[12px] bg-black text-white px-2 py-1 rounded">
+                        Copied!
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
