@@ -1,28 +1,25 @@
-import { Users } from "../constants/Users";
+const RoomReviewCard = ({ userData, date, rating, review }) => {
 
-const RoomReviewCard = ({ username, date, rating, review }) => {
-  const User = Users.find((user) => user.username === username);
+  const username = userData
+    ? `${userData.firstName} ${userData.lastName || ""}`.trim()
+    : "Anonymous";
 
-  if (!User) return null;
+  const profilePicture = `http://localhost:5000${userData?.profilePicture}` || "/images/user.jpg";
 
   return (
-    <div className="h-[380px] w-[700px] bg-[#d7d7d7] rounded-[20px] p-[25px]">
+    <div className="h-[380px] w-[700px] rounded-[20px] p-[25px] border-[0.5px] border-[#b5b2b2] shadow-md">
       <div className="top flex gap-[20px]">
         <div className="left">
           <img
-            src={
-              User.imgPath.startsWith("./")
-                ? User.imgPath.replace("./", "/")
-                : User.imgPath
-            }
-            alt=""
-            className="h-[90px] w-[90px] rounded-full"
+            src={profilePicture}
+            alt={username}
+            className="h-[90px] w-[90px] rounded-full object-cover"
           />
         </div>
         <div className="right flex flex-col gap-0">
           <p className="text-[23px] font-medium text-[#1a1a1a]">{username}</p>
           <p className="text-[16px] font-medium text-[#565656]">{date}</p>
-          <div className="stars flex items-center gap-1  pt-[5px]">
+          <div className="stars flex items-center gap-1 pt-[5px]">
             {[...Array(5)].map((_, i) =>
               i < Math.round(rating) ? (
                 <img

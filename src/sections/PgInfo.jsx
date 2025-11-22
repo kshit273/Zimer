@@ -15,7 +15,6 @@ const PgInfo = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [zoomImg, setZoomImg] = useState(null);
   const [zoomImgIndex, setZoomImgIndex] = useState(null);
-  const [selectedRoom, setSelectedRoom] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -367,7 +366,7 @@ const PgInfo = () => {
         </div>
 
         <div>
-          <PgReview RID={RID} />
+          <PgReview RID={RID} pgData={pgData}/>
         </div>
         <div className="w-[100vw] flex items-center justify-center my-[20px]">
           <div className="h-[1.5px] w-[80vw] bg-[#a4a4a4]"></div>

@@ -481,7 +481,7 @@ exports.getTenantsBatch = async (req, res) => {
     // Fetch tenants by IDs (assuming you're using MongoDB/Mongoose)
     const tenants = await User.find({
       _id: { $in: tenantIds }
-    }).select('firstName lastName id phone'); 
+    }).select('firstName lastName id phone profilePicture'); 
 
     // Check if any tenants were not found
     const foundIds = tenants.map(tenant => tenant._id.toString());
