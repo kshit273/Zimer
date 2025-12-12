@@ -62,7 +62,7 @@ const Smallabt = ({ heading, inner, imgpath }) => {
               <p
                 className={`${
                   isSmallScreen ? `text-[10px] ` : `text-[22px] `
-                } text-[#838383] `}
+                } text-[#404040] `}
               >
                 {item.para}
               </p>

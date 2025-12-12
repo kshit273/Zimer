@@ -139,7 +139,7 @@ const popularList = [
   "List your PG on Zimer for FREE",
   "Gauranted cashback for tenants",
   "Rewards for tenants",
-  "We will handle student payment records",
+  "We will handle tenant payment records",
   "Get your own Call Support for tenants",
   "Get a dashboard to keep record of payments",
   "Zimer Tenant Reliability Score (ZTRS) to know tenant's previous history",
@@ -149,13 +149,13 @@ const premiumList = [
   "List your PG on Zimer for FREE",
   "Gauranted cashback for tenants",
   "Rewards for tenants",
-  "We will handle student payment records",
+  "We will handle tenant payment records",
+  "Get your own Call Support for tenants",
   "Get a dashboard to keep record of payments",
   "Zimer Tenant Reliability Score (ZTRS) to know tenant's previous history",
   "Premium badges for your PG",
   "Priority listings (PGs with badges are ranked higher and verified thoroughly)",
   "Run targeted ads if your PG rank higher",
-  "Get your own Call Support for tenants",
 ];
 
 const testimonials = [
@@ -253,7 +253,6 @@ const socials = [
   { name: "x", logo: "./images/feature-imgs/x.png", link: "#" },
   { name: "youtube", logo: "./images/feature-imgs/youtube.png", link: "#" },
   { name: "instagram", logo: "./images/feature-imgs/instagram.png", link: "#" },
-  { name: "pinterest", logo: "./images/feature-imgs/pinterest.png", link: "#" },
 ];
 
 export {

@@ -1,33 +1,30 @@
 import { useState, useEffect, useRef } from "react";
-import Like from "../components/Like";
 import { useMediaQuery } from "react-responsive";
 
 const RoomCard = ({pgData, isPremiumSlider}) => {
   const isMedScreen = useMediaQuery({ minWidth: 801, maxWidth: 1024 });
   const isSmallScreen = useMediaQuery({ maxWidth: 800 });
-  const [islikeHovered, setIsLikeHovered] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isMoreClicked, setMoreClicked] = useState(false);
+  // const [isMoreClicked, setMoreClicked] = useState(false);
 
   // console.log(pgData)
 
-  const moreRef = useRef();
+  // const moreRef = useRef();
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (moreRef.current && !moreRef.current.contains(e.target)) {
-        setMoreClicked(false);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (moreRef.current && !moreRef.current.contains(e.target)) {
+  //       setMoreClicked(false);
+  //     }
+  //   };
 
-    if (isMoreClicked) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+  //   if (isMoreClicked) {
+  //     document.addEventListener("mousedown", handleClickOutside);
+  //   }
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreClicked]);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [isMoreClicked]);
 
   return (
     <div
@@ -35,8 +32,8 @@ const RoomCard = ({pgData, isPremiumSlider}) => {
         isMedScreen
           ? `h-[260px] w-[250px]`
           : isSmallScreen
-          ? `h-[180px] w-[150px]`
-          : `h-[390px] w-[350px]`
+          ? `h-[200px] w-[150px]`
+          : `h-[430px] w-[350px]`
       } rounded-[10px] relative`}
     >
       <div
@@ -149,16 +146,16 @@ const RoomCard = ({pgData, isPremiumSlider}) => {
           <p
             className={`${
               isMedScreen
-                ? `text-[11px] text-[#919191]`
+                ? `text-[11px] text-[#585858]`
                 : isSmallScreen
                 ? `text-[9px] text-[#585858]`
-                : `text-[17px] text-[#919191]`
+                : `text-[17px] text-[#585858]`
             } `}
           >
-            {pgData.description}
+            {pgData.address}
           </p>
           <div
-            className={`flex items-center ${
+            className={` mt-2 flex items-center ${
               isSmallScreen ? `gap-[2px]` : `gap-1`
             }`}
           >
@@ -193,32 +190,10 @@ const RoomCard = ({pgData, isPremiumSlider}) => {
             )}
           </div>
         </div>
-        <div
+        {/* <div
           className="flex gap-[10px] items-end mr-[10px] relative"
           ref={moreRef}
         >
-          <button
-            onMouseEnter={() => setIsLikeHovered(true)}
-            onMouseLeave={() => setIsLikeHovered(false)}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsLiked((prev) => !prev);
-            }}
-            className="cursor-pointer"
-          >
-            <div
-              className={`${
-                isMedScreen
-                  ? `w-[20px] h-[20px]`
-                  : isSmallScreen
-                  ? `w-[20px] h-[20px]`
-                  : `w-[40px] h-[40px] p-[7px]`
-              } bg-[#d0d0d0] rounded-full flex items-center justify-center duration-300`}
-            >
-              <Like size={isMedScreen ? 14 : isSmallScreen ? 14 : 30} />
-            </div>
-          </button>
 
           <button
             className="cursor-pointer"
@@ -293,7 +268,7 @@ const RoomCard = ({pgData, isPremiumSlider}) => {
               </ul>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

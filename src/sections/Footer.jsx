@@ -17,7 +17,7 @@ const Footer = () => {
     : "text-[17px] font-light";
 
   return (
-    <section id="footer" className="relative z-10">
+    <section id="footer" className="relative z-10 mb-[10px]">
       <div className={`flex min-h-[150px]`}>
         <div
           className={`flex flex-1 flex-col items-start w-[100px]  ${

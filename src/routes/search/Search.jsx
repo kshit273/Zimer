@@ -4,7 +4,7 @@ import FindRoom from "../../sections/FindRoom.jsx";
 import PgInfo from "../../sections/PgInfo.jsx";
 import SearchResults from "../../sections/SearchResults.jsx";
 
-const Search = ({ cityName }) => {
+const Search = () => {
   const [activeRID, setActiveRID] = useState(null);
   return (
     <>
@@ -25,9 +25,7 @@ const Search = ({ cityName }) => {
           path="/"
           element={
             <FindRoom
-              activeRID={activeRID}
               setActiveRID={setActiveRID}
-              cityName={cityName}
             />
           }
         />

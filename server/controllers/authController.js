@@ -456,12 +456,13 @@ exports.updateUser = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password"); // exclude password
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+    return res.status(200).json(user); // Return full user document
   } catch (err) {
+    console.error("Get user error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -4,7 +4,7 @@ import axios from "axios";
 import RoomSlider from "../components/RoomSlider";
 import SearchButton from "../components/SearchButton";
 
-const FindRoom = ({ activeRID, setActiveRID, cityName }) => {
+const FindRoom = ({ setActiveRID }) => {
   const isMedScreen = useMediaQuery({ minWidth: 801, maxWidth: 1024 });
   const isSmallScreen = useMediaQuery({ maxWidth: 800 });
 

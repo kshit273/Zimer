@@ -13,7 +13,7 @@ const SearchButton = ({ width }) => {
     e.preventDefault();
     const trimmed = query.trim();
     if (trimmed !== "") {
-      navigate(`/search/${encodeURIComponent(trimmed)}`);
+      navigate(`/search/results/${encodeURIComponent(trimmed)}`);
     }
   };
 

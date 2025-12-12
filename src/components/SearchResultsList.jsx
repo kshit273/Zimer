@@ -3,6 +3,7 @@ import RoomCard from "./RoomCard";
 import { useMediaQuery } from "react-responsive";
 
 const SearchResultsList = ({ search_keyword, list, onRoomClick }) => {
+  // console.log(list)
   const isMedScreen = useMediaQuery({ minWidth: 801, maxWidth: 1024 });
   const isSmallScreen = useMediaQuery({ maxWidth: 800 });
   const navigate = useNavigate();
@@ -34,16 +35,7 @@ const SearchResultsList = ({ search_keyword, list, onRoomClick }) => {
           }  grid-rows-auto `}
         >
           {list.map(
-            ({
-              RID,
-              head,
-              imgPath,
-              desc,
-              isVerified,
-              isLiked,
-              review,
-              isPremium,
-            }) => (
+            (pg,head) => (
               <div
                 key={head}
                 onClick={() => {
@@ -53,15 +45,8 @@ const SearchResultsList = ({ search_keyword, list, onRoomClick }) => {
                 style={{ cursor: "pointer" }}
               >
                 <RoomCard
-                  RID={RID}
-                  key={head}
-                  head={head}
-                  imgPath={imgPath}
-                  desc={desc}
-                  isVerified={isVerified}
-                  isLiked={isLiked}
-                  review={review}
-                  isPremium={isPremium}
+                  pgData={pg}
+                  isPremiumSlider={false}
                 />
               </div>
             )

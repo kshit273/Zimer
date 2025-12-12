@@ -12,9 +12,9 @@ import PgInfo from "./sections/PgInfo";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { supportedCities } from "./constants/Data";
+import FrontPageLoader from "./components/FrontPageLoader"
 import { Houses } from "./constants/Houses";
 import SearchResults from "./sections/SearchResults";
-import Messenger from "./routes/Messenger";
 import Navbar from "./components/Navbar";
 import TenantDashboard from "./routes/TenantDashboard";
 import LandlordDashboard from "./routes/LandlordDashboard";
@@ -27,8 +27,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cityName, setCityName] = useState(null);
-  // const [nearbyPGs, setNearbyPGs] = useState([]);
-  // const [cityCode, setCityCode] = useState(null);
 
   const location = useLocation();
 
@@ -103,46 +101,39 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/auth/verify-token", {
-          withCredentials: true, // 👈 send cookies
-        });
+  const checkAuth = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/auth/me", {
+        withCredentials: true,
+      });
+      setUser(res.data); // Store full user document
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (res.data.valid) {
-          setUser(res.data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  checkAuth();
+}, []);
 
-    checkAuth();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="h-screen w-screen flex items-center justify-center"><FrontPageLoader/></div>;
   return (
     <>
       <ScrollToTop />
       {![
-        "/messenger",
         "/userlogin",
         "/tenant/dashboard",
         "/landlord/dashboard",
-      ].includes(location.pathname) && <Navbar user={user} setUser={setUser} />}
+      ].includes(location.pathname) && <Navbar user={user} />}
 
       <Routes>
         <Route path="/" element={<Home user={user} />} />
         <Route
           path="/search/*"
-          element={<Search cityName={cityName} />}
+          element={<Search/>}
         />
         <Route path="/pg/:RID" element={<PgInfo />} />
-        <Route path="/search/:search_keyword" element={<SearchResults />} />
         <Route
           path="/landlord/dashboard"
           element={<LandlordDashboard setUser={setUser} user={user} coords={coords} />}
@@ -152,7 +143,6 @@ function App() {
           element={<TenantDashboard setUser={setUser} user={user} />}
         />
         <Route path="/userlogin" element={<Userlogin setUser={setUser} />} />
-        <Route path="/messenger" element={<Messenger />} />
         <Route path="/join/:RID/:roomId" element={<JoinRoom user={user}/>} />
       </Routes>
     </>

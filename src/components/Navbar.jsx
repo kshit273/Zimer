@@ -6,7 +6,7 @@ import { useMediaQuery } from "react-responsive";
 import { Link, Link as RouterLink } from "react-router-dom";
 import User from "./User";
 
-const Navbar = ({ user, setUser }) => {
+const Navbar = ({ user }) => {
   const isMedScreen = useMediaQuery({ minWidth: 770, maxWidth: 1500 });
   const isSmallScreen = useMediaQuery({ maxWidth: 769 });
   const isHam = useMediaQuery({ maxWidth: 1501 });
@@ -77,7 +77,7 @@ const Navbar = ({ user, setUser }) => {
           </div>
         ) : user ? (
           <>
-            <User imgPath={user.profilePicture} role={user.role} />
+            <User imgPath={user.profilePicture} user={user} />
           </>
         ) : (
           <JoinBtn />

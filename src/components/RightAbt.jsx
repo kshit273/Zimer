@@ -42,7 +42,7 @@ const RightAbt = ({ heading, inner, imgpath }) => {
             <h2 className="text-[#D72638] text-[25px] font-medium">
               {item.subheading}
             </h2>
-            <p className="text-[#838383] text-[22px] ">{item.para}</p>
+            <p className="text-[#404040] text-[22px] ">{item.para}</p>
           </div>
         ))}
       </div>
