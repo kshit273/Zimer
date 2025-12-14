@@ -50,14 +50,12 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
   const isRoomFull = tenants.length >= roomCapacity;
 
   // --- NEW: compute if availableFrom is today (date-only comparison) ---
-  const isAvailableToday = (() => {
-    if (!availableFrom) return false;
-    const a = new Date(availableFrom);
-    const t = new Date();
-    return a.getFullYear() === t.getFullYear() &&
-           a.getMonth() === t.getMonth() &&
-           a.getDate() === t.getDate();
-  })();
+const isAvailableToday = (() => {
+  if (!availableFrom) return false;
+  const a = new Date(availableFrom);
+  const t = new Date();
+  return a <= t; // Available from today or earlier
+})();
 
   const getCurrentMonthPaymentStatus = (tenant) => {
     const currentDate = new Date();
