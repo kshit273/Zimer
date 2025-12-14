@@ -2,24 +2,7 @@ import React, { useState } from 'react';
 import Dashboard from "./Dashboard";
 import PGDash from "./PGDash";
 
-const DashboardComp = ({user, formData, ownedPGsData, loadingPGs, pgError }) => {
-  const [selectedPGIndex, setSelectedPGIndex] = useState(0);
-  
-  // Get the currently selected PG data
-  const currentPGData = ownedPGsData && ownedPGsData.length > 0 
-    ? ownedPGsData[selectedPGIndex] 
-    : null;
-
-  // Storing the number of PGs
-  const ownedPGsLength = ownedPGsData.length;
-
-  // Handle PG selection (if landlord owns multiple PGs)
-  const handlePGSelection = (direction) => {
-    setSelectedPGIndex((prevIndex) => {
-      if (!ownedPGsData || ownedPGsData.length === 0) return 0;
-      return (prevIndex + direction + ownedPGsData.length) % ownedPGsData.length;
-    });
-  };
+const DashboardComp = ({user, formData, currentPGData ,handlePGSelection, ownedPGsLength  , loadingPGs, pgError }) => {
 
   return (
     <div className="w-full flex flex-col gap-4">

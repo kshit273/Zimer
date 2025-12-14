@@ -204,7 +204,7 @@ const plans = [
   },
   {
     title: "Popular",
-    price: "10",
+    price: "7",
     priBg: "#dfd0d0",
     secBg: "#D72638",
     line: "./images/r-line.png",
@@ -212,7 +212,7 @@ const plans = [
   },
   {
     title: "Premium",
-    price: "25",
+    price: "10",
     priBg: "#1A1A1A",
     secBg: "#d9d9d9",
     line: "./images/w-line.png",
