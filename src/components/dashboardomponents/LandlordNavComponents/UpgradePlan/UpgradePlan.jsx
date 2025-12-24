@@ -127,7 +127,7 @@ const UpgradePlan = ({currentPlan}) => {
               {/* Header */}
               <div className="p-6 text-center relative">
                 {plan.title === "Popular" && (
-                  <div className="absolute top-0 right-0 bg-yellow-400 text-black text-[13px] font-bold px-3 py-1 rounded-bl-lg">
+                  <div className="absolute top-0 right-0 bg-[#d72638] text-[#f5f5f5] text-[13px] font-bold px-3 py-1 rounded-bl-lg">
                     RECOMMENDED
                   </div>
                 )}
@@ -179,7 +179,7 @@ const UpgradePlan = ({currentPlan}) => {
                 {plan.title !== 'Basic' ? <button
   className="text-[16px] w-full mt-8 py-3 rounded-full font-semibold transition-opacity hover:opacity-90"
   style={{
-    backgroundColor: currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1) === plan.title ? '#22c55e' : plan.secBg,
+    backgroundColor: currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1) === plan.title ? '#d72638' : plan.secBg,
     color: currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1) === plan.title ? '#ffffff' : plan.priBg,
   }}
 >
