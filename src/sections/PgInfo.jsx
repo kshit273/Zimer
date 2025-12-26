@@ -328,64 +328,63 @@ const PgInfo = () => {
                 </div>
               )}
               {pgData.amenities && pgData.amenities.length > 0 && (
-                <div className="services mt-[30px]">
-                  <div className="head text-[35px] font-medium">
-                    Services provided
-                  </div>
-                  {(() => {
-                    const matchedServices = pgData.amenities
-                      .map((amenity) => services.find((s) => s.name === amenity))
-                      .filter(Boolean)
-                      .slice(0, 10);
+  <div className="services mt-[30px]">
+    <div className="head text-[35px] font-medium">Services provided</div>
+    {(() => {
+      const displayedAmenities = pgData.amenities
+        .map((amenity) => {
+          const found = services.find((s) => s.name === amenity);
+          return { name: amenity, imgPath: found?.imgPath ?? null };
+        })
+        .slice(0, 10);
 
-                    if (matchedServices.length <= 4) {
-                      return (
-                        <div className="flex flex-col gap-y-5 mt-[20px] max-w-[400px]">
-                          {matchedServices.map((matchedService, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-[15px]"
-                            >
-                              <img
-                                src={
-                                  matchedService.imgPath.startsWith("./")
-                                    ? matchedService.imgPath.replace("./", "/")
-                                    : matchedService.imgPath
-                                }
-                                alt={matchedService.name}
-                                className="h-[35px] w-[35px]"
-                              />
-                              <div className="text-[#6c6c6c] text-[19px]">
-                                {matchedService.name}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return (
-                      <div className="grid grid-cols-2 gap-x-10 gap-y-5 mt-[20px] max-w-[400px]">
-                        {matchedServices.map((matchedService, idx) => (
-                          <div key={idx} className="flex items-center gap-[15px]">
-                            <img
-                              src={
-                                matchedService.imgPath.startsWith("./")
-                                  ? matchedService.imgPath.replace("./", "/")
-                                  : matchedService.imgPath
-                              }
-                              alt={matchedService.name}
-                              className="h-[35px] w-[35px]"
-                            />
-                            <div className="text-[#6c6c6c] text-[19px]">
-                              {matchedService.name}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
+      const RenderIcon = ({ imgPath, name }) =>
+        imgPath ? (
+          <img
+            src={imgPath.startsWith("./") ? imgPath.replace("./", "/") : imgPath}
+            alt={name}
+            className="h-[35px] w-[35px]"
+          />
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="h-[35px] w-[35px] text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <circle cx="12" cy="12" r="10" className="opacity-20" />
+            <path d="M8 12h8M8 16h5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+
+      if (displayedAmenities.length <= 4) {
+        return (
+          <div className="flex flex-col gap-y-5 mt-[20px] max-w-[400px]">
+            {displayedAmenities.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-[15px]">
+                <RenderIcon imgPath={item.imgPath} name={item.name} />
+                <div className="text-[#6c6c6c] text-[19px]">{item.name}</div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      return (
+        <div className="grid grid-cols-2 gap-x-10 gap-y-5 mt-[20px] max-w-[400px]">
+          {displayedAmenities.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-[15px]">
+              <RenderIcon imgPath={item.imgPath} name={item.name} />
+              <div className="text-[#6c6c6c] text-[19px]">{item.name}</div>
+            </div>
+          ))}
+        </div>
+      );
+    })()}
+  </div>
+)}
             </div>
 
             <div className="rooms ml-[60px] mt-[30px]">

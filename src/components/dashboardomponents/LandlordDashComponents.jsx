@@ -37,6 +37,11 @@ const LandlordDashComponents = ({
     });
   };
 
+  console.log("user:",user);
+  console.log("formData:",formData);
+  console.log("ownedPGsData:",ownedPGsData);
+  console.log("loadingPGs:",loadingPGs);
+
   let component;
   
   switch (bar) {
@@ -83,7 +88,7 @@ const LandlordDashComponents = ({
     case 5:
       component = (
         <UpdatePGInfo 
-          ownedPGsData={ownedPGsData}
+          ownedPGsRID={user.ownedPGs}
           loadingPGs={loadingPGs}
         />
       );

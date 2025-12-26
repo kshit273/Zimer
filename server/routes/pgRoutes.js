@@ -15,6 +15,7 @@ const {
   deleteReview,
   getRoomById,
   updateRoomAvailability,
+  updatePGPhotos,
 } = require("../controllers/pgController");
 const upload = require("../middleware/upload");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -34,6 +35,7 @@ router.get("/", getAllPGs);
 router.get("/:pgId", getPGById);
 router.post("/", upload.any(), authMiddleware, createPG);
 router.put("/:id", updatePG);
+router.put("/:id/photos", upload.any(), updatePGPhotos);
 router.delete("/:id", deletePG);
 
 // Tenant routes

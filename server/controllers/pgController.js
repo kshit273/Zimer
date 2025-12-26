@@ -2,6 +2,8 @@ const PG = require("../models/pgModel");
 const Invite = require("../models/inviteModel")
 const { generateRID } = require("../middleware/ridService");
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 
 // GET all PGs
 exports.getAllPGs = async (req, res) => {
@@ -157,12 +159,78 @@ exports.createPG = async (req, res) => {
 // PUT update PG
 exports.updatePG = async (req, res) => {
   try {
-    const updated = await PG.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updated = await PG.findOneAndUpdate(
+      { RID: req.params.id },
+      req.body,
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: "PG not found" });
+    }
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: "Failed to update PG" });
+  }
+};
+
+exports.updatePGPhotos = async (req, res) => {
+  try {
+    console.log("updatePGPhotos - files:", req.files, "body:", req.body);
+
+    const organized = organizeFiles(req.files);
+    const pg = await PG.findOne({ RID: req.params.id });
+    if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    // Helper to delete a file on disk if it exists and is under /uploads
+    const deleteOnDisk = (publicPath) => {
+      if (!publicPath) return;
+      const rel = publicPath.replace(/^\/+/, ""); // remove leading slash
+      const filePath = path.join(__dirname, "..", rel);
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch (e) {
+        console.warn("Failed to delete file:", filePath, e.message);
+      }
+    };
+
+    // Replace coverPhoto if a new one is provided
+    if (organized.coverPhoto && organized.coverPhoto[0]) {
+      // delete old cover photo file (best-effort)
+      if (pg.coverPhoto) deleteOnDisk(pg.coverPhoto);
+      pg.coverPhoto = `/uploads/${organized.coverPhoto[0].filename}`;
+    }
+
+    // Add any new otherPhotos
+    if (organized.otherPhotos && organized.otherPhotos.length > 0) {
+      const newPhotos = organized.otherPhotos.map(f => `/uploads/${f.filename}`);
+      pg.otherPhotos = Array.isArray(pg.otherPhotos) ? pg.otherPhotos.concat(newPhotos) : newPhotos;
+    }
+
+    // Handle deletedPhotos passed in body (accepts JSON string or array)
+    let deleted = req.body.deletedPhotos;
+    if (deleted) {
+      if (typeof deleted === "string") {
+        try { deleted = JSON.parse(deleted); } catch (e) { deleted = [deleted]; }
+      }
+      if (!Array.isArray(deleted)) deleted = [deleted];
+
+      if (Array.isArray(pg.otherPhotos)) {
+        // remove from DB array and delete files on disk
+        pg.otherPhotos = pg.otherPhotos.filter(photoPath => {
+          if (deleted.includes(photoPath)) {
+            deleteOnDisk(photoPath);
+            return false;
+          }
+          return true;
+        });
+      }
+    }
+
+    const saved = await pg.save();
+    res.json(saved);
+  } catch (err) {
+    console.error("updatePGPhotos error:", err);
+    res.status(500).json({ error: "Failed to update photos", details: err.message });
   }
 };
 
