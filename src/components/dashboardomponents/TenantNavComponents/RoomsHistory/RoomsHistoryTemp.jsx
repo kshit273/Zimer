@@ -49,13 +49,13 @@ const RoomsHistoryTemp = ({ data }) => {
             <button className="px-6 py-2 bg-gradient-to-r from-[#d72638] to-[#ff0084] text-[15px] text-white font-normal rounded-full">
               Message
             </button>
-            <button className="p-2 border-[1px] border-[#1a1a1a] rounded-full">
+            {/* <button className="p-2 border-[1px] border-[#1a1a1a] rounded-full">
               <img
                 src="../images/call.png"
                 alt=""
                 className="h-[20px] w-[20px]"
               />
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

@@ -275,7 +275,7 @@ const isAvailableToday = (() => {
                         `Tenant ${i + 1}`
                       }
                     </p>
-                    <div className="flex gap-4">
+                    {/* <div className="flex gap-4">
                       <button className="bg-[#cdcdcd] p-2 rounded-full">
                         <img
                           src="../images/call.png"
@@ -290,7 +290,7 @@ const isAvailableToday = (() => {
                           className="h-[15px] w-[15px]"
                         />
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                   <p className="text-[20px] text-[#5c5c5c]">
                     {tenant.tenantDetails?._id || tenant.tenantId}

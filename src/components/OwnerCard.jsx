@@ -63,7 +63,7 @@ const OwnerCard = ({ LID }) => {
     <div className="card bg-[#d9d9d9] w-[500px] h-[220px] rounded-[20px] px-[30px] py-[10px]">
       <div className="top flex items-center justify-between">
         <div className="head text-[30px] font-medium  mt-[5px]">Managed By</div>
-        <div className="buttons flex gap-[10px]">
+        {/* <div className="buttons flex gap-[10px]">
           <a href={`tel:+91${landlord.phone}`}>
             <button className="call w-[40px] h-[40px] hover:bg-[#b3b3b3] rounded-full flex items-center justify-center duration-300">
               <img
@@ -82,7 +82,7 @@ const OwnerCard = ({ LID }) => {
               />
             </button>
           </Link>
-        </div>
+        </div> */}
       </div>
       <div className="flex gap-[20px] mt-[32px]">
         <div className="img ">
