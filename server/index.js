@@ -20,7 +20,11 @@ connectDB();
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173", // 👈 your frontend URL
+    origin: [
+      "http://localhost:5173", // web frontend
+      "http://localhost:8081", // Expo dev server
+      "exp://10.0.2.2:19000", // Expo Go
+    ],
     credentials: true, // 👈 allow cookies
   })
 );
@@ -37,9 +41,9 @@ app.use("/rewards", rewardRoutes);
 app.use("/referral", referralRoutes);
 app.use("/verification", verificationRoutes); // No need ig
 // app.use("/admin", adminRoutes); // enable later
-app.use("/wishlist", wishlistRoutes);
+// app.use("/wishlist", wishlistRoutes);
 app.use("/geocode", geocodeRoutes); // Done
 app.use("/uploads", express.static("public/uploads")); 
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));
