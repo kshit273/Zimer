@@ -5,7 +5,7 @@ import BaseNotification from "../../TenantNavComponents/Dashboard/Notification/B
 import LeaveReq from "../../TenantNavComponents/Dashboard/Notification/LeaveReq";
 import RentPaidNotification from "../../TenantNavComponents/Dashboard/Notification/RentPaidNotification";
 
-const Dash3 = ({ user, pgId }) => {
+const Dash3 = ({ formData, pgId }) => {
   const [announcement, setAnnouncement] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +131,7 @@ const Dash3 = ({ user, pgId }) => {
           <JoinReq
             key={notification._id}
             data={notification}
-            user={user}
+            formData={formData}
             onAccept={() => handleJoinRequestAction(notification._id, "accepted")}
             onReject={() => handleJoinRequestAction(notification._id, "rejected")}
           />
@@ -141,7 +141,7 @@ const Dash3 = ({ user, pgId }) => {
           <LeaveReq
             key={notification._id}
             data={notification}
-            user={user}
+            formData={formData}
             onAccept={() => handleLeaveRequestAction(notification._id, "accepted")}
             onReject={() => handleLeaveRequestAction(notification._id, "rejected")}
           />
@@ -156,7 +156,7 @@ const Dash3 = ({ user, pgId }) => {
             key={notification._id}
             className={`mb-4 rounded-[20px] w-full cursor-pointer `}
           >
-            <BaseNotification data={notification} id={user._id}/>
+            <BaseNotification data={notification} id={formData._id}/>
           </div>
         );
       default:
@@ -197,8 +197,11 @@ const Dash3 = ({ user, pgId }) => {
       <div className="relative">
         <div className="h-[520px] overflow-y-auto no-scrollbar flex flex-col items-center justify-start">
           {loading ? (
-            <div className="text-[#5c5c5c] text-[18px] mt-4">
-              Loading notifications...
+            <div className="w-full">
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
             </div>
           ) : notifications.length === 0 ? (
             <p className="text-[#5c5c5c] text-[18px] mt-4">

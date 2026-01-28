@@ -115,7 +115,7 @@ const RentDue = ({ pgData }) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4 rounded-[20px] bg-[#e2e2e2]">
       <div>
         <p className="text-[26px] font-medium text-[#5c5c5c]">Rent Due</p>
       </div>
@@ -144,7 +144,7 @@ const RentDue = ({ pgData }) => {
 
       <div className="flex gap-4 my-2">
         <button
-          className={`py-2 px-12 rounded-[40px] text-[18px] bg-gradient-to-r from-[#d72638] to-[#5500f8] text-white ${
+          className={`py-2 px-12 rounded-[40px] text-[18px] font-medium bg-gradient-to-r from-[#d72638] to-[#5500f8] text-white ${
             isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
           onClick={handlePay}

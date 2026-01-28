@@ -25,7 +25,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     payments:[],
     ownerFirstName:"",
     ownerLastName:"",
-    ownerPhone:""
   });
   const [loadingPGs, setLoadingPGs] = useState(false);
   const [pgError, setPgError] = useState(null);
@@ -50,7 +49,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     "Update Profile",
     "Rooms History",
     "View Legal docs",
-    "Refer and earn",
     "Leave PG",
     "Log out",
   ];
@@ -83,6 +81,12 @@ const TenantDashboard = ({ user, setUser, coords }) => {
       const res = await axios.get("http://localhost:5000/auth/me", {
         withCredentials: true,
       });
+
+      // ⛔ Role protection
+    if (res.data.role !== "tenant") {
+      navigate("/");
+      return;
+    }
       
       setFormData((prev) => ({
         ...prev,
@@ -218,7 +222,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
           ...prev,
           ownerFirstName: ownerInfo.firstName || "",
           ownerLastName: ownerInfo.lastName || "",
-          ownerPhone: ownerInfo.phone || ""
         }));
       } else {
         console.warn("No tenant found for given LID");

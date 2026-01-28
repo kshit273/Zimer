@@ -107,14 +107,6 @@ const Dash1 = ({ formData, pgData }) => {
     fetchTenantNames();
   }, [payments]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-gray-600">Loading payment information...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-8">
       <UserProfile formData={formData} pgData={pgData} />

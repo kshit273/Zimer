@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import RoomAvailabilityToggleComp from './RoomAvailabilityToggleComp';
 
 const handleInviteLink = async (roomId, PGID) => {
@@ -70,7 +70,7 @@ const isAvailableToday = (() => {
     }
     
     const today = new Date();
-    const dueDate = 5;
+    const dueDate = new Date(tenant.joinDate).getDate();
     const currentDay = today.getDate();
     
     if (currentDay < dueDate) {
@@ -158,6 +158,55 @@ const isAvailableToday = (() => {
     setSelectedTenants([]);
   };
 
+  useEffect(() => {
+    const prev = {
+      bodyOverflow: document.body.style.overflow,
+      htmlOverflow: document.documentElement.style.overflow,
+      bodyPaddingRight: document.body.style.paddingRight,
+      bodyPosition: document.body.style.position,
+      bodyTop: document.body.style.top,
+    };
+
+    if (showRemoveModal) {
+      scrollYRef.current = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.position = prev.bodyPosition ?? "";
+      document.body.style.top = prev.bodyTop ?? "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = prev.bodyOverflow ?? "";
+      document.documentElement.style.overflow = prev.htmlOverflow ?? "";
+      document.body.style.paddingRight = prev.bodyPaddingRight ?? "";
+
+      window.scrollTo(0, scrollYRef.current || 0);
+    }
+
+    return () => {
+      document.body.style.position = prev.bodyPosition ?? "";
+      document.body.style.top = prev.bodyTop ?? "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = prev.bodyOverflow ?? "";
+      document.documentElement.style.overflow = prev.htmlOverflow ?? "";
+      document.body.style.paddingRight = prev.bodyPaddingRight ?? "";
+      window.scrollTo(0, scrollYRef.current || 0);
+    };
+  }, [showRemoveModal]);
+
+  const scrollYRef = useRef(0);
+
   return (
     <>
       <div className="w-full bg-[#e2e2e2] rounded-[20px] p-6">
@@ -211,7 +260,6 @@ const isAvailableToday = (() => {
                 <p className="text-[20px] font-medium text-[#5c5c5c]">
                   Tenant name
                 </p>
-                <p className="text-[20px] font-medium text-[#5c5c5c]">Tenant ID</p>
                 <p className="text-[20px] font-medium text-[#5c5c5c]">
                   Join date
                 </p>
@@ -225,7 +273,6 @@ const isAvailableToday = (() => {
                     <p className="text-[20px] font-medium text-[#5c5c5c]">
                       Tenant name
                     </p>
-                    <p className="text-[20px] font-medium text-[#5c5c5c]">Tenant ID</p>
                     <p className="text-[20px] font-medium text-[#5c5c5c]">
                       Join date
                     </p>
@@ -262,7 +309,6 @@ const isAvailableToday = (() => {
                   <p className="text-[20px] text-[#5c5c5c]">Empty</p>
                 </div>
                 <p className="text-[20px] text-[#5c5c5c]">Empty</p>
-                <p className="text-[20px] text-[#5c5c5c]">Empty</p>
                 <p className="mb-7"></p>
               </div>
             ) : (
@@ -275,26 +321,7 @@ const isAvailableToday = (() => {
                         `Tenant ${i + 1}`
                       }
                     </p>
-                    {/* <div className="flex gap-4">
-                      <button className="bg-[#cdcdcd] p-2 rounded-full">
-                        <img
-                          src="../images/call.png"
-                          alt=""
-                          className="h-[15px] w-[15px]"
-                        />
-                      </button>
-                      <button className="bg-[#cdcdcd] p-2 rounded-full">
-                        <img
-                          src="../images/message.png"
-                          alt=""
-                          className="h-[15px] w-[15px]"
-                        />
-                      </button>
-                    </div> */}
                   </div>
-                  <p className="text-[20px] text-[#5c5c5c]">
-                    {tenant.tenantDetails?._id || tenant.tenantId}
-                  </p>
                   <p className="text-[20px] text-[#5c5c5c]">
                     {new Date(tenant.joinDate).toLocaleDateString()}
                   </p>
@@ -348,19 +375,19 @@ const isAvailableToday = (() => {
 
       {/* Remove Tenants Modal */}
       {showRemoveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-[20px] p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[20px] p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
             <h2 className="text-[24px] font-medium text-[#5c5c5c] mb-4">
               Remove Tenants from Room {roomId}
             </h2>
-            
+
             <div className="mb-6 max-h-[300px] overflow-y-auto">
               {tenants.map((tenant) => {
                 const tenantId = tenant.tenantDetails?._id || tenant.tenantId;
-                const tenantName = tenant.tenantDetails ? 
-                  `${tenant.tenantDetails.firstName} ${tenant.tenantDetails.lastName}` : 
-                  tenantId;
-                
+                const tenantName = tenant.tenantDetails
+                  ? `${tenant.tenantDetails.firstName} ${tenant.tenantDetails.lastName}`
+                  : tenantId;
+
                 return (
                   <div key={tenantId} className="flex items-center gap-3 mb-3 p-3 bg-[#f5f5f5] rounded-[12px]">
                     <input
@@ -370,7 +397,7 @@ const isAvailableToday = (() => {
                       onChange={() => handleCheckboxChange(tenantId)}
                       className="w-5 h-5 cursor-pointer"
                     />
-                    <label 
+                    <label
                       htmlFor={`tenant-${tenantId}`}
                       className="text-[18px] text-[#5c5c5c] cursor-pointer flex-1"
                     >

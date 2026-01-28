@@ -26,7 +26,7 @@ const UserProfile = ({ formData }) => {
         <span className="font-medium text-[20px]">{`${formData.firstName} ${formData.lastName}`}</span>
         <span className="text-[16px] text-[#666666]">+91 {formData.phone}</span>
         <span className="text-[16px] text-[#666666]">{formData.email}</span>
-        <span className="text-[16px] text-[#666666]">{formData._id}</span>
+        <span className="text-[16px] text-[#1a1a1a]">{formData.role.charAt(0).toUpperCase() +  formData.role.slice(1)}</span>
       </div>
     </div>
   );

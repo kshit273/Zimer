@@ -1,30 +1,6 @@
 import React from "react";
 
-const PGAbout = ({ handlePGSelection, formData, pgData, loading, error, length, residingPG }) => {
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-2 w-full">
-        <div className="h-20 bg-[#e8e8e8] rounded-[20px] animate-pulse my-4"></div>
-        <div className="flex gap-2 w-full">
-          <div className="flex gap-5 w-full">
-            <div className="h-[300px] w-[300px] min-w-[300px] rounded-[30px] bg-[#e8e8e8] animate-pulse flex-shrink-0"></div>
-            <div className="flex-1 min-w-0">
-              <div className="h-12 bg-[#e8e8e8] rounded animate-pulse mb-4"></div>
-              <div className="h-9 bg-[#e8e8e8] rounded animate-pulse mb-6 w-3/4"></div>
-              <div className="space-y-3">
-                <div className="h-4 bg-[#e8e8e8] rounded animate-pulse"></div>
-                <div className="h-4 bg-[#e8e8e8] rounded animate-pulse"></div>
-                <div className="h-4 bg-[#e8e8e8] rounded animate-pulse"></div>
-                <div className="h-4 bg-[#e8e8e8] rounded animate-pulse w-1/2"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingPG }) => {
   // Error state
   if (error) {
     return (

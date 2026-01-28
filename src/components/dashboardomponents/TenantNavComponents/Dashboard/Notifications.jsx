@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BaseNotification from "./Notification/BaseNotification";
 
-const Notifications = ({user}) => {
+const Notifications = ({formData}) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -32,36 +32,6 @@ const Notifications = ({user}) => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  // ✅ Mark notification as read
-  const markAsRead = async (id) => {
-    try {
-      const res = await axios.patch(
-        `http://localhost:5000/notifications/${id}/read`,
-        {},
-        { withCredentials: true }
-      );
-
-      // ✅ Access the _id or $oid property of the ObjectId
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n._id === id
-            ? {
-                ...n,
-                recipients: n.recipients.map((recipient) =>
-                  (recipient.recipientId._id || recipient.recipientId.$oid || recipient.recipientId.toString()) === userId
-                    ? { ...recipient, isRead: true }
-                    : recipient
-                )
-              }
-            : n
-        )
-      );
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
-
   return (
     <div className="h-full p-4">
       <div>
@@ -73,7 +43,12 @@ const Notifications = ({user}) => {
       <div className="relative">
         <div className="h-[520px] overflow-y-auto no-scrollbar flex flex-col items-center justify-start">
           {loading ? (
-            <p className="text-[#5c5c5c] text-[18px] mt-4">Loading...</p>
+            <div className="w-full">
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+              <div className="w-full h-[100px] bg-[#e2e2e2] mb-4 rounded-[20px] animate-pulse"></div>
+            </div>
           ) : notifications.length === 0 ? (
             <p className="text-[#5c5c5c] text-[18px] mt-4">
               No new notifications
@@ -83,20 +58,8 @@ const Notifications = ({user}) => {
               <div
                 key={notification._id}
                 className="mb-4 rounded-[20px] w-full cursor-pointer bg-[#e2e2e2] relative"
-                onClick={() => markAsRead(notification._id)}
               >
-                <BaseNotification id={user.id} data={notification} />
-                
-                {/* Red bubble for unread notifications */}
-                {!notification.recipients.find(recipient => {
-                  const recipientIdStr = recipient.recipientId._id || recipient.recipientId.$oid || recipient.recipientId.toString();
-                  return recipientIdStr === userId;
-                })?.isRead && (
-                  <div 
-                    className="absolute top-[0px] right-[0px] w-5 h-5 rounded-full "
-                    style={{ backgroundColor: '#d72638' }}
-                  />
-                )}
+                <BaseNotification id={formData.id} data={notification} />
               </div>
             ))
                     )}

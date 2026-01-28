@@ -29,10 +29,5 @@ router.patch('/:notificationId/status', authMiddleware, updateNotificationStatus
 
 // Get notifications
 router.get("/", getNotifications);
-router.get("/unread-count", getUnreadCount);
-
-// Update notifications
-router.patch("/:id/read",authMiddleware, markAsRead);
-router.patch("/mark-all-read", markAllAsRead);
 
 module.exports = router;

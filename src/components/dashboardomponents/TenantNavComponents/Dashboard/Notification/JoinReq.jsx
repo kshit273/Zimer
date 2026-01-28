@@ -1,9 +1,9 @@
 import React from "react";
 
-const JoinReq = ({ user, data, onAccept, onReject }) => {
+const JoinReq = ({ formData, data, onAccept, onReject }) => {
   const dateTime = new Date(data.createdAt);
 
-  const isSender = user.id === data.sender._id;
+  const isSender = formData.id === data.sender._id;
 
   // Format date nicely (e.g., "22 October 2025")
   const formattedDate = dateTime.toLocaleDateString("en-US", {

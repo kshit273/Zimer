@@ -12,7 +12,6 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
   const [ownedPGsData, setOwnedPGsData] = useState([]);
   const [loadingPGs, setLoadingPGs] = useState(false);
   const [pgError, setPgError] = useState(null);
-  
   const [formData, setFormData] = useState({
     _id : user?._id || "",
     firstName: user?.firstName || "",
@@ -26,6 +25,30 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
     password: "",
     ownedPGs: user?.ownedPGs || [], // Add owned PGs array
   });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role !== "landlord") {
+      navigate("/");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      _id: user._id || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      dob: user.dob || "",
+      gender: user.gender || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      role: user.role || "",
+      profilePicture: user.profilePicture || "",
+      ownedPGs: user.ownedPGs || [],
+    }));
+  }, [user, navigate]);
 
   const landlordNavList = [
     "Dashboard",
@@ -36,8 +59,6 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
     "Update PG info",
     "Log out",
   ];
-
-  const navigate = useNavigate();
   
   const handleLogOut = async () => {
     try {
@@ -57,40 +78,6 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
       console.error("Logout failed:", err.response?.data || err.message);
     }
   };
-
-  // Fetch user data including ownedPGs
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/auth/me", {
-          withCredentials: true,
-        });
-        
-        setFormData((prev) => ({
-          ...prev,
-          _id : res.data._id || "",
-          firstName: res.data.firstName || "",
-          lastName: res.data.lastName || "",
-          dob: res.data.dob || "",
-          gender: res.data.gender || "",
-          email: res.data.email || "",
-          phone: res.data.phone || "",
-          role: res.data.role || "",
-          profilePicture: res.data.profilePicture || "",
-          ownedPGs: res.data.ownedPGs || [],
-        }));
-        
-        // Update user state with fresh data
-        if (setUser) {
-          setUser(res.data);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, [setUser]);
 
   // Fetch PG data for all owned PGs
   useEffect(() => {

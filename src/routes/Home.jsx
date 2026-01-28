@@ -6,7 +6,7 @@ import Hero from "../sections/Hero";
 import Plans from "../sections/Plans";
 import Testimonials from "../Testimonials";
 
-function Home({ user }) {
+function Home() {
   return (
     <>
       <div className="absolute top-[-20px] left-[-20px] z-1 md:w-[512px] w-[256px]  md:h-[560px] h-[280px] pointer-events-none">

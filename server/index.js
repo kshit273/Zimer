@@ -37,9 +37,9 @@ app.use("/auth", authAndUserRoutes); // Done
 app.use("/pgs", pgRoutes); // Done
 app.use("/notifications", notificationRoutes);
 app.use("/payment", paymentRoutes);
-app.use("/rewards", rewardRoutes);
-app.use("/referral", referralRoutes);
-app.use("/verification", verificationRoutes); // No need ig
+// app.use("/rewards", rewardRoutes);
+// app.use("/referral", referralRoutes);
+app.use("/verification", verificationRoutes); // No need TILL NOW
 // app.use("/admin", adminRoutes); // enable later
 // app.use("/wishlist", wishlistRoutes);
 app.use("/geocode", geocodeRoutes); // Done

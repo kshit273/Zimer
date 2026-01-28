@@ -7,8 +7,8 @@ import ViewLegalDocs from "./TenantNavComponents/ViewLegalDocs/ViewLegalDocs";
 import { useState } from "react";
 
 const LandlordDashComponents = ({
-  setBar, 
-  user, 
+  setBar,  
+  user,
   setUser, 
   bar, 
   formData, 
@@ -37,10 +37,10 @@ const LandlordDashComponents = ({
     });
   };
 
-  console.log("user:",user);
-  console.log("formData:",formData);
-  console.log("ownedPGsData:",ownedPGsData);
-  console.log("loadingPGs:",loadingPGs);
+  // console.log("user:",user);
+  // console.log("formData:",formData);
+  // console.log("ownedPGsData:",ownedPGsData);
+  // console.log("loadingPGs:",loadingPGs);
 
   let component;
   
@@ -48,7 +48,6 @@ const LandlordDashComponents = ({
     case 0:
       component = (
         <DashboardComp 
-          user={user}
           formData={formData} 
           currentPGData={currentPGData}
           handlePGSelection={handlePGSelection}
@@ -60,12 +59,9 @@ const LandlordDashComponents = ({
       break;
     case 1:
       component = (
-        <RegisterPG 
-          coords={coords} 
-          setBar={setBar}
+        <RegisterPG
           setUser={setUser}
           user={user}
-          setFormData={setFormData}
         />
       );
       break;
@@ -88,7 +84,8 @@ const LandlordDashComponents = ({
     case 5:
       component = (
         <UpdatePGInfo 
-          ownedPGsRID={user.ownedPGs}
+          ownedPGsRID={formData.ownedPGs}
+          ownedPGsData={ownedPGsData}
           loadingPGs={loadingPGs}
         />
       );

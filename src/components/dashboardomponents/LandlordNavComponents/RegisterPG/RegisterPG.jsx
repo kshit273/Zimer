@@ -8,7 +8,7 @@ import AreaDropDown from "./AreaDropDown";
 import { cityAreaMap } from"../../../../utils/areaCodes"
 import axios from "axios";
 
-const RegisterPG = ({setUser,setBar,coords}) => {
+const RegisterPG = ({setUser,user}) => {
     const [formData, setFormData] = useState({
     pgName: "",
     description: "",
@@ -245,12 +245,8 @@ const RegisterPG = ({setUser,setBar,coords}) => {
       
       // 📌 Update user's ownedPGs array with the new RID
       try {
-        // Get current user data first
-        const userRes = await axios.get("http://localhost:5000/auth/me", {
-          withCredentials: true
-        });
         
-        const currentOwnedPGs = userRes.data.ownedPGs || [];
+        const currentOwnedPGs = user.ownedPGs || [];
         
         // Update user with new PG RID
         const updateRes = await axios.put(
@@ -679,7 +675,7 @@ const fullAddress = addressParts.join(", ");
       </div>
 
       {/* Terms */}
-      <div className="p-4 rounded-lg shadow flex flex-col gap-2">
+      <div className="p-4 rounded-lg bg-[#d2d2d2] flex flex-col gap-2">
         <div className="flex gap-4 items-center">
           <Checkbox
             checked={formData.confirmInfo}

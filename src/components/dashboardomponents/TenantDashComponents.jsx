@@ -3,7 +3,6 @@ import DashboardComp from "./TenantNavComponents/Dashboard/DashboardComp";
 import UpdateProfile from "./TenantNavComponents/UpdateProfile/UpdateProfile";
 import RoomsHistory from "./TenantNavComponents/RoomsHistory/RoomsHistory";
 import ViewLegalDocs from "./TenantNavComponents/ViewLegalDocs/ViewLegalDocs";
-import ReferAndEarn from "./TenantNavComponents/ReferAndEarn/ReferAndEarn";
 import LeavePG from "./TenantNavComponents/LeavePG/LeavePG";
 
 const TenantDashComponents = ({ 
@@ -24,7 +23,6 @@ const TenantDashComponents = ({
   switch (bar) {
     case 0:
       component = <DashboardComp 
-          user={user}
           formData={formData} 
           PGData={PGData}
           loadingPGs={loadingPGs}
@@ -49,9 +47,6 @@ const TenantDashComponents = ({
       component = <ViewLegalDocs />;
       break;
     case 4:
-      component = <ReferAndEarn />;
-      break;
-    case 5:
       component = <LeavePG roomNumber={PGData.room} pgId={PGData.RID} currentUserId={formData._id}/>;
       break;
     default:

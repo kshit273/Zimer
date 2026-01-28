@@ -13,12 +13,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { supportedCities } from "./constants/Data";
 import FrontPageLoader from "./components/FrontPageLoader"
-import { Houses } from "./constants/Houses";
-import SearchResults from "./sections/SearchResults";
+// import { Houses } from "./constants/Houses";
+// import SearchResults from "./sections/SearchResults";
 import Navbar from "./components/Navbar";
 import TenantDashboard from "./routes/TenantDashboard";
 import LandlordDashboard from "./routes/LandlordDashboard";
 import JoinRoom from "./routes/JoinRoom";
+import AdminDashboard from "./components/dashboardomponents/AdminNavComponents/AdminDashboard";
 
 axios.defaults.withCredentials = true;
 
@@ -125,10 +126,11 @@ function App() {
         "/userlogin",
         "/tenant/dashboard",
         "/landlord/dashboard",
+        "/admin/dashboard",
       ].includes(location.pathname) && <Navbar user={user} />}
 
       <Routes>
-        <Route path="/" element={<Home user={user} />} />
+        <Route path="/" element={<Home/>} />
         <Route
           path="/search/*"
           element={<Search/>}
@@ -142,6 +144,7 @@ function App() {
           path="/tenant/dashboard"
           element={<TenantDashboard setUser={setUser} user={user} />}
         />
+        <Route path="/admin/dashboard" element = {<AdminDashboard/>}/>
         <Route path="/userlogin" element={<Userlogin setUser={setUser} />} />
         <Route path="/join/:RID/:roomId" element={<JoinRoom user={user}/>} />
       </Routes>

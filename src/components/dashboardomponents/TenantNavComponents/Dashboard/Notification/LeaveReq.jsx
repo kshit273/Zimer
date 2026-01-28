@@ -1,9 +1,9 @@
 import React from "react";
 
-const LeaveReq = ({ user, data, onAccept, onReject }) => {
+const LeaveReq = ({ formData, data, onAccept, onReject }) => {
   const dateTime = new Date(data.createdAt);
 
-  const isSender = user.id === data.sender._id;
+  const isSender = formData.id === data.sender._id;
 
   // Format date nicely (e.g., "22 October 2025")
   const formattedDate = dateTime.toLocaleDateString("en-US", {

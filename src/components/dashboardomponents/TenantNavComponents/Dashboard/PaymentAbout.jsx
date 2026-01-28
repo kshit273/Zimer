@@ -86,7 +86,7 @@ const PaymentAbout = ({ payments, formData, residingPG, pgData }) => {
         </div>
 
         <div className="relative">
-          <div className="max-h-[420px] overflow-y-auto pr-2 no-scrollbar">
+          <div className="max-h-[500px] overflow-y-auto pr-2 no-scrollbar">
             <div className="flex flex-col gap-4">
               {pncHistory.length > 0 ? (
                 [...pncHistory].reverse().map((data, i) => (

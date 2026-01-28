@@ -32,9 +32,9 @@ router.put(
   upload.single("profilePicture"),
   updateUser
 );
-router.post("/forgot-password/send-otp",sendOtp)
-router.post("/forgot-password/verify-otp",verifyOtp)
-router.post("/forgot-password/reset",resetPassword)
+// router.post("/forgot-password/send-otp",sendOtp)
+// router.post("/forgot-password/verify-otp",verifyOtp)
+// router.post("/forgot-password/reset",resetPassword)
 router.post("/clear-pg", clearTenantPG);
 router.get("/me", authMiddleware, getUser);
 router.post("/tenants-batch", getTenantsBatch);

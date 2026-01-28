@@ -58,9 +58,9 @@ const getColorFromStartCycle = (start) => {
 };
 
 const MonthlyRentStatus = ({ start, paidMonths, residingPG }) => {
-  // console.log(start)
-  // console.log(paidMonths)
-  // console.log(residingPG)
+  console.log('start:',start)
+  console.log('paidMonths:',paidMonths)
+  console.log('residingPG:',residingPG)
   const today = new Date();
   const currentMonth = today.toLocaleString("en-US", { month: "long", year: "numeric" });
   const startMonth = new Date(start).toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -86,7 +86,9 @@ return (
 
   const monthDate = new Date(`${month} ${today.getFullYear()}`);
   const startDate = new Date(start);
-  const startMonthIndex = startDate.getMonth();
+const startMonthIndex = today.getFullYear() === startDate.getFullYear()
+  ? startDate.getMonth()
+  : 0; 
 
   // Only consider months starting from the joining month
   if (index >= startMonthIndex) {

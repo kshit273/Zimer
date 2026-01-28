@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const UpdatePGInfo = ({ ownedPGsRID = [], loadingPGs = false }) => {
+const UpdatePGInfo = ({ ownedPGsData, ownedPGsRID = [], loadingPGs = false }) => {
   // Selected PG from dropdown
   const [selectedRID, setSelectedRID] = useState("");
   
@@ -54,19 +54,21 @@ const UpdatePGInfo = ({ ownedPGsRID = [], loadingPGs = false }) => {
         setLoading(true);
         setError(null);
         
-        const response = await axios.get(`http://localhost:5000/pgs/${selectedRID}`, {
-          withCredentials: true,
-        });
+        // const response = await axios.get(`http://localhost:5000/pgs/${selectedRID}`, {
+        //   withCredentials: true,
+        // });
         
-        console.log("PG Data received:", response.data);
+        // console.log("PG Data received:", response.data);
+
+        const data = ownedPGsData.find(pg => pg.RID === selectedRID);
         
-        setPgData(response.data);
+        setPgData(data);
         setFormData({
-          pgName: response.data.pgName || "",
-          address: response.data.address || "",
-          description: response.data.description || "",
-          rules: response.data.rules || [],
-          amenities: response.data.amenities || []
+          pgName: data.pgName || "",
+          address: data.address || "",
+          description: data.description || "",
+          rules: data.rules || [],
+          amenities: data.amenities || []
         });
         
         // Reset edit modes when switching PGs

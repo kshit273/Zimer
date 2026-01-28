@@ -34,11 +34,15 @@ const SavedPGs = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-4 bg-[#d9d9d9] p-4 rounded-[20px]">
+      <div className="flex flex-col gap-4 bg-[#d9d9d9] p-4 rounded-[20px] w-full">
         <div className="p-2">
           <p className="text-[#464646] text-[32px] font-medium">Saved PGs</p>
         </div>
-        <div className="text-center py-8">Loading...</div>
+        <div className="flex flex-col gap-5 w-full">
+          <div className="bg-[#e2e2e2] h-[200px] w-full rounded-[20px] animate-pulse"></div>
+          <div className="bg-[#e2e2e2] h-[200px] w-full rounded-[20px] animate-pulse"></div>
+          <div className="bg-[#e2e2e2] h-[200px] w-full rounded-[20px] animate-pulse"></div>
+        </div>
       </div>
     );
   }
