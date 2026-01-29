@@ -9,22 +9,15 @@ const notificationSchema = new mongoose.Schema(
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Landlord",
       required: true,
     },
     recipients: [
       {
         recipientId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
+          ref: "Tenant",
           required: true,
-        },
-        isRead: {
-          type: Boolean,
-          default: false,
-        },
-        readAt: {
-          type: Date,
         },
       },
     ],
@@ -39,12 +32,12 @@ const notificationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "read", "unread"],
+      enum: ["pending", "accepted", "rejected","sent"],
       default: function () {
-        if (this.type === "announcement") return "unread";
+        if (this.type === "announcement") return "sent";
         if (this.type === "join_request" || this.type === "leave_request")
           return "pending";
-        return "unread";
+        return "sent";
       },
     },
     metadata: {

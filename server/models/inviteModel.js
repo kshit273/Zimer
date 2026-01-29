@@ -38,7 +38,7 @@ const inviteSchema = new mongoose.Schema(
     usedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Tenant",
       },
     ], // track which tenants joined via this link
   },

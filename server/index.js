@@ -8,11 +8,7 @@ const authAndUserRoutes = require("./routes/authAndUserRoutes");
 const pgRoutes = require("./routes/pgRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const rewardRoutes = require("./routes/rewardRoutes");
-const referralRoutes = require("./routes/referralRoutes");
-const verificationRoutes = require("./routes/verificationRoutes");
 // const adminRoutes = require("./routes/adminRoutes"); // for later
-const wishlistRoutes = require("./routes/wishlistRoutes");
 const geocodeRoutes = require("./routes/geocode");
 
 dotenv.config();
@@ -36,12 +32,7 @@ app.use(cookieParser());
 app.use("/auth", authAndUserRoutes); // Done
 app.use("/pgs", pgRoutes); // Done
 app.use("/notifications", notificationRoutes);
-app.use("/payment", paymentRoutes);
-// app.use("/rewards", rewardRoutes);
-// app.use("/referral", referralRoutes);
-app.use("/verification", verificationRoutes); // No need TILL NOW
-// app.use("/admin", adminRoutes); // enable later
-// app.use("/wishlist", wishlistRoutes);
+// app.use("/payment", paymentRoutes);
 app.use("/geocode", geocodeRoutes); // Done
 app.use("/uploads", express.static("public/uploads")); 
 

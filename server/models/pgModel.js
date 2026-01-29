@@ -5,7 +5,7 @@ const reviewSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Tenant",
       required: true,
     },
     reviewText: {
@@ -65,7 +65,6 @@ const roomSchema = new mongoose.Schema(
     amenities: [String],
     photos: [String],
     security: { type: Number },
-    availableFrom: { type: Date },
     description: { type: String },
   },
   { _id: false }

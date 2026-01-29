@@ -1,7 +1,6 @@
 // server/controllers/authController.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const Referral = require("../models/referralModel");
 const bcrypt = require("bcrypt");
 const pgModel = require("../models/pgModel");
 const crypto = require("crypto");
@@ -237,17 +236,6 @@ exports.signup = async (req, res) => {
       role,
       profilePicture,
     });
-
-    // ✅ Referral logic (optional field)
-    if (referralCode) {
-      const referral = await Referral.findOne({ code: referralCode });
-
-      if (referral) {
-        referral.invitedUsers.push(newUser._id);
-        referral.bonusEarned += 50; // You can make this dynamic later
-        await referral.save();
-      }
-    }
 
     // ✅ Create JWT token
     const token = jwt.sign(

@@ -7,9 +7,6 @@ const {
   createRentPaymentNotification,
   getNotifications,
   updateNotificationStatus,
-  markAsRead,
-  getUnreadCount,
-  markAllAsRead,
   acceptJoinRequest,
   acceptLeaveRequest, 
 } = require("../controllers/notificationController");
