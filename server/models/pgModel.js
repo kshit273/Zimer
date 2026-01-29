@@ -91,7 +91,7 @@ const pgSchema = new mongoose.Schema(
     // 📌 Owner
     LID: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Landlord",
       required: true,
     },
 
