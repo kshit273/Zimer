@@ -48,7 +48,7 @@ const roomSchema = new mongoose.Schema(
     },
     tenants: [
       {
-        tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant", required: true },
         joinDate: { type: Date, default: Date.now },
         leaveDate: { type: Date },
         payments: [
