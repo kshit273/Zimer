@@ -42,9 +42,6 @@ const notificationSchema = new mongoose.Schema(
     },
     metadata: {
       roomNumber: String,
-      roomId: {
-        type: String
-      },
       amount: Number,
       paymentId: String,
       tenantName: String,

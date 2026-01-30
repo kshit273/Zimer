@@ -17,7 +17,6 @@ const reviewSchema = new mongoose.Schema(
       community: { type: Number, required: true, min: 1, max: 5 },
       value: { type: Number, required: true, min: 1, max: 5 },
       location: { type: Number, required: true, min: 1, max: 5 },
-      food: { type: Number, required: true, min: 1, max: 5 },
       landlord: { type: Number, required: true, min: 1, max: 5 },
     },
     overallRating: {
@@ -61,7 +60,6 @@ const roomSchema = new mongoose.Schema(
       },
     ],
     rent: { type: Number, required: true },
-    furnished: { type: String, enum: ["fully", "no", "semi"], default: "no", required: true },
     amenities: [String],
     photos: [String],
     security: { type: Number },
@@ -115,7 +113,6 @@ const pgSchema = new mongoose.Schema(
       community: { type: Number, default: 0 },
       value: { type: Number, default: 0 },
       location: { type: Number, default: 0 },
-      food: { type: Number, default: 0 },
       landlord: { type: Number, default: 0 },
       overall: { type: Number, default: 0 },
     },

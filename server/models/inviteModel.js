@@ -29,7 +29,8 @@ const inviteSchema = new mongoose.Schema(
       default: Date.now,
     },
     expiresAt: {
-      type: Date, // optional: auto-expire after some days
+      type: Date, 
+      required : true
     },
     revoked: {
       type: Boolean,

@@ -15,10 +15,10 @@ const tenantSchema = new mongoose.Schema(
     rentalHistory: [
       {
         RID: { type: String, required: true },
-        roomId: { type: String },
-        rent: { type: Number },
-        joinedFrom: { type: Date },
-        leftOn: { type: Date },
+        roomId: { type: String, required: true },
+        rent: { type: Number, required: true },
+        joinedFrom: { type: Date, required: true },
+        leftOn: { type: Date, required: true },
       },
     ],
     currentPG: { type: String },
@@ -39,4 +39,4 @@ tenantSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("Tenant", tenantSchema);
+module.exports = mongoose.model("Tenant", tenantSchema);3
