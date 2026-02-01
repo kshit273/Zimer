@@ -49,12 +49,16 @@ const LeavePG = ({ pgId, roomNumber, currentUserId }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [noPG, setNoPG] = useState(false); // New state to handle no PG case
 
   // Fetch existing review on component mount
   useEffect(() => {
-    if (pgId && currentUserId) {
-      fetchExistingReview();
+    if (!pgId || !currentUserId) {
+      setNoPG(true); // If no PG ID, set noPG to true
+      setLoading(false); // Stop loading
+      return;
     }
+    fetchExistingReview();
   }, [pgId, currentUserId]);
 
   const fetchExistingReview = async () => {
@@ -197,6 +201,16 @@ const LeavePG = ({ pgId, roomNumber, currentUserId }) => {
     return (
       <div className="w-full flex items-center justify-center p-8 bg-[#d9d9d9] rounded-[20px]">
         <p className="text-lg text-gray-600">Loading your information...</p>
+      </div>
+    );
+  }
+
+  if (noPG) {
+    return (
+      <div className="w-full flex items-center justify-center p-8 bg-[#d9d9d9] rounded-[20px]">
+        <p className="text-lg text-gray-600">
+          You are not currently associated with any PG.
+        </p>
       </div>
     );
   }
