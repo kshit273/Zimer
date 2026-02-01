@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-const PgInfo = () => {
+const PgInfo = ({setError}) => {
   const { RID } = useParams();
   const navigate = useNavigate();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -40,14 +40,13 @@ const PgInfo = () => {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Copy failed", err);
-      alert("Failed to copy link");
     }
   };
 
   // API data states
   const [pgData, setPgData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [err, setErr] = useState(null);
 
   // Fetch PG data from API
   useEffect(() => {
@@ -110,15 +109,14 @@ const PgInfo = () => {
 
       if (response.data.success) {
         setIsSaved(!isSaved);
-        alert(response.data.message);
       }
     } catch (error) {
       console.error("Error saving PG:", error);
       if (error.response?.status === 401) {
-        alert("Please login to save PGs");
+        setError("Please login to save PGs");
         navigate("/login");
       } else {
-        alert(error.response?.data?.message || "Failed to save PG");
+        console.error(error.response?.data?.message || "Failed to save PG");
       }
     } finally {
       setIsLoading(false);
@@ -192,10 +190,10 @@ const PgInfo = () => {
     );
   }
 
-  if (error || !pgData) {
+  if (err || !pgData) {
     return (
       <div className="text-center text-lg text-red-500 pt-10">
-        {error || "PG not found."}
+        {err || "PG not found."}
       </div>
     );
   }

@@ -34,7 +34,7 @@ const DashboardComp = ({ formData, PGData, loadingPGs, pgError, residingPG }) =>
   return (
     <div className="w-full flex flex-col gap-4">
       <Dashboard pgData={PGData} loading={loadingPGs} error={pgError} formData={formData} residingPG={residingPG} />
-      <SavedPGs />
+      <SavedPGs savedPGs={formData.savedPGs}/>
       <LeaveReview pgId={PGData.RID} />
     </div>
   );

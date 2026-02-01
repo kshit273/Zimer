@@ -26,14 +26,21 @@ const Userlogin = ({ setUser }) => {
           data.append(key, formData[key]);
         }
       }
-      const res = await axios.post("http://localhost:5000/auth/signup", data, {
-        withCredentials: true,
-      });
+
+      let res;
+      if (formData.role === 'tenant'){
+          res = await axios.post("http://localhost:5000/auth/tenant/signup", data, {
+          withCredentials: true,
+        });
+      }else if(formData.role === 'landlord'){
+          res = await axios.post("http://localhost:5000/auth/landlord/signup", data, {
+          withCredentials: true,
+        });
+      }
 
       return { user: res.data.user }; 
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Signup failed");
       return false;
     }
   };
@@ -48,14 +55,10 @@ const Userlogin = ({ setUser }) => {
         { withCredentials: true }
       );
       setUser(res.data.user);
+      navigate(`/`);
 
-      const role = res.data.user.role;
-      {
-        role == `tenant` ? navigate(redirectTo) : navigate(`/`);
-      }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Login failed");
     }
   };
   return (

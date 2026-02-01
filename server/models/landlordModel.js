@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 
 const landlordSchema = new mongoose.Schema(
   {
+    role: { type: String, enum: ["tenant", "landlord"] },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, trim: true },
     dob: { type: String, required: true },

@@ -134,7 +134,6 @@ const PGDash = ({ pgData, loading, error }) => {
     if (pgData && pgData.rooms && pgData.rooms.length > 0) {
       processRoomsWithTenantData(pgData.rooms);
     } else if (pgData && pgData.rooms) {
-      // Handle case with empty rooms array
       setRoomsWithTenantData([]);
     }
   }, [pgData]);
@@ -208,12 +207,8 @@ const PGDash = ({ pgData, loading, error }) => {
               roomType={room.roomType}
               tenants={room.tenants || []}
               rent={room.rent}
-              furnished={room.furnished}
               amenities={room.amenities || []}
-              photos={room.photos || []}
               security={room.security}
-              availableFrom={room.availableFrom}
-              description={room.description}
               PGID={pgData.RID}
             />
           </div>

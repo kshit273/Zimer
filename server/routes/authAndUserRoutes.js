@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const {
-  signup,
+  landlordSignup,
+  tenantSignup,
   login,
   logout,
   verifyToken,
@@ -22,10 +23,11 @@ const upload = require("../middleware/upload");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Auth routes
-router.post("/signup", upload.single("profilePicture"), signup);
+router.post("/landlord/signup", upload.single("profilePicture"), landlordSignup);
+router.post("/tenant/signup", upload.single("profilePicture"), tenantSignup);
 router.post("/login", login);
 router.post("/logout", logout);
-router.get("/verify-token", verifyToken);
+// router.get("/verify-token", verifyToken);
 router.put(
   "/update",
   authMiddleware,
@@ -35,12 +37,11 @@ router.put(
 // router.post("/forgot-password/send-otp",sendOtp)
 // router.post("/forgot-password/verify-otp",verifyOtp)
 // router.post("/forgot-password/reset",resetPassword)
-router.post("/clear-pg", clearTenantPG);
 router.get("/me", authMiddleware, getUser);
-router.post("/tenants-batch", getTenantsBatch);
+router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.post("/saved-pgs", authMiddleware, postSavedPGs);
-router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs);
-router.get("/landlord-data/:lid", getLandlordData);
+router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs); 
+router.get("/landlord-data",authMiddleware, getLandlordData); 
 
 module.exports = router;

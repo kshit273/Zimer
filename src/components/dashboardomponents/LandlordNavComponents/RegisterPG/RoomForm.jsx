@@ -123,45 +123,6 @@ const RoomForm = ({ room, onChange, onRemove }) => {
         className="w-full p-2 bg-[#e2e2e2] rounded-lg mb-3"
       />
 
-      {/* Availability */}
-      <div className="flex items-center gap-4 my-4">
-        <label>
-          <input
-            type="checkbox"
-            name="available"
-            checked={room.available}
-            onChange={handleChange}
-          />{" "}
-          Available?
-        </label>
-        {room.available && (
-          <input
-            type="date"
-            name="availableFrom"
-            value={room.availableFrom}
-            onChange={handleChange}
-            className="p-2 bg-[#e2e2e2] rounded-lg"
-          />
-        )}
-      </div>
-
-      {/* Furnished */}
-      <div className="block text-[#5c5c5c] font-medium my-2">
-        Furnished
-      </div>
-      <div className="flex items-center gap-4">
-        <Radio
-          name={`furnished-${room.id}`}
-          option1="No"
-          option2="Semi"
-          option3="Fully"
-          value={room.furnished}
-          onChange={(val) =>
-            onChange({ ...room, furnished: val })
-          }
-        />
-      </div>
-
       {/* Description */}
       <label className="block text-[#5c5c5c] font-medium my-3">
         Description

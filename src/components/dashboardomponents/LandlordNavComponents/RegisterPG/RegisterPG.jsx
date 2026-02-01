@@ -62,11 +62,8 @@ const RegisterPG = ({setUser,user}) => {
       id: Date.now(), // unique id
       photos: [],
       roomType: "Select here",
-      furnished: "",
       rent: "",
       security:"",
-      available: false,
-      availableFrom: "",
       description: "",
       features: [],
     };
@@ -141,14 +138,6 @@ const RegisterPG = ({setUser,user}) => {
     }
   };
 
-    const validateRooms = (rooms) => {
-    rooms.forEach((room, index) => {
-      if (room.available && !room.availableFrom) {
-        setError(`Room ${index + 1}: Available from date is required when room is marked as available`);
-        return ;
-      }
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -196,17 +185,13 @@ const RegisterPG = ({setUser,user}) => {
       if (
         room.photos.length === 0 ||
         room.roomType === "Select here" ||
-        !room.rent ||
-        !room.furnished ||
-        (room.available && !room.availableFrom)
+        !room.rent 
       ) {
         setSuccess("");
         setError(`Please complete all required fields for Room ${i + 1}`);
         return;
       }
     }
-
-    validateRooms(formData.rooms);
 
     try {
       const fd = new FormData();
@@ -260,7 +245,7 @@ const RegisterPG = ({setUser,user}) => {
         
         // Update the user state if setUser is available
         if (setUser) {
-          setUser(updateRes.data);
+          setUser(updateRes.data.user);
         }
         
       } catch (updateErr) {

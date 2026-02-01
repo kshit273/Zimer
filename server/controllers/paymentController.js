@@ -1,7 +1,7 @@
 const Payment = require("../models/paymentModel");
 const PG = require("../models/pgModel");
 const Notification = require("../models/notificationModel");
-const User = require("../models/userModel")
+const Tenant = require("../models/tenantModel")
 
 // GET /payment/status/:id
 exports.getPaymentStatus = async (req, res) => {
@@ -86,7 +86,7 @@ exports.payRent = async (req, res) => {
     await pg.save();
 
     // 6. Get tenant details from User model
-    const tenantDetails = await User.findById(tenantId).select('firstName lastName name email phone');
+    const tenantDetails = await Tenant.findById(tenantId).select('firstName lastName name email phone');
     if (!tenantDetails) {
       return res.status(404).json({ 
         success: false, 

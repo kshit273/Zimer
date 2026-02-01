@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import RoomAvailabilityToggleComp from './RoomAvailabilityToggleComp';
 
 const handleInviteLink = async (roomId, PGID) => {
   const API_BASE = "http://localhost:5000"; // backend port
@@ -28,7 +27,7 @@ const handleInviteLink = async (roomId, PGID) => {
   }
 };
 
-const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities = [], photos = [], security, availableFrom, description, PGID, onRoomUpdate }) => {
+const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], security, PGID, onRoomUpdate }) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedTenants, setSelectedTenants] = useState([]);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -48,14 +47,6 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, furnished, amenities =
   
   const roomCapacity = getRoomCapacity(roomType);
   const isRoomFull = tenants.length >= roomCapacity;
-
-  // --- NEW: compute if availableFrom is today (date-only comparison) ---
-const isAvailableToday = (() => {
-  if (!availableFrom) return false;
-  const a = new Date(availableFrom);
-  const t = new Date();
-  return a <= t; // Available from today or earlier
-})();
 
   const getCurrentMonthPaymentStatus = (tenant) => {
     const currentDate = new Date();
@@ -216,8 +207,6 @@ const isAvailableToday = (() => {
           </p>
           <div className="flex gap-4">
             
-            {/* show invite/copy link button only when: room not full, availableFrom set AND availableFrom is today */}
-            {!isRoomFull && availableFrom && isAvailableToday && (
               <button
                 className="p-2.5 rounded-[12px] bg-[#cdcdcd] cursor-pointer"
                 onClick={() => handleInviteLink(roomId, PGID)}
@@ -228,7 +217,6 @@ const isAvailableToday = (() => {
                   className="h-[15px] w-[15px]"
                 />
               </button>
-            )}
 
             {isEmpty ? (
               <button className="p-2.5 rounded-[12px] bg-[#49C800]">
@@ -298,7 +286,6 @@ const isAvailableToday = (() => {
                 Security deposit
               </p>
               <p className="text-[20px] font-medium text-[#5c5c5c]">Room type</p>
-              <p className="text-[20px] font-medium text-[#5c5c5c]">Furnished</p>
             </div>
           </div>
           
@@ -333,7 +320,6 @@ const isAvailableToday = (() => {
               <p className="text-[20px] text-[#5c5c5c]">₹{rent || 0}</p>
               <p className="text-[20px] text-[#5c5c5c]">₹{security || 0}</p>
               <p className="text-[20px] text-[#5c5c5c] capitalize">{roomType || 'N/A'}</p>
-              <p className="text-[20px] text-[#5c5c5c] capitalize">{furnished || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -354,23 +340,6 @@ const isAvailableToday = (() => {
           </div>
         )}
         
-        {isEmpty && (
-          <div className="mt-4">
-            {availableFrom ? (
-              <p className="text-[16px] text-[#5c5c5c]">
-                Available from: {new Date(availableFrom).toLocaleDateString()}
-              </p>
-            ) : (
-              <>
-              <p className="text-[16px] text-[#ff6b6b]">
-                Availability date not set
-              </p>
-               <RoomAvailabilityToggleComp pgId={PGID} roomId={roomId} />
-              </>
-              
-            )}
-          </div>
-        )}
       </div>
 
       {/* Remove Tenants Modal */}

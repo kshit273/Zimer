@@ -41,6 +41,8 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     profilePicture: user?.profilePicture || "",
     password: "",
     currentPG: user?.currentPG || "", 
+    currentLandlord: user?.currentLandlord || "",
+    savedPGs: user?.savedPGs || [],
   });
 
 
@@ -62,7 +64,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
         {},
         { withCredentials: true }
       );
-      console.log(res.data.message);
 
       // clear user state
       setUser(null);
@@ -73,60 +74,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
       console.error("Logout failed:", err.response?.data || err.message);
     }
   };
-
-  // Fetch user data including currentPG
-  useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/auth/me", {
-        withCredentials: true,
-      });
-
-      // ⛔ Role protection
-    if (res.data.role !== "tenant") {
-      navigate("/");
-      return;
-    }
-      
-      setFormData((prev) => ({
-        ...prev,
-        _id: res.data._id || "",
-        firstName: res.data.firstName || "",
-        lastName: res.data.lastName || "",
-        dob: res.data.dob || "",
-        gender: res.data.gender || "",
-        email: res.data.email || "",
-        phone: res.data.phone || "",
-        role: res.data.role || "",
-        profilePicture: res.data.profilePicture || "",
-        currentPG: res.data.currentPG || "",
-      }));
-
-      // Set rental history RIDs
-      const tempRentalHistory = res.data.rentalHistory?.map((room) => room.RID) || [];
-      setRentalHistory(tempRentalHistory);
-      const rentalJoinAndLeaveDates = res.data.rentalHistory?.map((room)=> ({RID:room.RID, joinedFrom:room.joinedFrom}));
-      // console.log(rentalJoinAndLeaveDates)
-      setJoinAndLeaveDates(rentalJoinAndLeaveDates);
-      
-      // Update user state with fresh data
-      if (setUser) {
-        setUser(res.data);
-      }
-
-      // Update residing PG state (if applicable)
-      if (res.data.currentPG) {
-        setresidingPG(true);
-      } else {
-        setresidingPG(false);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
-  fetchUserData();
-}, [setUser]);
 
   useEffect(() => {
   const fetchCurrentPGData = async () => {
@@ -204,28 +151,17 @@ const TenantDashboard = ({ user, setUser, coords }) => {
 
   useEffect(() => {
   const fetchOwnerData = async () => {
-    if (!currentPGData.LID) return;
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/auth/tenants-batch",
-        { tenantIds: [currentPGData.LID] },
+        "http://localhost:5000/auth/landlord-data",
         { withCredentials: true }
       );
 
-      const { tenants } = response.data;
-
-      if (tenants && tenants.length > 0) {
-        const ownerInfo = tenants[0]; // assuming one ID = one tenant
-
         setCurrentPGData((prev) => ({
           ...prev,
-          ownerFirstName: ownerInfo.firstName || "",
-          ownerLastName: ownerInfo.lastName || "",
+          Ownername: response.data.name
         }));
-      } else {
-        console.warn("No tenant found for given LID");
-      }
     } catch (error) {
       console.error("❌ Error fetching owner data:", error);
     }
@@ -308,13 +244,10 @@ const TenantDashboard = ({ user, setUser, coords }) => {
               <div className="w-[85%] flex flex-col justify-center items-center ">
                 <TenantDashComponents
                   rentalHistory={rentalHistory}
-                  user={user}
                   setUser={setUser}
                   bar={bar}
                   formData={formData}
                   setFormData={setFormData}
-                  coords={coords}
-                  setBar={setBar}
                   PGData={currentPGData}
                   loadingPGs={loadingPGs}
                   pgError={pgError}

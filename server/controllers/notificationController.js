@@ -1,5 +1,5 @@
 const Notification = require("../models/notificationModel");
-const User = require("../models/userModel");
+const Tenant = require("../models/tenantModel");
 const PG = require("../models/pgModel");
 const Invite = require("../models/inviteModel");
 
@@ -90,7 +90,7 @@ exports.createJoinRequest = async (req, res) => {
     }
 
     // Get tenant details
-    const tenant = await User.findById(tenantId);
+    const tenant = await Tenant.findById(tenantId);
 
     // Check if join request already exists for this specific room
     const existingRequest = await Notification.findOne({
@@ -221,7 +221,7 @@ exports.acceptJoinRequest = async (req, res) => {
     await pg.save();
 
     // Update tenant's currentPG
-    await User.findByIdAndUpdate(notification.sender._id, {
+    await Tenant.findByIdAndUpdate(notification.sender._id, {
       currentPG: pg.RID, // Use RID
       $push: {
         rentalHistory: {
@@ -283,7 +283,7 @@ exports.createLeaveRequest = async (req, res) => {
     }
 
     // Get tenant details
-    const tenant = await User.findById(tenantId);
+    const tenant = await Tenant.findById(tenantId);
 
     // Create leave request notification - use RID
     const notification = await Notification.create({
@@ -374,7 +374,7 @@ exports.acceptLeaveRequest = async (req, res) => {
     await pg.save();
 
     // Update tenant's currentPG and rental history
-    const tenant = await User.findById(notification.sender._id);
+    const tenant = await Tenant.findById(notification.sender._id);
     if (tenant && tenant.currentPG === pg.RID) {
       // Update the rental history end date
       const historyIndex = tenant.rentalHistory.findIndex(
@@ -425,7 +425,7 @@ exports.createRentPaymentNotification = async (req, res) => {
 
     // Get PG and tenant details by RID
     const pg = await PG.findOne({ RID: pgId });
-    const tenant = await User.findById(tenantId);
+    const tenant = await Tenant.findById(tenantId);
 
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
@@ -614,7 +614,7 @@ exports.getUnreadCount = async (req, res) => {
     const userId = req.user.id;
 
     // Get user's current PG
-    const user = await User.findById(userId).select('currentPG');
+    const user = await Tenant.findById(userId).select('currentPG');
     
     const count = await Notification.countDocuments({
       $or: [

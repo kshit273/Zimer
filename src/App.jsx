@@ -20,6 +20,7 @@ import TenantDashboard from "./routes/TenantDashboard";
 import LandlordDashboard from "./routes/LandlordDashboard";
 import JoinRoom from "./routes/JoinRoom";
 import AdminDashboard from "./components/dashboardomponents/AdminNavComponents/AdminDashboard";
+import ErrorMessage from "./components/ErrorMessage"; // Import the new component
 
 axios.defaults.withCredentials = true;
 
@@ -28,6 +29,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cityName, setCityName] = useState(null);
+  const [error, setError] = useState(null); 
 
   const location = useLocation();
 
@@ -75,50 +77,48 @@ function App() {
             params: { lat, lng },
           });
 
-          // Google API response is inside res.data
-          // console.log("Geocode result:", res.data);
-
           const nearestCity = findNearestCity(lat, lng);
 
           if (nearestCity) {
             setCityName(nearestCity.name);
-            // setCityCode(nearestCity.code);
-
-            // const filteredPGs = Houses.filter((pg) =>
-            //   pg.RID.startsWith(nearestCity.code)
-            // );
-            // setNearbyPGs(filteredPGs);
           } else {
-            console.log("No matching city found");
+            setError("No matching city found"); // Set error message
           }
         } catch (err) {
-          console.error("Geocoding failed", err);
+          setError("Geocoding failed"); // Set error message
         }
       },
       (err) => {
-        console.error("Location access denied", err);
+        setError("Location access denied"); // Set error message
       }
     );
   }, []);
 
   useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/auth/me", {
-        withCredentials: true,
-      });
-      setUser(res.data); // Store full user document
-    } catch (err) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/auth/me", {
+          withCredentials: true,
+        });
+        setUser(res.data); // Store full user document
+      } catch (err) {
+        setUser(null);
+        setError("Failed to authenticate user"); // Set error message
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  checkAuth();
-}, []);
+    checkAuth();
+  }, []);
 
-  if (loading) return <div className="h-screen w-screen flex items-center justify-center"><FrontPageLoader/></div>;
+  if (loading)
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <FrontPageLoader />
+      </div>
+    );
+
   return (
     <>
       <ScrollToTop />
@@ -130,24 +130,26 @@ function App() {
       ].includes(location.pathname) && <Navbar user={user} />}
 
       <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route
-          path="/search/*"
-          element={<Search/>}
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/search/*" element={<Search setError={setError}/>} />
         <Route path="/pg/:RID" element={<PgInfo />} />
         <Route
           path="/landlord/dashboard"
-          element={<LandlordDashboard setUser={setUser} user={user} coords={coords} />}
+          element={
+            <LandlordDashboard setUser={setUser} user={user} coords={coords} />
+          }
         />
         <Route
           path="/tenant/dashboard"
           element={<TenantDashboard setUser={setUser} user={user} />}
         />
-        <Route path="/admin/dashboard" element = {<AdminDashboard/>}/>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/userlogin" element={<Userlogin setUser={setUser} />} />
-        <Route path="/join/:RID/:roomId" element={<JoinRoom user={user}/>} />
+        <Route path="/join/:RID/:roomId" element={<JoinRoom user={user} />} />
       </Routes>
+
+      {/* Render the ErrorMessage component */}
+      <ErrorMessage message={error} setError={setError} />
     </>
   );
 }

@@ -6,14 +6,12 @@ import UpdatePGInfo from "./LandlordNavComponents/UpdatePGInfo/UpdatePGInfo";
 import ViewLegalDocs from "./TenantNavComponents/ViewLegalDocs/ViewLegalDocs";
 import { useState } from "react";
 
-const LandlordDashComponents = ({
-  setBar,  
+const LandlordDashComponents = ({ 
   user,
   setUser, 
   bar, 
   formData, 
   setFormData, 
-  coords,
   ownedPGsData,
   loadingPGs,
   pgError
@@ -36,11 +34,6 @@ const LandlordDashComponents = ({
       return (prevIndex + direction + ownedPGsData.length) % ownedPGsData.length;
     });
   };
-
-  // console.log("user:",user);
-  // console.log("formData:",formData);
-  // console.log("ownedPGsData:",ownedPGsData);
-  // console.log("loadingPGs:",loadingPGs);
 
   let component;
   
@@ -69,7 +62,6 @@ const LandlordDashComponents = ({
       component = (
         <UpdateProfile
           setUser={setUser}
-          user={user}
           formData={formData}
           setFormData={setFormData}
         />

@@ -1,6 +1,7 @@
 // server/controllers/authController.js
 const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
+const Landlord = require("../models/landlordModel");
+const Tenant = require("../models/tenantModel");
 const bcrypt = require("bcrypt");
 const pgModel = require("../models/pgModel");
 const crypto = require("crypto");
@@ -8,201 +9,202 @@ const mongoose = require("mongoose");
 
 const otpStore = new Map();
 
-const sendWhatsAppOTP = async (phoneNumber, otp) => {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const client = require("twilio")(accountSid, authToken);
+// const sendWhatsAppOTP = async (phoneNumber, otp) => {
+//   const accountSid = process.env.TWILIO_ACCOUNT_SID;
+//   const authToken = process.env.TWILIO_AUTH_TOKEN;
+//   const client = require("twilio")(accountSid, authToken);
 
-  try {
-    await client.messages.create({
-      body: `Your OTP for password reset is: ${otp}. Valid for 10 minutes.`,
-      from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`, // e.g., whatsapp:+14155238886
-      to: `whatsapp:${phoneNumber}`, // User's phone with country code
-    });
-    return true;
-  } catch (error) {
-    console.error("WhatsApp send error:", error);
-    throw error;
-  }
-};
+//   try {
+//     await client.messages.create({
+//       body: `Your OTP for password reset is: ${otp}. Valid for 10 minutes.`,
+//       from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`, // e.g., whatsapp:+14155238886
+//       to: `whatsapp:${phoneNumber}`, // User's phone with country code
+//     });
+//     return true;
+//   } catch (error) {
+//     console.error("WhatsApp send error:", error);
+//     throw error;
+//   }
+// };
 
-exports.sendOtp = async(req,res) =>{
-  try {
-    const { email } = req.body;
+// exports.sendOtp = async(req,res) =>{
+//   try {
+//     const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-    }
+//     if (!email) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email is required",
+//       });
+//     }
 
-    // Check if user exists
-    const user = await User.findOne({ email: email.toLowerCase() });
+//     // Check if user exists
+//     const user = await User.findOne({ email: email.toLowerCase() });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "No account found with this email",
-      });
-    }
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "No account found with this email",
+//       });
+//     }
 
-    // Generate 6-digit OTP
-    const otp = crypto.randomInt(100000, 999999).toString();
+//     // Generate 6-digit OTP
+//     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // Store OTP with expiry (10 minutes)
-    otpStore.set(email, {
-      otp,
-      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
-      attempts: 0,
-    });
+//     // Store OTP with expiry (10 minutes)
+//     otpStore.set(email, {
+//       otp,
+//       expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+//       attempts: 0,
+//     });
 
-    // Send OTP via WhatsApp
-    await sendWhatsAppOTP(user.phone, otp);
+//     // Send OTP via WhatsApp
+//     await sendWhatsAppOTP(user.phone, otp);
 
-    // For development/testing - log OTP (REMOVE IN PRODUCTION)
-    console.log(`OTP for ${email}: ${otp}`);
+//     // For development/testing - log OTP (REMOVE IN PRODUCTION)
+//     console.log(`OTP for ${email}: ${otp}`);
 
-    res.status(200).json({
-      success: true,
-      message: "OTP sent successfully to your registered mobile number",
-    });
-  } catch (error) {
-    console.error("Send OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP. Please try again later.",
-    });
-  }
-}
+//     res.status(200).json({
+//       success: true,
+//       message: "OTP sent successfully to your registered mobile number",
+//     });
+//   } catch (error) {
+//     console.error("Send OTP error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to send OTP. Please try again later.",
+//     });
+//   }
+// }
 
-exports.verifyOtp = async(req,res) =>{
-  try {
-    const { email, otp } = req.body;
+// exports.verifyOtp = async(req,res) =>{
+//   try {
+//     const { email, otp } = req.body;
 
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required",
-      });
-    }
+//     if (!email || !otp) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email and OTP are required",
+//       });
+//     }
 
-    // Check if OTP exists
-    const otpData = otpStore.get(email);
+//     // Check if OTP exists
+//     const otpData = otpStore.get(email);
 
-    if (!otpData) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP expired or not found. Please request a new one.",
-      });
-    }
+//     if (!otpData) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "OTP expired or not found. Please request a new one.",
+//       });
+//     }
 
-    // Check if OTP expired
-    if (Date.now() > otpData.expiresAt) {
-      otpStore.delete(email);
-      return res.status(400).json({
-        success: false,
-        message: "OTP has expired. Please request a new one.",
-      });
-    }
+//     // Check if OTP expired
+//     if (Date.now() > otpData.expiresAt) {
+//       otpStore.delete(email);
+//       return res.status(400).json({
+//         success: false,
+//         message: "OTP has expired. Please request a new one.",
+//       });
+//     }
 
-    // Check attempt limit
-    if (otpData.attempts >= 3) {
-      otpStore.delete(email);
-      return res.status(400).json({
-        success: false,
-        message: "Too many failed attempts. Please request a new OTP.",
-      });
-    }
+//     // Check attempt limit
+//     if (otpData.attempts >= 3) {
+//       otpStore.delete(email);
+//       return res.status(400).json({
+//         success: false,
+//         message: "Too many failed attempts. Please request a new OTP.",
+//       });
+//     }
 
-    // Verify OTP
-    if (otpData.otp !== otp) {
-      otpData.attempts += 1;
-      otpStore.set(email, otpData);
-      return res.status(400).json({
-        success: false,
-        message: `Invalid OTP. ${3 - otpData.attempts} attempts remaining.`,
-      });
-    }
+//     // Verify OTP
+//     if (otpData.otp !== otp) {
+//       otpData.attempts += 1;
+//       otpStore.set(email, otpData);
+//       return res.status(400).json({
+//         success: false,
+//         message: `Invalid OTP. ${3 - otpData.attempts} attempts remaining.`,
+//       });
+//     }
 
-    // OTP verified successfully
-    // Mark as verified but keep in store for password reset
-    otpData.verified = true;
-    otpStore.set(email, otpData);
+//     // OTP verified successfully
+//     // Mark as verified but keep in store for password reset
+//     otpData.verified = true;
+//     otpStore.set(email, otpData);
 
-    res.status(200).json({
-      success: true,
-      message: "OTP verified successfully",
-    });
-  } catch (error) {
-    console.error("Verify OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to verify OTP. Please try again.",
-    });
-  }
-}
+//     res.status(200).json({
+//       success: true,
+//       message: "OTP verified successfully",
+//     });
+//   } catch (error) {
+//     console.error("Verify OTP error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to verify OTP. Please try again.",
+//     });
+//   }
+// }
 
-exports.resetPassword = async(req,res) =>{
-  try {
-    const { email, newPassword } = req.body;
+// exports.resetPassword = async(req,res) =>{
+//   try {
+//     const { email, newPassword } = req.body;
 
-    if (!email || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and new password are required",
-      });
-    }
+//     if (!email || !newPassword) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email and new password are required",
+//       });
+//     }
 
-    // Validate password strength
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters long",
-      });
-    }
+//     // Validate password strength
+//     if (newPassword.length < 6) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Password must be at least 6 characters long",
+//       });
+//     }
 
-    // Check if OTP was verified
-    const otpData = otpStore.get(email);
+//     // Check if OTP was verified
+//     const otpData = otpStore.get(email);
 
-    if (!otpData || !otpData.verified) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP verification required before resetting password",
-      });
-    }
+//     if (!otpData || !otpData.verified) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "OTP verification required before resetting password",
+//       });
+//     }
 
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
+//     // Find user
+//     const user = await User.findOne({ email: email.toLowerCase() });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found",
+//       });
+//     }
 
-    // Update password (will be hashed by pre-save middleware)
-    user.password = newPassword;
-    await user.save();
+//     // Update password (will be hashed by pre-save middleware)
+//     user.password = newPassword;
+//     await user.save();
 
-    // Clear OTP from store
-    otpStore.delete(email);
+//     // Clear OTP from store
+//     otpStore.delete(email);
 
-    res.status(200).json({
-      success: true,
-      message: "Password reset successfully",
-    });
-  } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to reset password. Please try again.",
-    });
-  }
-}
+//     res.status(200).json({
+//       success: true,
+//       message: "Password reset successfully",
+//     });
+//   } catch (error) {
+//     console.error("Reset password error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to reset password. Please try again.",
+//     });
+//   }
+// }
 
-exports.signup = async (req, res) => {
+//Done
+exports.landlordSignup = async (req, res) => {
   try {
     const {
       firstName,
@@ -211,21 +213,20 @@ exports.signup = async (req, res) => {
       dob,
       gender,
       phone,
-      role,
       password,
-      referralCode,
+      role
     } = req.body;
 
     const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
     // ✅ Check if email or username already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    const existingUser = await Landlord.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       return res.status(409).json({ error: "User already exists" });
     }
 
     // ✅ Create new user
-    const newUser = await User.create({
+    const newUser = await Landlord.create({
       firstName,
       lastName,
       email,
@@ -233,8 +234,8 @@ exports.signup = async (req, res) => {
       gender,
       phone,
       password,
-      role,
       profilePicture,
+      role
     });
 
     // ✅ Create JWT token
@@ -244,7 +245,7 @@ exports.signup = async (req, res) => {
         name: newUser.name,    
         email: newUser.email,
         profilePicture: newUser.profilePicture,
-        role: newUser.role 
+        role: newUser.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -257,14 +258,83 @@ exports.signup = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const safeUser = await newUser.constructor
+      .findById(newUser._id)
+      .select("-password");
+
     res.status(201).json({
       message: "Signup successful",
-      user: {
-        id: newUser._id,
-        name: newUser.fullName,
-        role: newUser.role,
+      user: safeUser,
+    });
+
+  } catch (err) {
+    console.error("Signup Error:", err);
+    res.status(500).json({ error: "Signup failed" });
+  }
+};
+
+//Done
+exports.tenantSignup = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      dob,
+      gender,
+      phone,
+      password,
+      role
+    } = req.body;
+
+    const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // ✅ Check if email or username already exists
+    const existingUser = await Tenant.findOne({ $or: [{ email }, { phone }] });
+    if (existingUser) {
+      return res.status(409).json({ error: "User already exists" });
+    }
+
+    // ✅ Create new user
+    const newUser = await Tenant.create({
+      firstName,
+      lastName,
+      email,
+      dob,
+      gender,
+      phone,
+      password,
+      profilePicture,
+      role
+    });
+
+    // ✅ Create JWT token
+    const token = jwt.sign(
+      { 
+        id: newUser._id,    
+        name: newUser.name,    
+        email: newUser.email,
         profilePicture: newUser.profilePicture,
+        role: newUser.role,
       },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const safeUser = await newUser.constructor
+      .findById(newUser._id)
+      .select("-password");
+
+    res.status(201).json({
+      message: "Signup successful",
+      user: safeUser,
     });
   } catch (err) {
     console.error("Signup Error:", err);
@@ -272,12 +342,13 @@ exports.signup = async (req, res) => {
   }
 };
 
+//Done
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // 🔍 Check if user exists
-    const user = await User.findOne({ email });
+    let user = await Tenant.findOne({ email }) || await Landlord.findOne({ email });
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -310,16 +381,14 @@ exports.login = async (req, res) => {
     });
 
     // 🎉 Success
+    const safeUser = await user.constructor
+      .findById(user._id)
+      .select("-password");
+
     res.status(200).json({
       message: "Login successful",
       token,
-      user: {
-        _id: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role,
-        profilePicture: user.profilePicture,
-      },
+      user: safeUser,
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -327,6 +396,7 @@ exports.login = async (req, res) => {
   }
 };
 
+//Done
 exports.logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true, // prevents JS access
@@ -336,59 +406,37 @@ exports.logout = (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
-exports.clearTenantPG = async (req, res) => {
-  try {
-    const { tenantIds } = req.body;
+// exports.verifyToken = (req, res) => {
+//   const token = req.cookies.token; // 👈 read cookie
+//   if (!token)
+//     return res.status(401).json({ valid: false, message: "No token" });
 
-    // Validate input
-    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
-      return res.status(400).json({ 
-        error: "tenantIds array is required" 
-      });
-    }
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     return res.status(200).json({ valid: true, user: decoded });
+//   } catch (error) {
+//     return res.status(401).json({ valid: false, message: "Invalid token" });
+//   }
+// };
 
-    // Clear currentPG field for all selected tenants
-    const updateResult = await User.updateMany(
-      { _id: { $in: tenantIds } },
-      { $set: { currentPG: "" } }
-    );
 
-    console.log(`Updated ${updateResult.modifiedCount} users`);
-
-    res.status(200).json({
-      message: `Successfully cleared PG for ${updateResult.modifiedCount} tenant(s)`,
-      modifiedCount: updateResult.modifiedCount
-    });
-
-  } catch (err) {
-    console.error("Error clearing tenant PG:", err);
-    res.status(500).json({ 
-      error: "Failed to clear tenant PG",
-      details: err.message 
-    });
-  }
-};
-
-exports.verifyToken = (req, res) => {
-  const token = req.cookies.token; // 👈 read cookie
-  if (!token)
-    return res.status(401).json({ valid: false, message: "No token" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return res.status(200).json({ valid: true, user: decoded });
-  } catch (error) {
-    return res.status(401).json({ valid: false, message: "Invalid token" });
-  }
-};
-
+//Done
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, dob, gender, phone, email, password,profilePicture } =
-      req.body;
+    const { firstName, lastName, dob, gender, phone, email, password, role } = req.body;
 
-    const user = await User.findById(userId);
+    const roleToUse = role || req.user.role;
+
+    let user;
+    if (roleToUse === "tenant") {
+      user = await Tenant.findById(userId);
+    } else if (roleToUse === "landlord") {
+      user = await Landlord.findById(userId);
+    } else {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -426,35 +474,51 @@ exports.updateUser = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({
-      message: "Profile updated successfully",
-      user: {
-        _id: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role,
-        profilePicture: user.profilePicture,
-      },
+    const safeUser = await user.constructor
+      .findById(user._id)
+      .select("-password");
+
+    return res.status(201).json({
+      message: "Signup successful",
+      user: safeUser,
     });
+
   } catch (err) {
     console.error("Update error:", err);
     res.status(500).json({ message: "Update failed" });
   }
 };
 
+//Done
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const userId = req.user?.id;
+    const role = req.user?.role;
+
+    let user = null;
+
+    if (role === "tenant") {
+      user = await Tenant.findById(userId).select("-password");
+    } else if (role === "landlord") {
+      user = await Landlord.findById(userId).select("-password");
+    } else {
+
+      user = (await Tenant.findById(userId).select("-password")) ||
+             (await Landlord.findById(userId).select("-password"));
+    }
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json(user); // Return full user document
+
+    return res.status(200).json(user);
   } catch (err) {
     console.error("Get user error:", err);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
+//Done
 exports.getTenantsBatch = async (req, res) => { 
   try {
     const { tenantIds } = req.body;
@@ -468,9 +532,9 @@ exports.getTenantsBatch = async (req, res) => {
     }
 
     // Fetch tenants by IDs (assuming you're using MongoDB/Mongoose)
-    const tenants = await User.find({
+    const tenants = await Tenant.find({
       _id: { $in: tenantIds }
-    }).select('firstName lastName id phone profilePicture'); 
+    }).select('firstName lastName phone profilePicture'); 
 
     // Check if any tenants were not found
     const foundIds = tenants.map(tenant => tenant._id.toString());
@@ -496,6 +560,7 @@ exports.getTenantsBatch = async (req, res) => {
   }
 };
 
+//Done
 exports.getSavedPGs = async(req, res) => {
   try {
     const userId = req.user?.id || req.user?._id; // Get userId from authenticated user
@@ -508,7 +573,7 @@ exports.getSavedPGs = async(req, res) => {
     }
 
     // Find user and get savedPGs
-    const user = await User.findById(userId).select('savedPGs');
+    const user = await Tenant.findById(userId).select('savedPGs');
     
     if (!user) {
       return res.status(404).json({ 
@@ -526,7 +591,7 @@ exports.getSavedPGs = async(req, res) => {
     const pgsWithLandlordInfo = await Promise.all(
       savedPGDetails.map(async (pg) => {
         // Find landlord by LID
-        const landlord = await User.findById(pg.LID).select('firstName lastName');
+        const landlord = await Landlord.findById(pg.LID).select('firstName lastName');
         
         // Convert mongoose document to plain object and add landlord info
         const pgObject = pg.toObject();
@@ -556,6 +621,7 @@ exports.getSavedPGs = async(req, res) => {
   }
 };
 
+//Done
 exports.postSavedPGs = async(req, res) => {
   try {
     const userId = req.user?.id || req.user?._id; // Get userId from authenticated user
@@ -585,7 +651,7 @@ exports.postSavedPGs = async(req, res) => {
     }
 
     // Find user
-    const user = await User.findById(userId).select('savedPGs');
+    const user = await Tenant.findById(userId).select('savedPGs');
     
     if (!user) {
       return res.status(404).json({ 
@@ -628,6 +694,7 @@ exports.postSavedPGs = async(req, res) => {
   }
 };
 
+//Done
 exports.updateLandlordPGs = async (req, res) => {
   try {
     const { ownedPGs } = req.body;
@@ -642,7 +709,7 @@ exports.updateLandlordPGs = async (req, res) => {
     }
 
     // Find the user and check if they exist
-    const user = await User.findById(userId);
+    const user = await Landlord.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -659,7 +726,7 @@ exports.updateLandlordPGs = async (req, res) => {
     }
 
     // Update the ownedPGs array
-    const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await Landlord.findByIdAndUpdate(
       userId,
       { 
         $set: { ownedPGs: ownedPGs }
@@ -696,9 +763,10 @@ exports.updateLandlordPGs = async (req, res) => {
   }
 };
 
+//Done
 exports.getLandlordData = async (req, res) => {
   try {
-    const { lid } = req.params;
+    const lid  = req.user?.currentLandlord;
 
     // Validate LID format (MongoDB ObjectId)
     if (!mongoose.Types.ObjectId.isValid(lid)) {
@@ -709,8 +777,8 @@ exports.getLandlordData = async (req, res) => {
     }
 
     // Find the landlord by ID
-    const landlord = await User.findById(lid).select(
-      "firstName lastName email phone profilePicture role ownedPGs"
+    const landlord = await Landlord.findById(lid).select(
+      "firstName lastName"
     );
 
     if (!landlord) {
@@ -731,12 +799,7 @@ exports.getLandlordData = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        id: landlord._id,
         name: `${landlord.firstName} ${landlord.lastName || ""}`.trim(),
-        email: landlord.email,
-        phone: landlord.phone,
-        profilePicture: landlord.profilePicture,
-        ownedPGs: landlord.ownedPGs,
       },
     });
   } catch (error) {

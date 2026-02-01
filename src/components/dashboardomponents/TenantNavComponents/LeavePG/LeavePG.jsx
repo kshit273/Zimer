@@ -182,8 +182,7 @@ const LeavePG = ({ pgId, roomNumber, currentUserId }) => {
 
       if (leaveRequestResponse.data.success) {
         alert(`${isEditMode ? 'Review updated' : 'Review submitted'} and leave request sent successfully! Waiting for landlord approval.`);
-        // Optionally redirect to dashboard or another page
-        // window.location.href = '/dashboard';
+        window.location.href = '/';
       }
     } catch (err) {
       console.error("Error submitting leave request:", err);

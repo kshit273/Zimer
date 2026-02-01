@@ -23,7 +23,7 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
     role: user?.role || "",
     profilePicture: user?.profilePicture || "",
     password: "",
-    ownedPGs: user?.ownedPGs || [], // Add owned PGs array
+    ownedPGs: user?.ownedPGs || [], 
   });
   const navigate = useNavigate();
 
@@ -149,8 +149,6 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
                   bar={bar}
                   formData={formData}
                   setFormData={setFormData}
-                  coords={coords}
-                  setBar={setBar}
                   ownedPGsData={ownedPGsData}
                   loadingPGs={loadingPGs}
                   pgError={pgError}

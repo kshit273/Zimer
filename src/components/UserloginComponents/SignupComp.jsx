@@ -9,7 +9,6 @@ const SignupComp = ({ redirectTo, onShowLogin, setUser, onSubmit }) => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    username: "",
     dob: "",
     gender: "Gender*",
     profilePicture: null,

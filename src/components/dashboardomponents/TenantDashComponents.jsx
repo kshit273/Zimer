@@ -7,13 +7,10 @@ import LeavePG from "./TenantNavComponents/LeavePG/LeavePG";
 
 const TenantDashComponents = ({ 
   rentalHistory,
-  setBar, 
-  user, 
   setUser, 
   bar, 
   formData, 
   setFormData, 
-  coords,
   PGData,
   loadingPGs,
   pgError,
@@ -33,7 +30,6 @@ const TenantDashComponents = ({
     case 1:
       component = (
         <UpdateProfile
-          user={user}
           setUser={setUser}
           formData={formData}
           setFormData={setFormData}

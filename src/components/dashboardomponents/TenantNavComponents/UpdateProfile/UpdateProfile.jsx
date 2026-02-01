@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UpdationForm from "./UpdationForm";
 
-const UpdateProfile = ({ user, setUser, formData, setFormData }) => {
+const UpdateProfile = ({ setUser, formData, setFormData }) => {
   const [loading, setLoading] = useState(false);
 
   // Handle update request
@@ -13,14 +13,15 @@ const handleUpdate = async (e) => {
   try {
     const formDataToSend = new FormData();
 
-    // Append all changed fields
+    // Append profile picture file if present
     Object.keys(formData).forEach((key) => {
-      // If profilePicture is a File, append it directly
       if (key === "profilePicture" && formData[key] instanceof File) {
         formDataToSend.append("profilePicture", formData[key]);
-      } else if (formData[key] !== (user?.[key] || "")) {
-        formDataToSend.append(key, formData[key]);
-      }
+      } 
+      // else if (key === "role" && formData[key] !== undefined && formData[key] !== null) {
+      //   // Append role (string)
+      //   formDataToSend.append("role", String(formData[key]));
+      // }
     });
 
     const res = await axios.put(
@@ -35,11 +36,8 @@ const handleUpdate = async (e) => {
     if (res.data?.user) {
       setUser(res.data.user);
     }
-
-    alert("Profile updated successfully!");
   } catch (err) {
     console.error("Update error:", err.response?.data || err.message);
-    alert(err.response?.data?.message || "Update failed");
   } finally {
     setLoading(false);
   }
