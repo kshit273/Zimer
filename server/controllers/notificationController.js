@@ -95,7 +95,7 @@ exports.createJoinRequest = async (req, res) => {
     // Check if join request already exists for this specific room
     const existingRequest = await Notification.findOne({
       sender: tenantId,
-      pg: pgId, // pgId is already RID
+      pg: pgId, 
       type: "join_request",
       status: "pending",
       "metadata.roomId": roomId,
@@ -113,7 +113,7 @@ exports.createJoinRequest = async (req, res) => {
         recipientId: pg.LID._id,
         isRead: false
       }],
-      pg: pg.RID, // Use RID instead of _id
+      pg: pg.RID, 
       message: message || `${tenant.firstName} ${tenant.lastName} has sent a join request for room ${roomId}`,
       status: "pending",
       metadata: {
@@ -143,7 +143,7 @@ exports.acceptJoinRequest = async (req, res) => {
     const { notificationId } = req.params;
     const landlordId = req.user.id;
 
-    // Find the notification and populate pg by RID
+    // Find the notification and populate sender
     const notification = await Notification.findById(notificationId)
       .populate('sender');
 
@@ -153,6 +153,11 @@ exports.acceptJoinRequest = async (req, res) => {
 
     if (notification.type !== "join_request") {
       return res.status(400).json({ error: "Invalid notification type" });
+    }
+
+    // Check if sender exists (could be null if user was deleted)
+    if (!notification.sender) {
+      return res.status(404).json({ error: "Sender not found" });
     }
 
     // Get PG by RID
@@ -222,7 +227,8 @@ exports.acceptJoinRequest = async (req, res) => {
 
     // Update tenant's currentPG
     await Tenant.findByIdAndUpdate(notification.sender._id, {
-      currentPG: pg.RID, // Use RID
+      currentPG: pg.RID,
+      currentLandlord: landlordId,
       $push: {
         rentalHistory: {
           RID: pg.RID,
@@ -247,17 +253,16 @@ exports.acceptJoinRequest = async (req, res) => {
     notification.status = "accepted";
     await notification.save();
 
-    // Create a success notification for the tenant - use RID
+    // Create a success notification for the tenant
     await Notification.create({
       type: "announcement",
       sender: landlordId,
+      senderModel: "Landlord", 
       recipients: [{
         recipientId: notification.sender._id,
-        isRead: false
       }],
-      pg: pg.RID, // Use RID instead of _id
+      pg: pg.RID,
       message: `Welcome to ${pg.pgName}! Your join request for room ${notification.metadata.roomId} has been accepted.`,
-      status: "unread",
     });
 
     res.json({

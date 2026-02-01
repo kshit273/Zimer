@@ -24,7 +24,11 @@ const tenantSchema = new mongoose.Schema(
     ],
     currentPG: { type: String },
     savedPGs: [{ type: String }],
-    currentLandlord: { type: String },
+    currentLandlord: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Landlord",
+          required: true,
+        },
   },
   { timestamps: true }
 );

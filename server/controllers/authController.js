@@ -311,8 +311,7 @@ exports.tenantSignup = async (req, res) => {
     // ✅ Create JWT token
     const token = jwt.sign(
       { 
-        id: newUser._id,    
-        name: newUser.name,    
+        id: newUser._id,       
         email: newUser.email,
         profilePicture: newUser.profilePicture,
         role: newUser.role,
@@ -766,7 +765,15 @@ exports.updateLandlordPGs = async (req, res) => {
 //Done
 exports.getLandlordData = async (req, res) => {
   try {
-    const lid  = req.user?.currentLandlord;
+    const { lid } = req.body;
+    
+    // Check if landlord ID exists in the request
+    if (!lid) {
+      return res.status(400).json({
+        success: false,
+        message: "Landlord ID is required",
+      });
+    }
 
     // Validate LID format (MongoDB ObjectId)
     if (!mongoose.Types.ObjectId.isValid(lid)) {
@@ -785,14 +792,6 @@ exports.getLandlordData = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Landlord not found",
-      });
-    }
-
-    // Verify the user is actually a landlord
-    if (landlord.role !== "landlord") {
-      return res.status(403).json({
-        success: false,
-        message: "User is not a landlord",
       });
     }
 

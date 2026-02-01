@@ -9,8 +9,18 @@ const notificationSchema = new mongoose.Schema(
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Landlord",
       required: true,
+      refPath: 'senderModel', 
+    },
+    senderModel: {
+      type: String,
+      required: true,
+      enum: ['Tenant', 'Landlord'], 
+      default: function() {
+        if (this.type === 'announcement') return 'Landlord';
+        if (this.type === 'join_request' || this.type === 'leave_request') return 'Tenant';
+        return 'Landlord';
+      }
     },
     recipients: [
       {
@@ -41,7 +51,7 @@ const notificationSchema = new mongoose.Schema(
       },
     },
     metadata: {
-      roomNumber: String,
+      roomId: String,
       amount: Number,
       paymentId: String,
       tenantName: String,

@@ -42,6 +42,6 @@ router.post("/tenants-batch",authMiddleware, getTenantsBatch);
 router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.post("/saved-pgs", authMiddleware, postSavedPGs);
 router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs); 
-router.get("/landlord-data",authMiddleware, getLandlordData); 
+router.post("/landlord-data",authMiddleware, getLandlordData); 
 
 module.exports = router;
