@@ -6,7 +6,7 @@ import Logout from "../components/Logout";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const TenantDashboard = ({ user, setUser, coords }) => {
+const TenantDashboard = ({ user, setUser, setToast }) => {
   const [bar, setBar] = useState(0);
   const [residingPG, setresidingPG] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -23,8 +23,6 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     coverPhoto:"",
     pgName:"",
     payments:[],
-    ownerFirstName:"",
-    ownerLastName:"",
   });
   const [loadingPGs, setLoadingPGs] = useState(false);
   const [pgError, setPgError] = useState(null);
@@ -44,6 +42,8 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     currentLandlord: user?.currentLandlord || "",
     savedPGs: user?.savedPGs || [],
   });
+
+  console.log('user --> formData:',formData);
 
   useEffect(()=>{
     if(user && user.currentPG){
@@ -72,6 +72,7 @@ const TenantDashboard = ({ user, setUser, coords }) => {
 
       // clear user state
       setUser(null);
+      setToast('Logged out successfully')
 
       // redirect to home/login
       navigate("/");
@@ -118,6 +119,7 @@ const TenantDashboard = ({ user, setUser, coords }) => {
           pgName:pgData.pgName || "",
           payments: userTenantData.payments || []
         });
+        console.log('PGData before OwnerName',currentPGData);
       } else {
         console.warn("User not found in any room");
         setCurrentPGData({
@@ -167,12 +169,13 @@ const TenantDashboard = ({ user, setUser, coords }) => {
           ...prev,
           Ownername: response.data.data.name,
         }));
+        console.log('pgdata after ownername:',currentPGData)
       } catch (error) {
         console.error("❌ Error fetching owner data:", error);
       }
     };
 
-    if (formData.currentLandlord) {
+    if (user.currentLandlord) {
       fetchOwnerData(); // Call the function only if currentLandlord exists
     }
   }, [formData.currentLandlord]);
@@ -259,6 +262,7 @@ const TenantDashboard = ({ user, setUser, coords }) => {
                   loadingPGs={loadingPGs}
                   pgError={pgError}
                   residingPG={residingPG}
+                  setToast={setToast}
                 />
               </div>
               <div className="w-[15%] min-w-[250px] flex flex-col items-center sticky top-[30px]">

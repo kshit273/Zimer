@@ -3,7 +3,7 @@ import Dashboard from "./Dashboard";
 import LeaveReview from "./LeaveReview";
 import SavedPGs from "./SavedPGs";
 
-const DashboardComp = ({ formData, PGData, loadingPGs, pgError, residingPG }) => {
+const DashboardComp = ({ formData, PGData, loadingPGs, pgError, residingPG, setToast }) => {
 
       // Loading state
   if (loadingPGs) {
@@ -33,7 +33,7 @@ const DashboardComp = ({ formData, PGData, loadingPGs, pgError, residingPG }) =>
   
   return (
     <div className="w-full flex flex-col gap-4">
-      <Dashboard pgData={PGData} loading={loadingPGs} error={pgError} formData={formData} residingPG={residingPG} />
+      <Dashboard pgData={PGData} loading={loadingPGs} error={pgError} formData={formData} residingPG={residingPG} setToast={setToast} />
       <SavedPGs savedPGs={formData.savedPGs}/>
       <LeaveReview pgId={PGData.RID} />
     </div>

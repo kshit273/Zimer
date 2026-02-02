@@ -38,7 +38,7 @@ const getNextUnpaidMonth = (joinFrom, payments) => {
   return nextDueDate.toISOString();
 };
 
-const RentDue = ({ pgData }) => {
+const RentDue = ({ pgData,setToast }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -91,7 +91,7 @@ const RentDue = ({ pgData }) => {
       );
 
       if (response.data.success) {
-        console.log("Rent paid successfully:", response.data);
+        setToast("Rent paid successfully");
         
         // Optionally refresh the page or update the UI
         window.location.reload();

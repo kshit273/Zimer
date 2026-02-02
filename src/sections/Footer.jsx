@@ -1,9 +1,16 @@
 import { useMediaQuery } from "react-responsive";
 import { socials } from "../constants/Abt";
+import { useNavigate } from "react-router-dom"; 
 
 const Footer = () => {
+  const navigate = useNavigate(); 
   const isSmallScreen = useMediaQuery({ minWidth: 820, maxWidth: 1077 });
   const isMobile = useMediaQuery({ maxWidth: 819 });
+
+  const handleRedirect = (e) => {
+    e.preventDefault(); 
+    navigate('/faq');
+  };
 
   const head = isSmallScreen
     ? "text-[18px] font-medium"
@@ -64,34 +71,34 @@ const Footer = () => {
             <div className={`flex flex-col `}>
               <h6 className={head}>Help and services</h6>
               <p className={para}>
-                <a href="#">How does it work</a>
+                <a href="#" onClick={handleRedirect}>How does it work</a>
               </p>
               <p className={para}>
-                <a href="#">FAQs</a>
+                <a href="#" onClick={handleRedirect}>FAQs</a>
               </p>
               <p className={para}>
-                <a href="#">Contact</a>
+                <a href="#" onClick={handleRedirect}>Contact</a>
               </p>
             </div>
             <div className="flex flex-col">
               <h6 className={head}>To explore</h6>
               <p className={para}>
-                <a href="#">Accomodations</a>
+                <a href="#" onClick={handleRedirect}>Accomodations</a>
               </p>
               <p className={para}>
-                <a href="#">Experiences</a>
+                <a href="#" onClick={handleRedirect}>Experiences</a>
               </p>
               <p className={para}>
-                <a href="#">Blog</a>
+                <a href="#" onClick={handleRedirect}>Blog</a>
               </p>
             </div>
             <div className="flex flex-col">
               <h6 className={head}>Other possibilities</h6>
               <p className={para}>
-                <a href="#">Give away</a>
+                <a href="#" onClick={handleRedirect}>Give away</a>
               </p>
               <p className={para}>
-                <a href="#">subscribe</a>
+                <a href="#" onClick={handleRedirect}>subscribe</a>
               </p>
             </div>
           </div>

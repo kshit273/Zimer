@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingPG }) => {
+  const [ownerName, setOwnerName] = useState(pgData?.Ownername || "not available");
+
+  useEffect(() => {
+    if (pgData?.Ownername) {
+      setOwnerName(pgData.Ownername);
+    }
+  }, [pgData]);
+
+  console.log('Data at PGAbout:',pgData)
   // Error state
   if (error) {
     return (
@@ -141,9 +150,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
               <div className="flex gap-5">
                 <p>PG owner</p>
                 <p className="font-light">
-                  { pgData.Ownername
-                    ? `${pgData.Ownername}` 
-                    : formData.role === 'landlord' ? `${formData.firstName} ${formData.lastName}` : 'not available' }
+                  {ownerName || (formData.role === 'landlord' ? `${formData.firstName} ${formData.lastName}` : 'not available')}
                 </p>
               </div>
               

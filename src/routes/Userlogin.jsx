@@ -4,7 +4,7 @@ import SignupComp from "../components/UserloginComponents/SignupComp";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const Userlogin = ({ setUser }) => {
+const Userlogin = ({ setUser, setToast }) => {
   const [showLogin, setShowLogin] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,6 +38,7 @@ const Userlogin = ({ setUser }) => {
         });
       }
 
+      setToast('logged in successfully'); // Set toast message
       return { user: res.data.user }; 
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
@@ -55,6 +56,7 @@ const Userlogin = ({ setUser }) => {
         { withCredentials: true }
       );
       setUser(res.data.user);
+      setToast('logged in successfully'); // Set toast message
       navigate(`/`);
 
     } catch (err) {

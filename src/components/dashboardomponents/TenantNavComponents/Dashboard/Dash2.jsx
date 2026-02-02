@@ -6,8 +6,6 @@ import ZTRS from "./ZTRS";
 
 // Helper function to calculate sequential paid months
 const calculateSequentialPaidMonths = (joinDate, payments) => {
-  console.log("joinDate:", joinDate);
-  console.log("payments:", payments);
   
   if (!joinDate || !Array.isArray(payments) || payments.length === 0) {
     return [];
@@ -18,7 +16,6 @@ const calculateSequentialPaidMonths = (joinDate, payments) => {
     .filter(p => p?.month)
     .map(p => p.month);
 
-  console.log("paidMonths:", paidMonths);
   return paidMonths;
 };
 

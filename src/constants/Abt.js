@@ -4,7 +4,7 @@ const about = [
     inner: [
       {
         subheading: "Verified Listings",
-        para: "Every room listed on Zimer is thoroughly verified for safety, legality, and accuracy. Say goodbye to scams and surprises.",
+        para: "Every verified room listed on Zimer is thoroughly verified for safety, legality, and accuracy. Say goodbye to scams and surprises.",
       },
       {
         subheading: "Smart Matching",
@@ -17,62 +17,65 @@ const about = [
     ],
     imgpath: "./images/abt-imgs/room1.png",
   },
+
   {
-    heading: "How It Works ?",
+    heading: "Need Help? We're Here.",
     inner: [
       {
-        subheading: "Search Your Area",
-        para: "Enter your preferred location and filter by your needs, budget and amenities.",
+        subheading: "24×7 Support",
+        para: "Our dedicated support team is available around the clock to assist with anything you need during your room-hunting journey.",
       },
       {
-        subheading: "Get Matched",
-        para: "Our smart algorithm suggests rooms that fit your lifestyle and budget, so you don’t waste time scrolling endlessly.",
+        subheading: "Instant Assistance After Booking",
+        para: "Once you click 'Book Now', our team will reach out within 2–3 hours to guide you through the next steps.",
       },
       {
-        subheading: "Connect & Move Ins",
-        para: "Connect with verified hosts, schedule visits, and book your room—everything within Zimer.",
+        subheading: "Call Our Support Team",
+        para: "Whether you have questions, concerns, or need help choosing a room, our support team is just one call away.",
       },
     ],
     imgpath: "./images/abt-imgs/room2.png",
   },
+
   {
-    heading: "Why Choose Zimer ?",
-    inner: [
-      {
-        subheading: "Verified & Safe Listings",
-        para: "We screen every listing to ensure accuracy and legitimacy—your safety and trust come first.",
-      },
-      {
-        subheading: "Tailored Matches, Every Time",
-        para: "Say goodbye to irrelevant options. Our system recommends rooms based on your unique needs and preferences.",
-      },
-      {
-        subheading: "Trusted by Tenants",
-        para: "Rely on honest feedback from previous tenants to make informed, confident decisions.",
-      },
-    ],
+    heading: "Your Personalised PG Manager",
+  inner: [
+    {
+      subheading: "Complete PG & Room Management",
+      para: "Landlords get a dedicated dashboard that shows every room, who’s staying where, and current occupancy at a glance—no more messy spreadsheets.",
+    },
+    {
+      subheading: "Rent Tracking Made Easy",
+      para: "See which tenants have paid, who’s pending, and when payments were made. Our support team also assists in collecting rent on time for you.",
+    },
+    {
+      subheading: "The Best 10% You'll Ever Spend",
+      para: "With a fully managed dashboard and a call support team handling tenant coordination and rent collections, this becomes the smartest and easiest way to run your PG.",
+    },
+  ],
     imgpath: "./images/abt-imgs/room3.png",
   },
 ];
+
 
 const tenantFeatureCards = [
   {
     titleStart: "Find Verified Rooms ",
     titleMid: "in Seconds",
     titleEnd: "",
-    img: "./images/feature-imgs/room.png",
-  },
-  {
-    titleStart: "Earn ",
-    titleMid: "gauranteed cashback",
-    titleEnd: " with Every Payment*",
-    img: "./images/feature-imgs/money.png",
-  },
-  {
-    titleStart: "",
-    titleMid: "Verified",
-    titleEnd: " room Listings",
     img: "./images/feature-imgs/shield.png",
+  },
+  {
+    titleStart: "Keep record of everything using the ",
+    titleMid: "Dashboard",
+    titleEnd: "",
+    img: "./images/feature-imgs/dash.png",
+  },
+  {
+    titleStart: "24*7 ",
+    titleMid: "Call Team",
+    titleEnd: " support",
+    img: "./images/feature-imgs/callSupport.png",
   },
   {
     titleStart: "Join a ",
@@ -153,7 +156,7 @@ const premiumList = [
   "Get your own Call Support for tenants",
   "Get a dashboard to keep record of payments",
   "Zimer Tenant Reliability Score (ZTRS) to know tenant's previous history",
-  "Premium badges for your PG",
+  "Verification badges for your PG",
   "Priority listings (PGs with badges are ranked higher and verified thoroughly)",
   "Run targeted ads if your PG rank higher",
 ];

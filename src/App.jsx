@@ -8,6 +8,7 @@ import Home from "./routes/Home";
 import ScrollToTop from "./components/ScrollToTop";
 import Search from "./routes/search/Search";
 import Userlogin from "./routes/Userlogin";
+import FAQ from "./routes/FAQ";
 import PgInfo from "./sections/PgInfo";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -150,6 +151,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
         <Route path="/userlogin" element={<Userlogin setUser={setUser} setToast={showToast} />} />
         <Route path="/join/:RID/:roomId" element={<JoinRoom user={user} setToast={showToast} />} />
+        <Route path="/faq" element={<FAQ />} />
       </Routes>
 
       {/* Render the Toast component */}

@@ -14,7 +14,8 @@ const TenantDashComponents = ({
   PGData,
   loadingPGs,
   pgError,
-  residingPG
+  residingPG,
+  setToast
  }) => {
   let component;
   switch (bar) {
@@ -25,6 +26,7 @@ const TenantDashComponents = ({
           loadingPGs={loadingPGs}
           pgError={pgError}
           residingPG={residingPG}
+          setToast={setToast}
         />;
       break;
     case 1:
