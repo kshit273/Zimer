@@ -141,7 +141,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
               <div className="flex gap-5">
                 <p>PG owner</p>
                 <p className="font-light">
-                  {formData.role === 'tenant' && pgData.Ownername
+                  { pgData.Ownername
                     ? `${pgData.Ownername}` 
                     : formData.role === 'landlord' ? `${formData.firstName} ${formData.lastName}` : 'not available' }
                 </p>

@@ -10,7 +10,14 @@ const User = ({ imgPath, user }) => {
     <>
       <div className="flex justify-center items-center rounded-[15px] gap-10 ">
         <Link to={`/${userRole}/dashboard`}>
-          <div className="flex gap-2 items-center justify-center">
+          <div className="flex gap-4 items-start justify-center">
+            <div className="flex flex-col items-end justify-center">
+              <p className="text-[20px] text-[#1a1a1a] font-medium ">Dashboard</p>
+              <div className="flex items-center justify-center gap-1 mt-[-2px]">
+                <p>{user.role}</p>
+                <img src="./images/arrowBlack.png" alt="" className="h-[10px] w-[10px]"/>
+              </div>
+            </div>
             <img
               src={userImg}
               alt="profile"
@@ -18,7 +25,7 @@ const User = ({ imgPath, user }) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = "/images/user.png";
               }}
-              className="h-[50px] w-[50px] rounded-full flex-shrink-0 cursor-pointer"
+              className="h-[55px] w-[55px] rounded-[15px]  cursor-pointer"
             />
           </div>
         </Link>
