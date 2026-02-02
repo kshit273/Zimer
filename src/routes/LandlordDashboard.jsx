@@ -6,7 +6,7 @@ import Logout from "../components/Logout";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const LandlordDashboard = ({ user, setUser, coords }) => {
+const LandlordDashboard = ({ user, setUser, setToast }) => {
   const [bar, setBar] = useState(0);
   const [showLogout, setShowLogout] = useState(false);
   const [ownedPGsData, setOwnedPGsData] = useState([]);
@@ -152,6 +152,7 @@ const LandlordDashboard = ({ user, setUser, coords }) => {
                   ownedPGsData={ownedPGsData}
                   loadingPGs={loadingPGs}
                   pgError={pgError}
+                  setToast={setToast}
                 />
               </div>
               <div className="w-[15%] min-w-[250px] flex flex-col items-center sticky top-[30px]">

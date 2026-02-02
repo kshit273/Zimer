@@ -3,7 +3,7 @@ import axios from "axios";
 import RoomTemp from "./RoomTemp";
 import Loader from "../RegisterPG/Loader";
 
-const PGDash = ({ pgData, loading, error }) => {
+const PGDash = ({ pgData, loading, error, setToast }) => {
   const [roomsWithTenantData, setRoomsWithTenantData] = useState([]);
   const [tenantDataLoading, setTenantDataLoading] = useState(false);
   const [tenantDataError, setTenantDataError] = useState(null);
@@ -210,6 +210,7 @@ const PGDash = ({ pgData, loading, error }) => {
               amenities={room.amenities || []}
               security={room.security}
               PGID={pgData.RID}
+              setToast={setToast}
             />
           </div>
         ))}

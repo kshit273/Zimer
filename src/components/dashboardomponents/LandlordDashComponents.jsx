@@ -14,7 +14,8 @@ const LandlordDashComponents = ({
   setFormData, 
   ownedPGsData,
   loadingPGs,
-  pgError
+  pgError,
+  setToast
 }) => {
   const [selectedPGIndex, setSelectedPGIndex] = useState(0);
   
@@ -47,6 +48,7 @@ const LandlordDashComponents = ({
           ownedPGsLength = {ownedPGsLength}
           loadingPGs={loadingPGs}
           pgError={pgError}
+          setToast={setToast}
         />
       );
       break;
@@ -55,6 +57,7 @@ const LandlordDashComponents = ({
         <RegisterPG
           setUser={setUser}
           user={user}
+          setToast={setToast}
         />
       );
       break;
@@ -64,6 +67,7 @@ const LandlordDashComponents = ({
           setUser={setUser}
           formData={formData}
           setFormData={setFormData}
+          setToast={setToast}
         />
       );
       break;
@@ -79,6 +83,7 @@ const LandlordDashComponents = ({
           ownedPGsRID={formData.ownedPGs}
           ownedPGsData={ownedPGsData}
           loadingPGs={loadingPGs}
+          setToast={setToast}
         />
       );
       break;
@@ -89,6 +94,7 @@ const LandlordDashComponents = ({
           ownedPGsData={ownedPGsData}
           loadingPGs={loadingPGs}
           pgError={pgError}
+          setToast={setToast}
         />
       );
       break;

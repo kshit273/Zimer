@@ -16,15 +16,14 @@ const LoginRequestPage = ({ onSend, onCancel, pgData, roomData }) => {
 
           {/* PG + Room Info */}
           {pgData && roomData && (
-            <div className="mb-4 text-[15px] text-gray-700">
+            <div className="mb-4 text-[17px] font-medium text-[#1a1a1a]">
               <p>{pgData.pgName}</p>
               <p>{roomData.roomType} room</p>
-              <p>Room ID: {roomData.roomId}</p>
             </div>
           )}
 
           <div className="flex flex-col gap-3">
-            <div><label className="flex items-center gap-2 text-[18px] text-[#464646]">
+            <div><label className="flex items-center gap-2 text-[16px] text-[#464646]">
               <input
                 type="checkbox"
                 checked={security}
@@ -33,7 +32,7 @@ const LoginRequestPage = ({ onSend, onCancel, pgData, roomData }) => {
               I have deposited security.
             </label>
 
-            <label className="flex items-center gap-2 text-[18px] text-[#464646]">
+            <label className="flex items-center gap-2 text-[16px] text-[#464646]">
               <input
                 type="checkbox"
                 checked={terms}
@@ -54,7 +53,7 @@ const LoginRequestPage = ({ onSend, onCancel, pgData, roomData }) => {
             </label>
           </div>
 
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex justify-end gap-2 mt-16">
             <button
               onClick={onCancel}
               className="px-4 py-2 bg-gray-300 rounded-[10px]"

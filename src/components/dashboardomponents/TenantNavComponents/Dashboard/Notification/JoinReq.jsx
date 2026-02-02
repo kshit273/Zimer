@@ -3,7 +3,7 @@ import React from "react";
 const JoinReq = ({ formData, data, onAccept, onReject }) => {
   const dateTime = new Date(data.createdAt);
 
-  const isSender = formData.id === data.sender._id;
+  // const isSender = formData.id === data.sender._id;
 
   // Format date nicely (e.g., "22 October 2025")
   const formattedDate = dateTime.toLocaleDateString("en-US", {
@@ -29,7 +29,7 @@ const JoinReq = ({ formData, data, onAccept, onReject }) => {
     : "Not specified";
 
   return (
-    <div className={`${isSender?`bg-[#b52f2f]`:`bg-[#e2e2e2]`} rounded-[20px] p-4 mb-4`}>
+    <div className={`bg-[#e2e2e2] rounded-[20px] p-4 mb-4`}>
       <div className="flex flex-col justify-center gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-[19px] text-[#49C800] font-medium">Join Request</p>

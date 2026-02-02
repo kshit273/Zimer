@@ -20,7 +20,7 @@ import TenantDashboard from "./routes/TenantDashboard";
 import LandlordDashboard from "./routes/LandlordDashboard";
 import JoinRoom from "./routes/JoinRoom";
 import AdminDashboard from "./components/dashboardomponents/AdminNavComponents/AdminDashboard";
-import ErrorMessage from "./components/ErrorMessage"; // Import the new component
+import Toast from "./components/Toast";
 
 axios.defaults.withCredentials = true;
 
@@ -29,9 +29,14 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cityName, setCityName] = useState(null);
-  const [error, setError] = useState(null); 
+  const [toast, setToast] = useState(null); 
 
   const location = useLocation();
+
+  // Helper function to show toast notifications
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
 
   function getDistance(lat1, lon1, lat2, lon2) {
     const toRad = (deg) => (deg * Math.PI) / 180;
@@ -48,6 +53,7 @@ function App() {
 
     return R * c; // Distance in KM
   }
+
   function findNearestCity(userLat, userLng) {
     let closestCity = null;
     let minDistance = Infinity;
@@ -71,7 +77,6 @@ function App() {
 
         setCoords({ lat, lng });
   
-
         try {
           const res = await axios.get("http://localhost:5000/geocode", {
             params: { lat, lng },
@@ -82,14 +87,14 @@ function App() {
           if (nearestCity) {
             setCityName(nearestCity.name);
           } else {
-            setError("No matching city found"); // Set error message
+            showToast("No matching city found", "error"); 
           }
         } catch (err) {
-          setError("Geocoding failed"); // Set error message
+          showToast("Geocoding failed", "error"); 
         }
       },
       (err) => {
-        setError("Location access denied"); // Set error message
+        showToast("Location access denied", "error"); 
       }
     );
   }, []);
@@ -100,10 +105,9 @@ function App() {
         const res = await axios.get("http://localhost:5000/auth/me", {
           withCredentials: true,
         });
-        setUser(res.data); // Store full user document
+        setUser(res.data); 
       } catch (err) {
         setUser(null);
-        setError("Failed to authenticate user"); // Set error message
       } finally {
         setLoading(false);
       }
@@ -131,25 +135,31 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/search/*" element={<Search setError={setError}/>} />
-        <Route path="/pg/:RID" element={<PgInfo />} />
+        <Route path="/search/*" element={<Search setToast={showToast}/>} />
+        <Route path="/pg/:RID" element={<PgInfo setToast={showToast}/>} />
         <Route
           path="/landlord/dashboard"
           element={
-            <LandlordDashboard setUser={setUser} user={user} coords={coords} />
+            <LandlordDashboard setUser={setUser} user={user} setToast={showToast} />
           }
         />
         <Route
           path="/tenant/dashboard"
-          element={<TenantDashboard setUser={setUser} user={user} />}
+          element={<TenantDashboard setUser={setUser} user={user} setToast={showToast} />}
         />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/userlogin" element={<Userlogin setUser={setUser} />} />
-        <Route path="/join/:RID/:roomId" element={<JoinRoom user={user} />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
+        <Route path="/userlogin" element={<Userlogin setUser={setUser} setToast={showToast} />} />
+        <Route path="/join/:RID/:roomId" element={<JoinRoom user={user} setToast={showToast} />} />
       </Routes>
 
-      {/* Render the ErrorMessage component */}
-      <ErrorMessage message={error} setError={setError} />
+      {/* Render the Toast component */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </>
   );
 }

@@ -5,7 +5,7 @@ import BaseNotification from "../../TenantNavComponents/Dashboard/Notification/B
 import LeaveReq from "../../TenantNavComponents/Dashboard/Notification/LeaveReq";
 import RentPaidNotification from "../../TenantNavComponents/Dashboard/Notification/RentPaidNotification";
 
-const Dash3 = ({ formData, pgId }) => {
+const Dash3 = ({ formData, pgId, setToast }) => {
   const [announcement, setAnnouncement] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ const Dash3 = ({ formData, pgId }) => {
       fetchNotifications(); // Refresh after action
     } catch (error) {
       console.error("Error updating join request:", error);
-      alert(error.response?.data?.error || `Failed to ${action} request`);
+      setToast(error.response?.data?.error || `Failed to ${action} request`,'error');
     }
   };
 
@@ -101,7 +101,7 @@ const Dash3 = ({ formData, pgId }) => {
       fetchNotifications(); // Refresh after action
     } catch (error) {
       console.error("Error updating leave request:", error);
-      alert(error.response?.data?.error || `Failed to ${action} request`);
+      setToast(error.response?.data?.error || `Failed to ${action} request`,'error');
     }
   };
 
@@ -119,7 +119,7 @@ const Dash3 = ({ formData, pgId }) => {
   //     fetchNotifications(); // Refresh after action
   //   } catch (error) {
   //     console.error("Error updating notification:", error);
-  //     alert(`Failed to ${action} request`);
+  //     setToast(`Failed to ${action} request`);
   //   }
   // };
 

@@ -99,18 +99,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
           </button>
         </div> : null}
         <div className="flex gap-5">
-          <div className="h-[300px] w-[300px] min-w-[300px] rounded-[30px] bg-[#1a1a1a] relative overflow-hidden">
-            {/* {formData.role === "tenant" && (
-              <div className="absolute top-3 right-3 flex gap-3 items-center z-10">
-                <div className="w-[40px] h-[40px] bg-[#cdcdcd] rounded-full p-2">
-                  <img src="../images/call.png" alt="Call" />
-                </div>
-                <div className="w-[40px] h-[40px] bg-[#cdcdcd] rounded-full p-1.5">
-                  <img src="../images/message.png" alt="Message" />
-                </div>
-              </div>
-            )} */}
-            
+          <div className="h-[300px] w-[300px] min-w-[300px] rounded-[30px] bg-[#1a1a1a] relative overflow-hidden">       
             {pgData.coverPhoto ? (
               <img 
                 src={`http://localhost:5000${pgData.coverPhoto}`} 
@@ -152,9 +141,9 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
               <div className="flex gap-5">
                 <p>PG owner</p>
                 <p className="font-light">
-                  {pgData.ownerFirstName && pgData.ownerLastName
-                    ? `${pgData.ownerFirstName} ${pgData.ownerLastName}` 
-                    : `${formData.firstName} ${formData.lastName}` }
+                  {pgData.Ownername
+                    ? `${pgData.Ownername}` 
+                    : 'not available' }
                 </p>
               </div>
               

@@ -1,38 +1,38 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const handleInviteLink = async (roomId, PGID) => {
-  const API_BASE = "http://localhost:5000"; // backend port
-  try {
-    const res = await fetch(`${API_BASE}/pgs/generate-tenant-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ PGID, roomId }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Error ${res.status}: ${text}`);
-    }
-    const data = await res.json();
-    
-    if (data.inviteLink) {
-      await navigator.clipboard.writeText(data.inviteLink);
-      alert("Invite link copied to clipboard!");
-    } else {
-      alert("Error generating invite link");
-    }
-  } catch (error) {
-    console.error(error);
-    alert("Failed to generate invite link");
-  }
-};
-
-const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], security, PGID, onRoomUpdate }) => {
+const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], security, PGID, onRoomUpdate, setToast }) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedTenants, setSelectedTenants] = useState([]);
   const [isRemoving, setIsRemoving] = useState(false);
 
   const isEmpty = tenants.length === 0;
+
+  const handleInviteLink = async (roomId, PGID) => {
+    const API_BASE = "http://localhost:5000";
+    try {
+      const res = await fetch(`${API_BASE}/pgs/generate-tenant-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ PGID, roomId }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Error ${res.status}: ${text}`);
+      }
+      const data = await res.json();
+      
+      if (data.inviteLink) {
+        await navigator.clipboard.writeText(data.inviteLink);
+        setToast("Invite link copied to clipboard!");
+      } else {
+        setToast("Error generating invite link", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      setToast("Failed to generate invite link", "error");
+    }
+  };
 
   const getRoomCapacity = (type) => {
     if (!type) return Infinity;
@@ -88,7 +88,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
 
   const handleRemoveConfirm = async () => {
     if (selectedTenants.length === 0) {
-      alert("Please select at least one tenant to remove");
+      setToast("Please select at least one tenant to remove", "error");
       return;
     }
 
@@ -127,7 +127,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
       }
 
       const pgData = await pgResponse.json();
-      alert(pgData.message || "Tenants removed successfully");
+      setToast(pgData.message || "Tenants removed successfully", "success");
       
       setShowRemoveModal(false);
       setSelectedTenants([]);
@@ -138,7 +138,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
       }
     } catch (error) {
       console.error("Error removing tenants:", error);
-      alert("Failed to remove tenants: " + error.message);
+      setToast("Failed to remove tenants: " + error.message, "error");
     } finally {
       setIsRemoving(false);
     }
@@ -200,6 +200,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
 
   return (
     <>
+
       <div className="w-full bg-[#e2e2e2] rounded-[20px] p-6">
         <div className="flex justify-between items-center mb-4">
           <p className="text-[24px] font-medium text-[#5c5c5c]">
@@ -207,8 +208,9 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
           </p>
           <div className="flex gap-4">
             
+            {!isRoomFull ? 
               <button
-                className="p-2.5 rounded-[12px] bg-[#cdcdcd] cursor-pointer"
+                className="p-2.5 rounded-[12px] bg-[#cdcdcd] cursor-pointer hover:bg-[#b8b8b8] transition-colors"
                 onClick={() => handleInviteLink(roomId, PGID)}
               >
                 <img
@@ -216,7 +218,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
                   alt="Invite"
                   className="h-[15px] w-[15px]"
                 />
-              </button>
+              </button> : null}
 
             {isEmpty ? (
               <button className="p-2.5 rounded-[12px] bg-[#49C800]">
@@ -228,7 +230,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
               </button>
             ) : (
               <button
-                className="bg-[#d72638] p-2 pl-3 pt-2.5 rounded-[12px] cursor-pointer"
+                className="bg-[#d72638] p-2 pl-3 pt-2.5 rounded-[12px] cursor-pointer hover:bg-[#c01f2f] transition-colors"
                 onClick={removeTenants}
               >
                 <img
@@ -382,14 +384,14 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
               <button
                 onClick={handleCancelRemove}
                 disabled={isRemoving}
-                className="flex-1 bg-[#cdcdcd] text-[#5c5c5c] py-3 rounded-[12px] font-medium text-[18px] cursor-pointer disabled:opacity-50"
+                className="flex-1 bg-[#cdcdcd] text-[#5c5c5c] py-3 rounded-[12px] font-medium text-[18px] cursor-pointer disabled:opacity-50 hover:bg-[#b8b8b8] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRemoveConfirm}
                 disabled={isRemoving || selectedTenants.length === 0}
-                className="flex-1 bg-[#d72638] text-white py-3 rounded-[12px] font-medium text-[18px] cursor-pointer disabled:opacity-50"
+                className="flex-1 bg-[#d72638] text-white py-3 rounded-[12px] font-medium text-[18px] cursor-pointer disabled:opacity-50 hover:bg-[#c01f2f] transition-colors"
               >
                 {isRemoving ? "Removing..." : "Remove"}
               </button>
@@ -397,6 +399,22 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
     </>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Dashboard from "./Dashboard";
 import PGDash from "./PGDash";
 
-const DashboardComp = ({ formData, currentPGData ,handlePGSelection, ownedPGsLength  , loadingPGs, pgError }) => {
+const DashboardComp = ({ formData, currentPGData ,handlePGSelection, ownedPGsLength  , loadingPGs, pgError, setToast}) => {
 
     // Loading state
   if (loadingPGs) {
@@ -38,11 +38,13 @@ const DashboardComp = ({ formData, currentPGData ,handlePGSelection, ownedPGsLen
             error={pgError} 
             handlePGSelection={handlePGSelection}
             length={ownedPGsLength}
+            setToast={setToast}
           />
           <PGDash 
             pgData={currentPGData} 
             loading={loadingPGs} 
             error={pgError} 
+            setToast={setToast}
           />
     </div>
   );

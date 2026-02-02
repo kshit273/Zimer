@@ -45,6 +45,11 @@ const TenantDashboard = ({ user, setUser, coords }) => {
     savedPGs: user?.savedPGs || [],
   });
 
+  useEffect(()=>{
+    if(user && user.currentPG){
+      setresidingPG(true);
+    }
+  })
 
   const tenantNavList = [
     "Dashboard",
@@ -150,25 +155,27 @@ const TenantDashboard = ({ user, setUser, coords }) => {
 }, [formData.currentPG, formData._id]);
 
   useEffect(() => {
-  const fetchOwnerData = async () => {
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/auth/landlord-data",
-        { withCredentials: true }
-      );
+    const fetchOwnerData = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/auth/landlord-data",
+          { lid: formData.currentLandlord }, 
+          { withCredentials: true }
+        );
 
         setCurrentPGData((prev) => ({
           ...prev,
-          Ownername: response.data.name
+          Ownername: response.data.data.name,
         }));
-    } catch (error) {
-      console.error("❌ Error fetching owner data:", error);
-    }
-  };
+      } catch (error) {
+        console.error("❌ Error fetching owner data:", error);
+      }
+    };
 
-  fetchOwnerData();
-}, [currentPGData.LID]);
+    if (formData.currentLandlord) {
+      fetchOwnerData(); // Call the function only if currentLandlord exists
+    }
+  }, [formData.currentLandlord]);
 
   useEffect(() => {
     const fetchRentalHistory = async () => {

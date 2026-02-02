@@ -3,7 +3,7 @@ import Dash1 from "./Dash1";
 import Dash2 from "./Dash2";
 import Dash3 from "./Dash3";
 
-const Dashboard = ({ handlePGSelection, formData, pgData, error, length }) => {
+const Dashboard = ({ handlePGSelection, formData, pgData, error, length, setToast }) => {
   return (
     <div className="w-full grid grid-cols-14 gap-4 bg-[#d9d9d9] p-4 rounded-[20px]">
       <div className="col-span-4">
@@ -18,7 +18,7 @@ const Dashboard = ({ handlePGSelection, formData, pgData, error, length }) => {
             />
       </div>
       <div className="col-span-4">
-        {pgData ? <Dash3 pgId={pgData.RID} formData={formData}/> : 
+        {pgData ? <Dash3 pgId={pgData.RID} formData={formData} setToast={setToast}/> : 
         <div className="flex flex-col gap-2 bg-[#d9d9d9] rounded-[35px] p-6 ">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-[24px] font-medium text-[#1a1a1a]">

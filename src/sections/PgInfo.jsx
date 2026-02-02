@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-const PgInfo = ({setError}) => {
+const PgInfo = ({setToast}) => {
   const { RID } = useParams();
   const navigate = useNavigate();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -57,10 +57,10 @@ const PgInfo = ({setError}) => {
           withCredentials: true,
         });
         setPgData(response.data);
-        setError(null);
+        setToast(null);
       } catch (err) {
         console.error("Error fetching PG data:", err);
-        setError("Failed to load PG data");
+        setToast("Failed to load PG data","error");
       } finally {
         setLoading(false);
       }
@@ -113,7 +113,7 @@ const PgInfo = ({setError}) => {
     } catch (error) {
       console.error("Error saving PG:", error);
       if (error.response?.status === 401) {
-        setError("Please login to save PGs");
+        setToast("Please login to save PGs","error");
         navigate("/login");
       } else {
         console.error(error.response?.data?.message || "Failed to save PG");

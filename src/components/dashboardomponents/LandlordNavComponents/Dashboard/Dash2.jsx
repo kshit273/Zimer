@@ -1,5 +1,4 @@
 import PGAbout from "../../TenantNavComponents/Dashboard/PGAbout";
-import PlanDetails from "./PlanDetails";
 
 const Dash2 = ({ handlePGSelection, formData,pgData,error,length }) => {
   return (

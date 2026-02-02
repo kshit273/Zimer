@@ -4,7 +4,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import LoginRequestPage from "../components/LoginRequestPage";
 
-const JoinRoom = ({ user }) => {
+const JoinRoom = ({ user, setToast }) => {
   const { RID, roomId } = useParams();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -41,12 +41,12 @@ const JoinRoom = ({ user }) => {
         setPgData(response.data.pg);
         setRoomData(response.data.room);
       } else {
-        alert("Invalid or expired invitation link");
+        setToast("Invalid or expired invitation link", "error");
         navigate("/");
       }
     } catch (error) {
       console.error("Error validating invite:", error);
-      alert("Invalid or expired invitation link");
+      setToast("Invalid or expired invitation link","error");
       navigate("/");
     }
   };
@@ -66,12 +66,12 @@ const JoinRoom = ({ user }) => {
 
 const handleSend = async (security, acceptedTerms, moveInDate) => {
   if (!security || !acceptedTerms) {
-    alert("You must deposit security and accept terms.");
+    setToast("You must deposit security and accept terms.","error");
     return;
   }
 
   if (!moveInDate) {
-    alert("Please select a move-in date.");
+    setToast("Please select a move-in date.","error");
     return;
   }
 
@@ -81,7 +81,6 @@ const handleSend = async (security, acceptedTerms, moveInDate) => {
       `http://localhost:5000/notifications/join-request`,
       { 
         pgId: RID, // ✅ Use RID param from URL
-        roomNumber: roomData.roomNumber, // ✅ Add roomNumber
         message: `${currentUserData.firstName} ${currentUserData.lastName} wants to join room ${roomData.roomId}`, // ✅ Use currentUserData
         moveInDate: moveInDate,
         roomId: roomData.roomId, // ✅ Use roomId
@@ -93,14 +92,14 @@ const handleSend = async (security, acceptedTerms, moveInDate) => {
     );
 
     if (res.data.success) {
-      alert("Join request sent to landlord! You will be notified once approved.");
+      setToast("Join request sent to landlord! You will be notified once approved.");
       navigate("/");
     } else {
-      alert(res.data.error || "Failed to send join request");
+      setToast(res.data.error || "Failed to send join request","error");
     }
   } catch (err) {
     console.error("JoinRoom error:", err.response?.data || err.message);
-    alert(err.response?.data?.error || "Server error");
+    setToast(err.response?.data?.error || "Server error","error");
   }
 };
   return (

@@ -4,7 +4,7 @@ import FindRoom from "../../sections/FindRoom.jsx";
 import PgInfo from "../../sections/PgInfo.jsx";
 import SearchResults from "../../sections/SearchResults.jsx";
 
-const Search = ({setError}) => {
+const Search = ({setToast}) => {
   const [activeRID, setActiveRID] = useState(null);
   return (
     <>
@@ -34,7 +34,7 @@ const Search = ({setError}) => {
           element={<SearchResults setActiveRID={setActiveRID} />}
         />
       </Routes>
-      {activeRID && <PgInfo RID={activeRID} setError={setError} />}
+      {activeRID && <PgInfo RID={activeRID} />}
     </>
   );
 };
