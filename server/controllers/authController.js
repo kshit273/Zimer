@@ -530,12 +530,44 @@ exports.getTenantsBatch = async (req, res) => {
       });
     }
 
-    // Fetch tenants by IDs (assuming you're using MongoDB/Mongoose)
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    // Check if user is a landlord
+    if (req.user.role !== 'landlord') {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Only landlords can access tenant data"
+      });
+    }
+
+    const landlordId = req.user.id;
+
+    // Fetch tenants by IDs and include currentLandlord field
     const tenants = await Tenant.find({
       _id: { $in: tenantIds }
-    }).select('firstName lastName phone profilePicture'); 
+    }).select('firstName lastName phone profilePicture currentLandlord');
 
-    // Check if any tenants were not found
+    // Filter tenants that belong to the requesting landlord
+    const authorizedTenants = tenants.filter(tenant => 
+      tenant.currentLandlord && tenant.currentLandlord.toString() === landlordId
+    );
+
+    // Identify unauthorized access attempts
+    const unauthorizedIds = tenants
+      .filter(tenant => !tenant.currentLandlord || tenant.currentLandlord.toString() !== landlordId)
+      .map(tenant => tenant._id.toString());
+
+    if (unauthorizedIds.length > 0) {
+      console.warn(`Unauthorized access attempt by landlord ${landlordId} for tenants: ${unauthorizedIds.join(', ')}`);
+    }
+
+    // Check if any tenants were not found in database
     const foundIds = tenants.map(tenant => tenant._id.toString());
     const notFoundIds = tenantIds.filter(id => !foundIds.includes(id));
     
@@ -543,10 +575,20 @@ exports.getTenantsBatch = async (req, res) => {
       console.warn(`Tenants not found: ${notFoundIds.join(', ')}`);
     }
 
+    // Remove currentLandlord from response (security)
+    const tenantsResponse = authorizedTenants.map(tenant => ({
+      _id: tenant._id,
+      firstName: tenant.firstName,
+      lastName: tenant.lastName,
+      phone: tenant.phone,
+      profilePicture: tenant.profilePicture
+    }));
+
     res.status(200).json({
       success: true,
-      tenants,
-      notFound: notFoundIds 
+      tenants: tenantsResponse,
+      notFound: notFoundIds,
+      unauthorized: unauthorizedIds.length > 0 ? unauthorizedIds : undefined
     });
 
   } catch (error) {
