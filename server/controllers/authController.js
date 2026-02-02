@@ -405,18 +405,18 @@ exports.logout = (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
-// exports.verifyToken = (req, res) => {
-//   const token = req.cookies.token; // 👈 read cookie
-//   if (!token)
-//     return res.status(401).json({ valid: false, message: "No token" });
+exports.verifyToken = (req, res) => {
+  const token = req.cookies.token; // 👈 read cookie
+  if (!token)
+    return res.status(401).json({ valid: false, message: "No token" });
 
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     return res.status(200).json({ valid: true, user: decoded });
-//   } catch (error) {
-//     return res.status(401).json({ valid: false, message: "Invalid token" });
-//   }
-// };
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ valid: true, user: decoded });
+  } catch (error) {
+    return res.status(401).json({ valid: false, message: "Invalid token" });
+  }
+};
 
 
 //Done

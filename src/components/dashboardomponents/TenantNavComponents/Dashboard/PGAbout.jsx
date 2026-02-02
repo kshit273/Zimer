@@ -9,7 +9,6 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
     }
   }, [pgData]);
 
-  console.log('Data at PGAbout:',pgData)
   // Error state
   if (error) {
     return (

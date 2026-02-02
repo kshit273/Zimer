@@ -43,8 +43,6 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
     savedPGs: user?.savedPGs || [],
   });
 
-  console.log('user --> formData:',formData);
-
   useEffect(()=>{
     if(user && user.currentPG){
       setresidingPG(true);
@@ -82,46 +80,33 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
   };
 
   useEffect(() => {
-  const fetchCurrentPGData = async () => {
-    setLoadingPGs(true);
-    setPgError(null);
-    
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/pgs/${formData.currentPG}`,
-        { withCredentials: true }
-      );
-      const pgData = response.data;
-
-      // Find the room and tenant data for current user
-      let userRoomData = null;
-      let userTenantData = null;
+    const fetchCurrentPGData = async () => {
+      setLoadingPGs(true);
+      setPgError(null);
       
-      for (const room of pgData.rooms) {
-        const tenant = room.tenants.find(t => t.tenantId === formData._id || t.tenantId?._id === formData._id);
-        if (tenant) {
-          userRoomData = room;
-          userTenantData = tenant;
-          break;
-        }
-      }
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/pgs/tenant-pg/${formData.currentPG}`,
+          { withCredentials: true }
+        );
+        const pgData = response.data;
 
-      if (userRoomData && userTenantData) {
+        // Set the current PG data directly from the response
         setCurrentPGData({
           LID: pgData.LID || "",
           RID: pgData.RID || "",
           address: pgData.address || "",
           plan: pgData.plan || "",
-          rent: userRoomData.rent || 0,
-          room: userRoomData.roomId || "",
-          joinFrom: userTenantData.joinDate || "",
+          rent: pgData.rent || 0,
+          room: pgData.room || "",
+          joinFrom: pgData.joinFrom || "",
           coverPhoto: pgData.coverPhoto || "",
-          pgName:pgData.pgName || "",
-          payments: userTenantData.payments || []
+          pgName: pgData.pgName || "",
+          payments: pgData.payments || [],
         });
-        console.log('PGData before OwnerName',currentPGData);
-      } else {
-        console.warn("User not found in any room");
+      } catch (error) {
+        console.error("Error fetching current PG data:", error);
+        setPgError("Failed to load PG data");
         setCurrentPGData({
           LID: "",
           RID: "",
@@ -130,31 +115,17 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
           rent: 0,
           room: "",
           joinFrom: "",
-          payments: []
+          payments: [],
         });
+      } finally {
+        setLoadingPGs(false);
       }
-    } catch (error) {
-      console.error("Error fetching current PG data:", error);
-      setPgError("Failed to load PG data");
-      setCurrentPGData({
-        LID: "",
-        RID: "",
-        address: "",
-        plan: "",
-        rent: 0,
-        room: "",
-        joinFrom: "",
-        payments: []
-      });
-    } finally {
-      setLoadingPGs(false);
-    }
-  };
+    };
 
-  if (formData.currentPG) {
-    fetchCurrentPGData();
-  }
-}, [formData.currentPG, formData._id]);
+    if (formData.currentPG) {
+      fetchCurrentPGData();
+    }
+  }, [formData.currentPG]);
 
   useEffect(() => {
     const fetchOwnerData = async () => {
@@ -169,7 +140,6 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
           ...prev,
           Ownername: response.data.data.name,
         }));
-        console.log('pgdata after ownername:',currentPGData)
       } catch (error) {
         console.error("❌ Error fetching owner data:", error);
       }

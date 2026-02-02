@@ -20,6 +20,11 @@ exports.getPGById = async (req, res) => {
   try {
     const pg = await PG.findOne({ RID: req.params.pgId }); 
     if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    if (pg.LID.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+
     res.json(pg);
   } catch (err) {
     res.status(500).json({ error: "Error getting PG" });
@@ -676,5 +681,53 @@ exports.updateRoomAvailability = async (req, res) => {
   } catch (error) {
     console.error('Error updating availability:', error);
     res.status(500).json({ message: 'Server error', details: error.message });
+  }
+};
+
+exports.getTenantPGData = async (req, res) => {
+  try {
+    const { pgId } = req.params; 
+    const tenantId = req.user.id; 
+
+    const pg = await PG.findOne({ RID: pgId }); // Find PG by RID
+    if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    // Find the room and tenant data for the current tenant
+    let userRoomData = null;
+    let userTenantData = null;
+
+    for (const room of pg.rooms) {
+      const tenant = room.tenants.find(
+        (t) => t.tenantId.toString() === tenantId
+      );
+      if (tenant) {
+        userRoomData = room;
+        userTenantData = tenant;
+        break;
+      }
+    }
+
+    if (!userRoomData || !userTenantData) {
+      return res.status(404).json({ error: "Tenant data not found in PG" });
+    }
+
+    // Return only the required fields
+    const tenantPGData = {
+      LID: pg.LID || "",
+      RID: pg.RID || "",
+      address: pg.address || "",
+      plan: pg.plan || "",
+      rent: userRoomData.rent || 0,
+      room: userRoomData.roomId || "",
+      joinFrom: userTenantData.joinDate || "",
+      coverPhoto: pg.coverPhoto || "",
+      pgName: pg.pgName || "",
+      payments: userTenantData.payments || [],
+    };
+
+    res.json(tenantPGData);
+  } catch (err) {
+    console.error("Error fetching tenant PG data:", err);
+    res.status(500).json({ error: "Failed to fetch tenant PG data", details: err.message });
   }
 };
