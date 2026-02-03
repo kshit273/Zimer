@@ -48,7 +48,7 @@ PUT    /update-landlord-pgs       // auth required
 POST   /landlord-data             // auth required
 ```
 
-# 🔐 Auth Routes (`/auth`)
+# 🔐 PG Routes (`/pg`)
 
 ```js
 POST   /:pgId/reviews                // auth required
