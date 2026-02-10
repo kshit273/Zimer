@@ -38,6 +38,7 @@ router.put(
 // router.post("/forgot-password/verify-otp",verifyOtp)
 // router.post("/forgot-password/reset",resetPassword)
 router.get("/me", authMiddleware, getUser);
+router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.post("/saved-pgs", authMiddleware, postSavedPGs);

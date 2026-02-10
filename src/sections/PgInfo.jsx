@@ -53,7 +53,7 @@ const PgInfo = ({setToast}) => {
     const fetchPgData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/pgs/${RID}`, {
+        const response = await axios.get(`http://localhost:5000/pgs/show-data/${RID}`, {
           withCredentials: true,
         });
         setPgData(response.data);

@@ -5,17 +5,17 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-// GET all PGs
+// Done
 exports.getAllPGs = async (req, res) => {
   try {
-    const pgs = await PG.find();
+    const pgs = await PG.find().select("-rooms.tenants");
     res.json(pgs);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch PGs" });
   }
 };
 
-// GET PG by ID
+// Done
 exports.getPGById = async (req, res) => {
   try {
     const pg = await PG.findOne({ RID: req.params.pgId }); 
@@ -31,7 +31,19 @@ exports.getPGById = async (req, res) => {
   }
 };
 
-// CREATE PG 
+// Done
+exports.getPGByIdToShow = async (req, res) => {
+  try {
+    const pg = await PG.findOne({ RID: req.params.pgId }).select("-rooms.tenants"); 
+    if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    res.json(pg);
+  } catch (err) {
+    res.status(500).json({ error: "Error getting PG" });
+  }
+};
+
+// Done
 const organizeFiles = (files) => {
   const organized = {};
   
@@ -47,11 +59,12 @@ const organizeFiles = (files) => {
   return organized;
 };
 
+// Done
 const transformFormData = (formData, LID, files = {}) => {
   // Organize files by fieldname
   const organizedFiles = organizeFiles(files);
   
-  console.log("Organized files:", Object.keys(organizedFiles)); // Debug log
+  // console.log("Organized files:", Object.keys(organizedFiles)); // Debug log
 
   // Ensure rooms is an array
   let rooms = formData.rooms;
@@ -125,10 +138,13 @@ const transformFormData = (formData, LID, files = {}) => {
   };
 };
 
+// Done
 exports.createPG = async (req, res) => {
   try {
-    console.log("Files received:", req.files); // Debug log
-    console.log("Body received:", req.body); // Debug log
+
+    if(req.user.role !== 'landlord'){
+      return res.status(401).json({error : "Unauthorized"});
+    }
     
     const formData = req.body;
     
@@ -144,7 +160,6 @@ exports.createPG = async (req, res) => {
     }
 
     const pgData = transformFormData(formData, req.user.id, req.files);
-    console.log("Transformed PG data:", pgData); // Debug log
     
     const rid = await generateRID(address.city, address.areaCode);
 
@@ -161,9 +176,14 @@ exports.createPG = async (req, res) => {
   }
 };
 
-// PUT update PG
+// Done
 exports.updatePG = async (req, res) => {
   try {
+
+    if(req.user.role !== 'landlord'){
+      return res.status(401).json({error : "Unauthorized"});
+    }
+
     const updated = await PG.findOneAndUpdate(
       { RID: req.params.id },
       req.body,
@@ -178,9 +198,13 @@ exports.updatePG = async (req, res) => {
   }
 };
 
+//Done
 exports.updatePGPhotos = async (req, res) => {
   try {
-    console.log("updatePGPhotos - files:", req.files, "body:", req.body);
+
+    if(req.user.role !== 'landlord'){
+      return res.status(401).json({error : "Unauthorized"});
+    }
 
     const organized = organizeFiles(req.files);
     const pg = await PG.findOne({ RID: req.params.id });
@@ -239,9 +263,11 @@ exports.updatePGPhotos = async (req, res) => {
   }
 };
 
+//Done
 exports.removeTenantsFromRoom = async (req, res) => {
   try {
     const { PGID, roomId, tenantIds } = req.body;
+    const userId = req.user.id;
 
     // Validate input
     if (!PGID || !roomId || !tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
@@ -254,6 +280,10 @@ exports.removeTenantsFromRoom = async (req, res) => {
     
     if (!pg) {
       return res.status(404).json({ error: "PG not found" });
+    }
+
+    if (pg.LID !== userId){
+      return res.status(400).json({error:"User not authorized"});
     }
 
     // Find the room in the PG
@@ -291,24 +321,19 @@ exports.removeTenantsFromRoom = async (req, res) => {
   }
 };
 
-// DELETE PG
-exports.deletePG = async (req, res) => {
-  try {
-    await PG.findByIdAndDelete(req.params.id);
-    res.json({ message: "PG deleted" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete PG" });
-  }
-};
-
 // generate Token for tenant login into room
 exports.generateToken = async (req, res) => {
   try {
     const { PGID, roomId } = req.body;
+    const userId = req.user.id;
 
     // fetch PG using RID
     const pg = await PG.findOne({ RID: PGID });
     if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    if (pg.LID !== userId){
+      return res.status(400).json({error:"User not authorized"});
+    }
 
     const room = pg.rooms.find(r => r.roomId === roomId);
     if (!room) return res.status(404).json({ error: "Room not found" });
@@ -319,7 +344,7 @@ exports.generateToken = async (req, res) => {
     else if (room.roomType === "double") capacity = 2;
     else if (room.roomType === "triple") capacity = 3;
     else if (room.roomType === "quad") capacity = 4;
-    else capacity = Infinity; // "other" = unlimited tenants
+    else capacity = Infinity;
 
     const currentTenants = room.tenants.length;
     const maxJoins = capacity === Infinity ? null : capacity - currentTenants;
@@ -353,7 +378,12 @@ exports.validateInvite = async (req, res) => {
   try {
     const { RID, roomId } = req.params;
     const { token } = req.query;
-    console.log(token);
+    const userRole = req.user.role;
+
+    if(userRole !== 'tenant'){
+      return res.status(400).json({error:"Only tenants are allowed to access the join links"});
+    }
+    // console.log(token);
 
     // 1. Validate invite token
     const invite = await Invite.findOne({ 
@@ -404,16 +434,12 @@ exports.validateInvite = async (req, res) => {
   }
 };
 
-// ============================================
-// REVIEW RELATED CONTROLLERS
-// ============================================
-
-// POST - Add a review to a PG
+//Done
 exports.addReview = async (req, res) => {
   try {
     const { pgId } = req.params;
     const { reviewText, ratings } = req.body;
-    const userId = req.user.id; // From authentication middleware
+    const userId = req.user.id;
 
     // Validate input
     if (!reviewText || !ratings) {
@@ -489,7 +515,7 @@ exports.addReview = async (req, res) => {
   }
 };
 
-// GET - Get all reviews for a PG
+//Done
 exports.getReviews = async (req, res) => {
   try {
     const { pgId } = req.params;
@@ -527,7 +553,56 @@ exports.getReviews = async (req, res) => {
   }
 };
 
-// PUT - Update a review
+//Done
+exports.getTenantPGData = async (req, res) => {
+  try {
+    const { pgId } = req.params; 
+    const tenantId = req.user.id; 
+
+    const pg = await PG.findOne({ RID: pgId }); // Find PG by RID
+    if (!pg) return res.status(404).json({ error: "PG not found" });
+
+    // Find the room and tenant data for the current tenant
+    let userRoomData = null;
+    let userTenantData = null;
+
+    for (const room of pg.rooms) {
+      const tenant = room.tenants.find(
+        (t) => t.tenantId.toString() === tenantId
+      );
+      if (tenant) {
+        userRoomData = room;
+        userTenantData = tenant;
+        break;
+      }
+    }
+
+    if (!userRoomData || !userTenantData) {
+      return res.status(404).json({ error: "Tenant data not found in PG" });
+    }
+
+    // Return only the required fields
+    const tenantPGData = {
+      LID: pg.LID || "",
+      RID: pg.RID || "",
+      address: pg.address || "",
+      plan: pg.plan || "",
+      rent: userRoomData.rent || 0,
+      room: userRoomData.roomId || "",
+      joinFrom: userTenantData.joinDate || "",
+      coverPhoto: pg.coverPhoto || "",
+      pgName: pg.pgName || "",
+      payments: userTenantData.payments || [],
+    };
+
+    res.json(tenantPGData);
+  } catch (err) {
+    console.error("Error fetching tenant PG data:", err);
+    res.status(500).json({ error: "Failed to fetch tenant PG data", details: err.message });
+  }
+};
+
+//Done
 exports.updateReview = async (req, res) => {
   try {
     const { pgId, reviewId } = req.params;
@@ -583,151 +658,5 @@ exports.updateReview = async (req, res) => {
   } catch (err) {
     console.error("Error updating review:", err);
     res.status(500).json({ error: "Failed to update review", details: err.message });
-  }
-};
-
-// DELETE - Delete a review
-exports.deleteReview = async (req, res) => {
-  try {
-    const { PGID, reviewId } = req.params;
-    const userId = req.user.id;
-
-    const pg = await PG.findOne({ RID: PGID });
-    if (!pg) {
-      return res.status(404).json({ error: "PG not found" });
-    }
-
-    const review = pg.reviews.id(reviewId);
-    if (!review) {
-      return res.status(404).json({ error: "Review not found" });
-    }
-
-    // Check if the user is the owner of the review
-    if (review.userId.toString() !== userId) {
-      return res.status(403).json({ error: "You can only delete your own review" });
-    }
-
-    // Remove review
-    pg.reviews.pull(reviewId);
-
-    // Recalculate average ratings
-    pg.calculateAverageRatings();
-
-    await pg.save();
-
-    res.json({
-      message: "Review deleted successfully",
-      averageRatings: pg.averageRatings,
-      totalReviews: pg.totalReviews,
-    });
-  } catch (err) {
-    console.error("Error deleting review:", err);
-    res.status(500).json({ error: "Failed to delete review", details: err.message });
-  }
-};
-
-// GET room by roomId
-exports.getRoomById = async (req, res) => {
-  try {
-    const { pgId, roomId } = req.params;
-    
-    const pg = await PG.findOne({ RID: pgId });
-    
-    if (!pg) {
-      return res.status(404).json({ message: 'PG not found' });
-    }
-    
-    const room = pg.rooms.find(r => r.roomId === roomId);
-    
-    if (!room) {
-      return res.status(404).json({ message: 'Room not found' });
-    }
-    
-    res.json(room);
-  } catch (error) {
-    console.error('Error fetching room:', error);
-    res.status(500).json({ message: 'Server error', details: error.message });
-  }
-};
-
-// PATCH - Update room availability
-exports.updateRoomAvailability = async (req, res) => {
-  try {
-    const { pgId, roomId } = req.params;
-    const { availableFrom } = req.body;
-    
-    const pg = await PG.findOne({ RID: pgId });
-    
-    if (!pg) {
-      return res.status(404).json({ message: 'PG not found' });
-    }
-    
-    // Find the room in the rooms array
-    const room = pg.rooms.find(r => r.roomId === roomId);
-    
-    if (!room) {
-      return res.status(404).json({ message: 'Room not found' });
-    }
-    
-    // Update the availableFrom field
-    room.availableFrom = availableFrom;
-    
-    await pg.save();
-    
-    res.json({ 
-      message: 'Availability updated successfully', 
-      room 
-    });
-  } catch (error) {
-    console.error('Error updating availability:', error);
-    res.status(500).json({ message: 'Server error', details: error.message });
-  }
-};
-
-exports.getTenantPGData = async (req, res) => {
-  try {
-    const { pgId } = req.params; 
-    const tenantId = req.user.id; 
-
-    const pg = await PG.findOne({ RID: pgId }); // Find PG by RID
-    if (!pg) return res.status(404).json({ error: "PG not found" });
-
-    // Find the room and tenant data for the current tenant
-    let userRoomData = null;
-    let userTenantData = null;
-
-    for (const room of pg.rooms) {
-      const tenant = room.tenants.find(
-        (t) => t.tenantId.toString() === tenantId
-      );
-      if (tenant) {
-        userRoomData = room;
-        userTenantData = tenant;
-        break;
-      }
-    }
-
-    if (!userRoomData || !userTenantData) {
-      return res.status(404).json({ error: "Tenant data not found in PG" });
-    }
-
-    // Return only the required fields
-    const tenantPGData = {
-      LID: pg.LID || "",
-      RID: pg.RID || "",
-      address: pg.address || "",
-      plan: pg.plan || "",
-      rent: userRoomData.rent || 0,
-      room: userRoomData.roomId || "",
-      joinFrom: userTenantData.joinDate || "",
-      coverPhoto: pg.coverPhoto || "",
-      pgName: pg.pgName || "",
-      payments: userTenantData.payments || [],
-    };
-
-    res.json(tenantPGData);
-  } catch (err) {
-    console.error("Error fetching tenant PG data:", err);
-    res.status(500).json({ error: "Failed to fetch tenant PG data", details: err.message });
   }
 };

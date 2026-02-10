@@ -602,62 +602,60 @@ exports.getTenantsBatch = async (req, res) => {
 };
 
 //Done
-exports.getSavedPGs = async(req, res) => {
+exports.getSavedPGs = async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id; // Get userId from authenticated user
-    
+
     if (!userId) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "User not authenticated" 
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
       });
     }
 
     // Find user and get savedPGs
-    const user = await Tenant.findById(userId).select('savedPGs');
-    
+    const user = await Tenant.findById(userId).select("savedPGs");
+
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "User not found" 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
-    // Fetch the full PG details
-    const savedPGDetails = await pgModel.find({ 
-      RID: { $in: user.savedPGs } 
-    });
+    // Fetch the required PG details
+    const savedPGDetails = await pgModel
+      .find({ RID: { $in: user.savedPGs } })
+      .select("coverPhoto pgName address LID");
 
     // Fetch landlord details for each PG
     const pgsWithLandlordInfo = await Promise.all(
       savedPGDetails.map(async (pg) => {
-        // Find landlord by LID
-        const landlord = await Landlord.findById(pg.LID).select('firstName lastName');
-        
-        // Convert mongoose document to plain object and add landlord info
-        const pgObject = pg.toObject();
-        pgObject.landlordName = landlord 
-          ? `${landlord.firstName} ${landlord.lastName}`.trim()
-          : 'Unknown';
-        pgObject.landlordFirstName = landlord?.firstName || '';
-        pgObject.landlordLastName = landlord?.lastName || '';
-        
-        return pgObject;
+        const landlord = await Landlord.findById(pg.LID).select(
+          "firstName lastName"
+        );
+
+        return {
+          coverPhoto: pg.coverPhoto,
+          pgName: pg.pgName,
+          address: pg.address,
+          landlordFirstName: landlord?.firstName || "Unknown",
+          landlordLastName: landlord?.lastName || "Unknown",
+        };
       })
     );
 
     return res.status(200).json({
       success: true,
       data: pgsWithLandlordInfo,
-      count: pgsWithLandlordInfo.length
+      count: pgsWithLandlordInfo.length,
     });
-
   } catch (error) {
     console.error("Error fetching saved PGs:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch saved PGs",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -849,6 +847,61 @@ exports.getLandlordData = async (req, res) => {
       success: false,
       message: "Failed to fetch landlord data",
       error: error.message,
+    });
+  }
+};
+
+//Done
+exports.clearTenantPG = async (req, res) => {
+  try {
+    const { tenantIds } = req.body;
+
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Tenant IDs are required and must be an array",
+      });
+    }
+
+    const landlordId = req.user.id; // Get landlord ID from authMiddleware
+
+    // Fetch tenants to validate their currentPG
+    const tenants = await Tenant.find({
+      _id: { $in: tenantIds },
+      currentPG: { $exists: true, $ne: null }, // Ensure currentPG exists
+    }).select("currentPG");
+
+    // Filter tenants whose currentPG belongs to the landlord
+    const validTenantIds = [];
+    for (const tenant of tenants) {
+      const pg = await pgModel.findOne({ RID: tenant.currentPG, LID: landlordId });
+      if (pg) {
+        validTenantIds.push(tenant._id);
+      }
+    }
+
+    if (validTenantIds.length === 0) {
+      return res.status(403).json({
+        success: false,
+        message: "No tenants found with PGs owned by the current landlord",
+      });
+    }
+
+    // Update tenants to clear their currentPG field
+    const result = await Tenant.updateMany(
+      { _id: { $in: validTenantIds } },
+      { $unset: { currentPG: "" } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `${result.nModified} tenants' current PG cleared successfully`,
+    });
+  } catch (error) {
+    console.error("Error clearing tenants' current PG:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear tenants' current PG. Please try again later.",
     });
   }
 };

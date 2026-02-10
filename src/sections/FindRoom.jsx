@@ -78,7 +78,7 @@ const FindRoom = ({ setActiveRID }) => {
 
     // Fetch PG details from API
     try {
-      const response = await axios.get(`http://localhost:5000/pgs/${rid}`);
+      const response = await axios.get(`http://localhost:5000/pgs/show-data/${rid}`);
       const pgDetails = response.data;
       
       if (pgDetails) {

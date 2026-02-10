@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAllPGs,
   getPGById,
+  getPGByIdToShow,
   createPG,
   updatePG,
   generateToken,
@@ -10,8 +11,7 @@ const {
   removeTenantsFromRoom,
   addReview,
   getReviews,
-  getRoomById,
-  updateRoomAvailability,
+  updateReview,
   updatePGPhotos,
   getTenantPGData,
 } = require("../controllers/pgController");
@@ -19,22 +19,21 @@ const upload = require("../middleware/upload");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Review routes
-router.post("/:pgId/reviews", authMiddleware, addReview);
-router.get("/:pgId/reviews", getReviews);
-
-router.get("/:pgId/room/:roomId", getRoomById);
-router.patch("/:pgId/room/:roomId/availability", updateRoomAvailability);
+router.post("/:pgId/reviews", authMiddleware, addReview); 
+router.get("/:pgId/reviews", getReviews); 
+router.put("/:pgId/reviews/:reviewId", authMiddleware, updateReview)
 
 // PG routes
 router.get("/", getAllPGs);
 router.get("/:pgId",authMiddleware, getPGById);
+router.get("/show-data/:pgId",authMiddleware, getPGByIdToShow);
 router.post("/", upload.any(), authMiddleware, createPG);
-router.put("/:id", updatePG);
-router.put("/:id/photos", upload.any(), updatePGPhotos);
+router.put("/:id",authMiddleware, updatePG);
+router.put("/:id/photos", upload.any(),authMiddleware, updatePGPhotos);
 
 // Tenant routes
-router.post("/remove-tenants", removeTenantsFromRoom);
-router.post("/generate-tenant-token", generateToken);
+router.post("/remove-tenants", authMiddleware, removeTenantsFromRoom); 
+router.post("/generate-tenant-token", authMiddleware, generateToken); 
 router.get("/validate-invite/:RID/:roomId", authMiddleware, validateInvite);
 router.get("/tenant-pg/:pgId", authMiddleware, getTenantPGData);
 

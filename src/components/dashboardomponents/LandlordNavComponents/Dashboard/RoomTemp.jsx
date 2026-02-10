@@ -97,7 +97,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
 
     try {
       // Step 1: Clear currentPG from User model
-      const userResponse = await fetch(`${API_BASE}/auth/clear-pg`, {
+      const userResponse = await fetch(`${API_BASE}/auth/clear-tenant-pg`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

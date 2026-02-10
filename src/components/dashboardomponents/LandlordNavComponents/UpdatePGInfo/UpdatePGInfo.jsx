@@ -53,12 +53,6 @@ const UpdatePGInfo = ({ ownedPGsData, ownedPGsRID = [], loadingPGs = false }) =>
       try {
         setLoading(true);
         setError(null);
-        
-        // const response = await axios.get(`http://localhost:5000/pgs/${selectedRID}`, {
-        //   withCredentials: true,
-        // });
-        
-        // console.log("PG Data received:", response.data);
 
         const data = ownedPGsData.find(pg => pg.RID === selectedRID);
         
@@ -178,8 +172,6 @@ const UpdatePGInfo = ({ ownedPGsData, ownedPGsRID = [], loadingPGs = false }) =>
       } else if (section === "amenities") {
         updateData = { amenities: formData.amenities };
       }
-
-      console.log("Updating with data:", updateData);
 
       const response = await axios.put(
         `http://localhost:5000/pgs/${pgData.RID}`,
