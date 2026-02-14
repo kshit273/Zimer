@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { navLinks } from "../constants/Abt";
 import JoinBtn from "./JoinBtn";
-import Hamburger from "./Hamburger";
 import { useMediaQuery } from "react-responsive";
 import { Link, Link as RouterLink } from "react-router-dom";
 import User from "./User";
@@ -82,10 +81,6 @@ const Navbar = ({ user }) => {
         ) : (
           <JoinBtn />
         )}
-        <Hamburger
-          show={showHamburger}
-          onClose={() => setShowHamburger(false)}
-        />
       </div>
     </header>
   );

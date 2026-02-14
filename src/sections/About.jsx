@@ -162,7 +162,7 @@ const About = () => {
         {isSmallScreen || isMedScreen ? (
           <JoinAbt isMedScreen={isMedScreen} isSmallScreen={isSmallScreen} />
         ) : (
-          <></>
+          null
         )}
       </div>
     </section>

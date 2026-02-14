@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 
 const JoinBtn = ({ isSmallScreen }) => {
+
+  const redirectToPlayStore = () =>{
+    window.open("https://play.google.com/store/apps/details?id=com.roomie", "_blank");
+  }
+
   return (
-    <Link to="/userlogin">
       <div
         className={`${
           isSmallScreen
@@ -12,10 +16,10 @@ const JoinBtn = ({ isSmallScreen }) => {
         style={{
           background: "linear-gradient(120deg, #d72638 0%, #ff0084 100%)",
         }}
+        onClick={redirectToPlayStore}
       >
         Join Now
       </div>
-    </Link>
   );
 };
 
