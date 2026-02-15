@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
 const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], security, PGID, onRoomUpdate, setToast }) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -10,18 +11,19 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
   const handleInviteLink = async (roomId, PGID) => {
     const API_BASE = "http://localhost:5000";
     try {
-      const res = await fetch(`${API_BASE}/pgs/generate-tenant-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ PGID, roomId }),
-      });
+      const res = await axios.post(
+        `${API_BASE}/pgs/generate-tenant-token`,
+        { PGID, roomId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true
+        }
+      );
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Error ${res.status}: ${text}`);
-      }
-      const data = await res.json();
-      
+      const data = res.data;
+
       if (data.inviteLink) {
         await navigator.clipboard.writeText(data.inviteLink);
         setToast("Invite link copied to clipboard!");

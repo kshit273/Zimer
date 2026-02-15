@@ -3,23 +3,18 @@ import React from "react";
 const JoinReq = ({ formData, data, onAccept, onReject }) => {
   const dateTime = new Date(data.createdAt);
 
-  // const isSender = formData.id === data.sender._id;
-
-  // Format date nicely (e.g., "22 October 2025")
   const formattedDate = dateTime.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
 
-  // Format time nicely (e.g., "5:30 PM")
   const formattedTime = dateTime.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
 
-  // Format move-in date if available
   const moveInDate = data.metadata?.moveInDate 
     ? new Date(data.metadata.moveInDate).toLocaleDateString("en-US", {
         day: "numeric",

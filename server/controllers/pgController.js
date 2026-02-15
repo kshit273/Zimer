@@ -327,11 +327,12 @@ exports.generateToken = async (req, res) => {
     const { PGID, roomId } = req.body;
     const userId = req.user.id;
 
+
     // fetch PG using RID
     const pg = await PG.findOne({ RID: PGID });
     if (!pg) return res.status(404).json({ error: "PG not found" });
 
-    if (pg.LID !== userId){
+    if (pg.LID.toString() !== userId){
       return res.status(400).json({error:"User not authorized"});
     }
 
@@ -639,10 +640,13 @@ exports.updateReview = async (req, res) => {
           return res.status(400).json({ error: `Invalid rating for ${key}` });
         }
       }
+
+      // Ensure all required ratings are present and valid
+      const validRatings = requiredRatings.map(key => ratings[key] || 0);
+      const overallRating = validRatings.reduce((sum, rating) => sum + rating, 0) / validRatings.length;
+
       review.ratings = ratings;
-      review.overallRating = parseFloat(
-        ((ratings.community + ratings.value + ratings.location + ratings.food + ratings.landlord) / 5).toFixed(1)
-      );
+      review.overallRating = parseFloat(overallRating.toFixed(1));
     }
 
     // Recalculate average ratings

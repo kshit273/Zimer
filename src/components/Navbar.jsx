@@ -67,20 +67,11 @@ const Navbar = ({ user }) => {
             </ul>
           </nav>
         )}
-        {isHam ? (
-          <div
-            className="h-[22px] w-[22px]"
-            onClick={() => setShowHamburger(true)}
-          >
-            <img src="/images/menu.png" alt="menu" />
-          </div>
-        ) : user ? (
-          <>
+        {user && !isSmallScreen ? (
             <User imgPath={user.profilePicture} user={user} />
-          </>
-        ) : (
+        ) : isSmallScreen ? null : !isSmallScreen && !isMedScreen ? (
           <JoinBtn />
-        )}
+        ) : null}
       </div>
     </header>
   );

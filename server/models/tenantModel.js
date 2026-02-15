@@ -27,7 +27,6 @@ const tenantSchema = new mongoose.Schema(
     currentLandlord: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Landlord",
-          required: true,
         },
   },
   { timestamps: true }

@@ -1,7 +1,8 @@
-import React from "react";
+import React from 'react'
 
-const LeaveReq = ({ data, onAccept, onReject }) => {
-  const dateTime = new Date(data.createdAt);
+const JRNotification = ({ data, onAccept, onReject }) => {
+
+    const dateTime = new Date(data.createdAt);
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
     day: "numeric",
@@ -15,8 +16,8 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
     hour12: true,
   });
 
-  const moveOutDate = data.metadata?.moveOutDate 
-    ? new Date(data.metadata.moveOutDate).toLocaleDateString("en-US", {
+  const moveInDate = data.metadata?.moveInDate 
+    ? new Date(data.metadata.moveInDate).toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -27,25 +28,29 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
     <div className={`bg-[#e2e2e2] rounded-[20px] p-4 mb-4`}>
       <div className="flex flex-col justify-center gap-3">
         <div className="flex flex-col gap-1">
-          <p className="text-[19px] text-[#d72638] font-medium">Leave Request</p>
+          <p className="text-[19px] text-[#49C800] font-medium">Join Request</p>
           <p className="text-[15px] text-[#1a1a1a] font-medium">
             {data.metadata?.tenantName || "Unknown User"}
           </p>
-          <p className="text-[14px] text-[#5c5c5c]">{data.message}</p>
+          <p className="text-[14px] text-[#5c5c5c]">{data.message || 'message'}</p>
           
           {/* Additional details */}
           <div className="mt-2 space-y-1">
             <p className="text-[13px] text-[#5c5c5c]">
-              <span className="font-medium">Room:</span> {data.metadata?.roomNumber || "N/A"}
+              <span className="font-medium">PG:</span> {data.RID || "N/A"}
             </p>
             <p className="text-[13px] text-[#5c5c5c]">
-              <span className="font-medium">Move-out Date:</span> {moveOutDate}
+              <span className="font-medium">Room:</span> {data.roomId || "N/A"}
             </p>
-            {data.metadata?.reason && (
-              <p className="text-[13px] text-[#5c5c5c]">
-                <span className="font-medium">Review:</span> {data.metadata.reason}
-              </p>
-            )}
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Email:</span> {data.tenantEmail || "N/A"}
+            </p>
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Phone:</span> {data.tenantPhone || "N/A"}
+            </p>
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Move-in Date:</span> {moveInDate || 'date'}
+            </p>
           </div>
         </div>
 
@@ -92,7 +97,7 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
         <span>{formattedTime}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LeaveReq;
+export default JRNotification
