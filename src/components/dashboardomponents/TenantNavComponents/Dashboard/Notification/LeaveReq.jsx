@@ -35,9 +35,9 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
           
           {/* Additional details */}
           <div className="mt-2 space-y-1">
-            <p className="text-[13px] text-[#5c5c5c]">
+            {/* <p className="text-[13px] text-[#5c5c5c]">
               <span className="font-medium">Room:</span> {data.metadata?.roomNumber || "N/A"}
-            </p>
+            </p> */}
             <p className="text-[13px] text-[#5c5c5c]">
               <span className="font-medium">Move-out Date:</span> {moveOutDate}
             </p>
