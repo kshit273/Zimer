@@ -7,7 +7,8 @@ const ztrsSchema = new mongoose.Schema(
         ref : "Tenant",
         required: true,
     },
-     RID: {
+    timeline: [{
+      RID: {
       type: String,  
       ref: "PG",
       required: true,
@@ -19,6 +20,11 @@ const ztrsSchema = new mongoose.Schema(
     ztrs:{
         type : Number,
         required : true,
+    }
+  }],
+    finalScore: {
+      type: Number,
+      required: true,
     }
   },
   { timestamps: true }

@@ -3,9 +3,9 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./db");
 const cookieParser = require("cookie-parser");
-
 const authAndUserRoutes = require("./routes/authAndUserRoutes");
 const pgRoutes = require("./routes/pgRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 // const adminRoutes = require("./routes/adminRoutes"); // for later
@@ -15,6 +15,7 @@ dotenv.config();
 connectDB();
 const app = express();
 app.use(
+  
   cors({
     origin: [
       "http://localhost:5173", // web frontend
@@ -35,6 +36,7 @@ app.use("/notifications", notificationRoutes);
 // app.use("/payment", paymentRoutes);
 app.use("/geocode", geocodeRoutes); // Done
 app.use("/uploads", express.static("public/uploads")); 
+app.use("/admin",adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));

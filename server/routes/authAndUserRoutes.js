@@ -25,6 +25,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 // Auth routes
 router.post("/landlord/signup", upload.single("profilePicture"), landlordSignup);
 router.post("/tenant/signup", upload.single("profilePicture"), tenantSignup);
+// router.post("/admin/login", adminLogin)
 router.post("/login", login);
 router.post("/logout", logout);
 // router.get("/verify-token", verifyToken);

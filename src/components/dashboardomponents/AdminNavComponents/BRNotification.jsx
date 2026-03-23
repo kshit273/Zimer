@@ -1,36 +1,59 @@
-import React from 'react'
+import { useState } from "react";
 
-const BRNotification = ({name, contact, email, reqTime, RID, pgName}) => {
+const BRNotification = ({ name, contact, email, reqTime, RID, pgName }) => {
+  const [responded, setResponded] = useState(false);
+
   return (
-    <div className='p-3 bg-[#e2e2e2] rounded-[10px] w-full flex flex-col gap-3'>
-        <div className='flex flex-col'>
-            <div className='text-[#464646] text-[18px] font-medium'>Booking request by {name}</div>
-            <div className='text-[#787878] text-[15px]'>A new user , {name} has put up a request for PG - {RID} , {pgName} at {reqTime}.</div>
-        </div>
-        <div className='flex gap-8'>
-            <div className='flex flex-col text-[#464646] font-medium'>
-                <div>Name</div>
-                <div>Contact</div>
-                <div>Email</div>
-                <div>Req time</div>
-                <div>Res time</div>
-            </div>
-            <div className='flex flex-col text-[#787878] font-light'>
-                <div>{name}</div>
-                <div>{contact}</div>
-                <div>{email}</div>
-                <div>{reqTime}</div>
-                <div> - </div>
-            </div>
-        </div>
-        <div>
-            <button className='flex items-center gap-2 bg-[#e2e2e2] px-2 py-[1.5px] rounded-[20px] cursor-pointer border-1 border-[#49c800]'>
-                <img src="../../../images/check.png" alt="" className='h-[15px] w-[15px]'/>
-                <p className='text-[#49c800] text-[15px]'>Responded</p>
-            </button>
-        </div>
-    </div>
-  )
-}
+    <div className="font-dm-mono bg-[#111111] border border-[#1f1f1f] rounded-xl p-4 flex flex-col gap-4">
 
-export default BRNotification
+      {/* Header */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="block w-1 h-1 rounded-full bg-[#c8f135]" />
+          <p className="text-[0.75rem] tracking-[0.18em] text-[#c8f135] uppercase">Booking Request</p>
+        </div>
+        <p className="text-[#e8e8e0] font-medium text-medium">{name}</p>
+        <p className="text-[0.85rem] text-[#555550] leading-relaxed">
+          Requested PG <span className="text-[#e8e8e0]">{pgName}</span>{" "}
+          <span className="text-[#3a3a3a]">({RID})</span> at {reqTime}.
+        </p>
+      </div>
+
+      {/* Detail grid */}
+      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+        {[
+          ["Name",     name],
+          ["Contact",  contact],
+          ["Email",    email],
+          ["Req time", reqTime],
+          ["Res time", "—"],
+        ].map(([label, value]) => (
+          <>
+            <span key={label + "l"} className="text-[0.7rem] tracking-[0.1em] text-[#555550] uppercase self-center">{label}</span>
+            <span key={label + "v"} className="text-[0.78rem] text-[#e8e8e0] self-center truncate">{value}</span>
+          </>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-[#1f1f1f]" />
+
+      {/* Action */}
+      <button
+        onClick={() => setResponded(true)}
+        disabled={responded}
+        className={`self-start flex items-center gap-2 px-3 py-1.5 rounded-lg text-[0.72rem] tracking-[0.12em] uppercase border transition-all duration-200
+          ${responded
+            ? "border-[#c8f135]/30 text-[#c8f135]/60 cursor-default"
+            : "border-[#c8f135]/40 text-[#c8f135] hover:bg-[#c8f135]/5 cursor-pointer"
+          }`}
+      >
+        <span>{responded ? "✓" : "○"}</span>
+        {responded ? "Responded" : "Mark as responded"}
+      </button>
+
+    </div>
+  );
+};
+
+export default BRNotification;

@@ -1,64 +1,111 @@
-import React, { useEffect, useState } from 'react'
-import BRNotification from './BRNotification'
-import JRNotification from './JRNotification'
-import LRNotification from './LRNotification'
+import { useEffect, useState } from "react";
+import BRNotification from "./BRNotification";
+import JRNotification from "./JRNotification";
+import LRNotification from "./LRNotification";
 
-const DropdownComp = ({heading, data}) => {
-    const [showArrow, setShowArrow] = useState(false)
-    const [open, setOpen] = useState(false)
-    const [isRead, setIsRead] = useState(false)
+// Accent colours per heading type
+const TYPE_COLOR = {
+  Booking: "text-[#c8f135]  border-[#c8f135]/20  bg-[#c8f135]/5",
+  Join:    "text-[#4ade80]  border-[#4ade80]/20  bg-[#4ade80]/5",
+  Leave:   "text-[#f87171]  border-[#f87171]/20  bg-[#f87171]/5",
+};
+const BADGE_COLOR = {
+  Booking: "bg-[#c8f135]  text-[#0a0a0a]",
+  Join:    "bg-[#4ade80]  text-[#0a0a0a]",
+  Leave:   "bg-[#f87171]  text-[#0a0a0a]",
+};
+const DOT_COLOR = {
+  Booking: "bg-[#c8f135]",
+  Join:    "bg-[#4ade80]",
+  Leave:   "bg-[#f87171]",
+};
 
-    const unreadCount = Array.isArray(data) ? data.length : 0;
-    const subHeading =  !isRead ? `You may have some ${heading} requests` : `No pending ${heading} requests`;
+const DropdownComp = ({ heading, data }) => {
+  const [open, setOpen]     = useState(false);
+  const [isRead, setIsRead] = useState(false);
 
-    useEffect(() => {
+  const unreadCount = Array.isArray(data) ? data.length : 0;
+
+  useEffect(() => {
     if (unreadCount < 1) setIsRead(true);
-}, [unreadCount]);
+  }, [unreadCount]);
 
-    const handleJoinRequestAccept = () =>{}
-    const handleLeaveRequestAccept = () =>{}
-    const handleJoinRequestReject = () =>{}
-    const handleLeaveRequestReject = () =>{}
+  const handleToggle = () => {
+    setOpen((prev) => !prev);
+    setIsRead(true);
+  };
+
+  const handleJoinRequestAccept  = () => {};
+  const handleJoinRequestReject  = () => {};
+  const handleLeaveRequestAccept = () => {};
+  const handleLeaveRequestReject = () => {};
+
+  const accentClass = TYPE_COLOR[heading]  || TYPE_COLOR.Booking;
+  const badgeClass  = BADGE_COLOR[heading] || BADGE_COLOR.Booking;
+  const dotClass    = DOT_COLOR[heading]   || DOT_COLOR.Booking;
 
   return (
-    <div className='p-2 bg-[#e9e9e9] rounded-[10px]'>
-        <div className='flex gap-2  items-center '
-            onMouseEnter={() => setShowArrow(true)}
-            onMouseLeave={() => setShowArrow(false)}>
-            <div className='p-2'>
-                <img src="../../../images/message.png" alt="" className='h-[35px] w-[40px]'/>
-            </div>
-            <div className='w-full flex items-center justify-between'>
-                <div className='py-2'>
-                    <div className='font-medium text-[20px]'>{heading} requests</div>
-                    <div className='font-light text-[15px]'>{subHeading}</div>
-                </div>
-                <div className='flex gap-2 items-center justify-center'>
-                    {!isRead ?  <div className='flex items-center justify-center bg-[#d72638] h-[30px] w-[30px] rounded-full text-[#e2e2e2] font-medium text-[15px]'>{unreadCount}</div> : null}
-                    {showArrow ? 
-                    <div className='flex items-center justify-center bg-[#d6d6d6] h-[25px] w-[25px] rounded-full cursor-pointer duration-300' onClick={() => {
-                        setOpen((prev) => !prev);
-                        setIsRead(true);
-                    }}>
-                        <img src="../../../images/arrowBlack.png" alt="" className={`h-[10px] w-[10px] ${open ? 'rotate-270' : 'rotate-90' } `}/>
-                    </div> : null}
-                </div>
-            </div>
-        </div>
-        {open ? 
-        <div className='flex flex-col gap-2 mt-1'>
-            {heading == 'Booking' ?
-            data.map((item, index) => (
-                <BRNotification key={index} name={item.name} contact={item.contact} email={item.email} reqTime={item.reqTime} RID={item.RID} pgName={item.pgName}/>))
-                 : 
-                heading == 'Join' ?  data.map((item,index) => (<JRNotification data = {item} key={index} onAccept={handleJoinRequestAccept} onReject={handleJoinRequestReject}/>))
-                 : 
-                heading == 'Leave' ? data.map((item,index) => (<LRNotification data = {item} key={index} onAccept={handleLeaveRequestAccept} onReject={handleLeaveRequestReject}/>))
-                 : 
-                null}
-        </div>:null}
-    </div>
-  )
-}
+    <div className={`font-dm-mono border rounded-xl overflow-hidden transition-all duration-300 ${accentClass}`}>
 
-export default DropdownComp
+      {/* Header row — always visible */}
+      <button
+        onClick={handleToggle}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-white/[0.02] transition-colors duration-200"
+      >
+        {/* Dot */}
+        <span className={`flex-shrink-0 block w-2.5 h-2.5 rounded-full ${dotClass} ${!isRead ? "animate-pulse" : "opacity-30"}`} />
+
+        {/* Labels */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[0.85rem] font-medium tracking-[0.1em] text-[#e8e8e0] uppercase">
+            {heading} requests
+          </p>
+          <p className="text-[0.75rem] text-[#555550] mt-0.5">
+            {!isRead
+              ? `${unreadCount} pending request${unreadCount !== 1 ? "s" : ""}`
+              : `No pending ${heading.toLowerCase()} requests`}
+          </p>
+        </div>
+
+        {/* Unread badge */}
+        {!isRead && unreadCount > 0 && (
+          <span className={`flex-shrink-0 text-[0.8rem] font-medium w-6 h-6 rounded-full flex items-center justify-center ${badgeClass}`}>
+            {unreadCount}
+          </span>
+        )}
+
+        {/* Chevron */}
+        <span className={`flex-shrink-0 text-[#555550] text-xl transition-transform duration-300 ${open ? "rotate-180" : "rotate-0"}`}>
+          ▾
+        </span>
+      </button>
+
+      {/* Expanded items */}
+      {open && (
+        <div className="border-t border-[#1f1f1f] flex flex-col gap-2 p-3 bg-[#0a0a0a]/40">
+          {heading === "Booking" &&
+            data.map((item, i) => (
+              <BRNotification key={i}
+                name={item.name} contact={item.contact} email={item.email}
+                reqTime={item.reqTime} RID={item.RID} pgName={item.pgName}
+              />
+            ))}
+          {heading === "Join" &&
+            data.map((item, i) => (
+              <JRNotification key={i} data={item}
+                onAccept={handleJoinRequestAccept} onReject={handleJoinRequestReject}
+              />
+            ))}
+          {heading === "Leave" &&
+            data.map((item, i) => (
+              <LRNotification key={i} data={item}
+                onAccept={handleLeaveRequestAccept} onReject={handleLeaveRequestReject}
+              />
+            ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DropdownComp;

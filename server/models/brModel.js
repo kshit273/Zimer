@@ -7,6 +7,11 @@ const brSchema = new mongoose.Schema(
         ref : "Tenant",
         required: true,
     },
+    receiver: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref : "Admin",
+        required: true,
+    },
      RID: {
       type: String,  
       ref: "PG",
@@ -14,7 +19,7 @@ const brSchema = new mongoose.Schema(
     },
     response: {
       type: String,
-      required: true,
+      default:'',
     },
     pgName: {
       type: String,

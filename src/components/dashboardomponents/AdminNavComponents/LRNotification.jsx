@@ -1,100 +1,82 @@
-import React from 'react'
-
 const LRNotification = ({ data, onAccept, onReject }) => {
-
-    const dateTime = new Date(data.createdAt);
+  const dateTime = new Date(data.createdAt);
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+    day: "numeric", month: "long", year: "numeric",
   });
-
   const formattedTime = dateTime.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
+    hour: "numeric", minute: "2-digit", hour12: true,
   });
-
-  const moveOutDate = data.metadata?.moveOutDate 
+  const moveOutDate = data.metadata?.moveOutDate
     ? new Date(data.metadata.moveOutDate).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
+        day: "numeric", month: "short", year: "numeric",
       })
     : "Not specified";
 
-
   return (
-    <div className={`bg-[#e2e2e2] rounded-[20px] p-4 mb-4`}>
-      <div className="flex flex-col justify-center gap-3">
-        <div className="flex flex-col gap-1">
-          <p className="text-[19px] text-[#d72638] font-medium">Leave Request</p>
-          <p className="text-[15px] text-[#1a1a1a] font-medium">
-            {data.metadata?.tenantName || "Unknown User"}
-          </p>
-          <p className="text-[14px] text-[#5c5c5c]">{data.message}</p>
-          
-          {/* Additional details */}
-          <div className="mt-2 space-y-1">
-            <p className="text-[13px] text-[#5c5c5c]">
-              <span className="font-medium">PG:</span> {data.RID || "N/A"}
-            </p>
-            <p className="text-[13px] text-[#5c5c5c]">
-              <span className="font-medium">Move-out Date:</span> {moveOutDate}
-            </p>
-            {data.metadata?.reason && (
-              <p className="text-[13px] text-[#5c5c5c]">
-                <span className="font-medium">Review:</span> {data.metadata.reason}
-              </p>
-            )}
-          </div>
+    <div className="font-dm-mono bg-[#111111] border border-[#1f1f1f] rounded-xl p-4 flex flex-col gap-4">
+
+      {/* Header */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="block w-1 h-1 rounded-full bg-[#f87171]" />
+          <p className="text-[0.75rem] tracking-[0.18em] text-[#f87171] uppercase">Leave Request</p>
         </div>
-
-        {/* Action buttons - only show if status is pending */}
-        {data.status === "pending" && (
-          <div className="flex gap-2">
-            <button 
-              onClick={onAccept}
-              className="rounded-[20px] px-6 py-2 bg-[#49c800] hover:bg-[#3db300] transition-colors"
-            >
-              <img
-                src="../images/whitetick.png"
-                alt="Accept"
-                className="h-[15px] w-[15px]"
-              />
-            </button>
-            <button 
-              onClick={onReject}
-              className="rounded-[20px] px-6 py-2 bg-[#d72638] hover:bg-[#c41e30] transition-colors"
-            >
-              <img
-                src="../images/cross.png"
-                alt="Reject"
-                className="h-[15px] w-[15px]"
-              />
-            </button>
-          </div>
-        )}
-
-        {/* Status indicator for processed requests */}
-        {data.status !== "pending" && (
-          <div className="flex items-center gap-2">
-            <span className={`text-[14px] font-medium ${
-              data.status === "accepted" ? "text-[#49c800]" : "text-[#d72638]"
-            }`}>
-              {data.status === "accepted" ? "✓ Accepted" : "✗ Rejected"}
-            </span>
-          </div>
-        )}
+        <p className="text-[#e8e8e0] font-medium text-medium">
+          {data.metadata?.tenantName || "Unknown User"}
+        </p>
+        <p className="text-[0.75rem] text-[#555550] leading-relaxed">{data.message}</p>
       </div>
 
-      <div className="flex justify-between text-[12px] text-gray-700 mt-4 pt-2 border-t border-gray-300">
+      {/* Detail grid */}
+      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+        {[
+          ["PG",        data.RID     || "N/A"],
+          ["Move-out",  moveOutDate],
+          ...(data.metadata?.reason
+            ? [["Reason", data.metadata.reason]]
+            : []),
+        ].map(([label, value]) => (
+          <>
+            <span key={label + "l"} className="text-[0.7rem] tracking-[0.1em] text-[#555550] uppercase self-start pt-0.5">{label}</span>
+            <span key={label + "v"} className="text-[0.78rem] text-[#e8e8e0] leading-relaxed">{value}</span>
+          </>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-[#1f1f1f]" />
+
+      {/* Actions / status */}
+      {data.status === "pending" ? (
+        <div className="flex gap-2">
+          <button
+            onClick={onAccept}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[0.72rem] tracking-[0.12em] uppercase border border-[#4ade80]/30 text-[#4ade80] hover:bg-[#4ade80]/5 transition-colors duration-200 cursor-pointer"
+          >
+            ✓ Approve
+          </button>
+          <button
+            onClick={onReject}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[0.72rem] tracking-[0.12em] uppercase border border-[#f87171]/30 text-[#f87171] hover:bg-[#f87171]/5 transition-colors duration-200 cursor-pointer"
+          >
+            ✕ Deny
+          </button>
+        </div>
+      ) : (
+        <p className={`text-[0.75rem] font-medium ${data.status === "accepted" ? "text-[#4ade80]" : "text-[#f87171]"}`}>
+          {data.status === "accepted" ? "✓ Approved" : "✕ Denied"}
+        </p>
+      )}
+
+      {/* Timestamp */}
+      <div className="flex justify-between text-[0.68rem] text-[#3a3a3a] pt-1 border-t border-[#1f1f1f]">
         <span>{formattedDate}</span>
         <span>{formattedTime}</span>
       </div>
-    </div>
-  )
-}
 
-export default LRNotification
+    </div>
+  );
+};
+
+export default LRNotification;
