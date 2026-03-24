@@ -17,9 +17,7 @@ const {
 router.post("/login", adminLogin);
 
 // Protected routes
-router.get("/dashboard", auth, isAdmin, getDashboard);
 router.get("/pgs", auth, isAdmin, getPGs);
-router.post("/pgs", auth, isAdmin, getPGs); // POST variant if RIDs sent in body
 
 router.get("/br", auth, isAdmin, getBRNotifications);
 router.put("/br", auth, isAdmin, updateBRResponse);

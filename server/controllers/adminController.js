@@ -1,15 +1,10 @@
-const PG = require("../models/PG");
-const Admin = require("../models/Admin");
-const Br = require("../models/Br");
-const ZTRS = require("../models/ZTRS");
-const AdminNotification = require("../models/AdminNotification");
-const bcrypt = require("bcryptjs");
+const PG = require("../models/pgModel");
+const Admin = require("../models/adminModel");
+const Br = require("../models/brModel");
+const ZTRS = require("../models/ztrsModel");
+const AdminNotification = require("../models/adminNotificationModel");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-// GET /dashboard — no-op
-const getDashboard = (req, res) => {
-  return res.status(200).json({ message: "Welcome, Admin!" });
-};
 
 // GET /pgs — basic data for up to 30 PGs by RID array
 // Expected body/query: { rids: ["RID1", "RID2", ...] }  (max 30)
@@ -246,7 +241,6 @@ const getNotifications = async (req, res) => {
 };
 
 module.exports = {
-  getDashboard,
   getPGs,
   getPGDetails,
   adminLogin,
