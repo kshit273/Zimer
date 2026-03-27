@@ -1,6 +1,3 @@
-// Shared dark-theme font injector for all Admin components.
-// Import and render <AdminStyles /> once at the top of AdminDashboard.
-
 const AdminStyles = () => (
   <>
     <link
@@ -20,6 +17,8 @@ const AdminStyles = () => (
 
       @keyframes pulse-dot  { 0%,100%{opacity:1} 50%{opacity:.3} }
       .pulse-dot { animation: pulse-dot 2s infinite; }
+
+      @keyframes spin-loader { to { transform: rotate(360deg); } }
 
       @keyframes admin-fade-up {
         from { opacity:0; transform:translateY(16px); }

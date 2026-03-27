@@ -11,6 +11,7 @@ const {
   updateBRResponse,
   postZTRS,
   getNotifications,
+  getTenantData,
 } = require("../controllers/adminController");
 
 // Public route — no auth needed for login
@@ -28,5 +29,7 @@ router.get("/notifications", auth, isAdmin, getNotifications);
 
 // Must come LAST — catches /:pgId and won't shadow the routes above
 router.get("/:pgId", auth, isAdmin, getPGDetails);
+
+router.get("/tenant/:tenantId", auth, isAdmin, getTenantData);
 
 module.exports = router;

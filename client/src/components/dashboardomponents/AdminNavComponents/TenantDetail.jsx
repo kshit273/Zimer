@@ -36,7 +36,7 @@ const ZTRSBar = ({ score }) => {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">ZTRS Score</span>
+        <span className="text-[0.95rem] tracking-[0.15em] text-[#555550] uppercase">ZTRS Score</span>
         <span className="text-base font-medium" style={{ color }}>
           {score ?? 0}
         </span>
@@ -49,9 +49,9 @@ const ZTRSBar = ({ score }) => {
         />
       </div>
       <div className="flex justify-between">
-        <span className="text-[0.5rem] text-[#2a2a2a]">−100</span>
-        <span className="text-[0.5rem] text-[#2a2a2a]">0</span>
-        <span className="text-[0.5rem] text-[#2a2a2a]">+100</span>
+        <span className="text-[0.8rem] text-[#2a2a2a]">−100</span>
+        <span className="text-[0.8rem] text-[#2a2a2a]">0</span>
+        <span className="text-[0.8rem] text-[#2a2a2a]">+100</span>
       </div>
     </div>
   );
@@ -60,8 +60,8 @@ const ZTRSBar = ({ score }) => {
 // ── Small label+value row ─────────────────────────────────────────────────────
 const InfoRow = ({ label, value, accent = false }) => (
   <div className="flex flex-col gap-0.5">
-    <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">{label}</span>
-    <span className={`text-[0.75rem] font-medium ${accent ? "text-[#c8f135]" : "text-[#e8e8e0]"}`}>
+    <span className="text-[0.85rem] tracking-[0.15em] text-[#555550] uppercase">{label}</span>
+    <span className={`text-[1.05rem] font-medium ${accent ? "text-[#c8f135]" : "text-[#e8e8e0]"}`}>
       {value || "—"}
     </span>
   </div>
@@ -71,7 +71,7 @@ const InfoRow = ({ label, value, accent = false }) => (
 const SectionLabel = ({ text }) => (
   <div className="flex items-center gap-3 mb-3">
     <div className="w-3 h-px bg-[#c8f135]" />
-    <span className="text-[0.6rem] tracking-[0.22em] text-[#555550] uppercase">{text}</span>
+    <span className="text-[0.9rem] tracking-[0.22em] text-[#555550] uppercase">{text}</span>
   </div>
 );
 
@@ -82,17 +82,17 @@ const PaymentRow = ({ payment, index }) => (
   <div className="flex items-center gap-3 px-3 py-2.5 bg-[#0f0f0f] border border-[#1f1f1f] rounded-lg">
     {/* Index bubble */}
     <div className="flex-shrink-0 w-6 h-6 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
-      <span className="text-[0.5rem] text-[#555550]">{index + 1}</span>
+      <span className="text-[0.8rem] text-[#555550]">{index + 1}</span>
     </div>
 
     {/* Month */}
     <div className="flex-1 min-w-0">
-      <p className="text-[0.68rem] text-[#e8e8e0] font-medium">{payment.month}</p>
-      <p className="text-[0.58rem] text-[#555550]">Paid on {fmt(payment.paidOn)}</p>
+      <p className="text-[0.98rem] text-[#e8e8e0] font-medium">{payment.month}</p>
+      <p className="text-[0.88rem] text-[#555550]">Paid on {fmt(payment.paidOn)}</p>
     </div>
 
     {/* Amount */}
-    <span className="flex-shrink-0 text-[0.72rem] font-medium text-[#4ade80]">
+    <span className="flex-shrink-0 text-[1.02rem] font-medium text-[#4ade80]">
       {fmtCurrency(payment.amount)}
     </span>
   </div>
@@ -112,17 +112,17 @@ const HistoryRow = ({ entry, isCurrent }) => (
 
     <div className="flex-1 min-w-0 flex flex-col gap-1">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[0.65rem] font-medium text-[#e8e8e0]">{entry.RID}</span>
+        <span className="text-[0.95rem] font-medium text-[#e8e8e0]">{entry.RID}</span>
         {isCurrent && (
-          <span className="text-[0.5rem] tracking-[0.12em] uppercase px-1.5 py-0.5 rounded border border-[#c8f135]/30 text-[#c8f135] bg-[#c8f135]/5">
+          <span className="text-[0.8rem] tracking-[0.12em] uppercase px-1.5 py-0.5 rounded border border-[#c8f135]/30 text-[#c8f135] bg-[#c8f135]/5">
             Current
           </span>
         )}
       </div>
-      <p className="text-[0.6rem] text-[#555550]">
+      <p className="text-[0.9rem] text-[#555550]">
         Room {entry.roomId} · {fmtCurrency(entry.rent)}/mo
       </p>
-      <p className="text-[0.58rem] text-[#3a3a3a]">
+      <p className="text-[0.88rem] text-[#3a3a3a]">
         {fmt(entry.joinedFrom)}
         {entry.leftOn ? ` → ${fmt(entry.leftOn)}` : " → Present"}
       </p>
@@ -157,14 +157,14 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-[#1f1f1f] flex-shrink-0">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-[0.65rem] tracking-[0.2em] uppercase text-[#555550] hover:text-[#c8f135] transition-colors duration-200 group"
+          className="flex items-center gap-2 text-[0.95rem] tracking-[0.2em] uppercase text-[#555550] hover:text-[#c8f135] transition-colors duration-200 group"
         >
           <span className="group-hover:-translate-x-1 transition-transform duration-200 inline-block">←</span>
           Back to PG
         </button>
 
         <div className="flex items-center gap-2">
-          <span className={`text-[0.52rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border
+          <span className={`text-[0.82rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border
             ${isActive
               ? "text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/5"
               : "text-[#555550] border-[#2a2a2a]"
@@ -172,7 +172,7 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
             {isActive ? "Active" : "Past tenant"}
           </span>
           {isActive && (
-            <span className={`text-[0.52rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border
+            <span className={`text-[0.82rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border
               ${hasPaidThisMonth
                 ? "text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/5"
                 : "text-[#c8f135] border-[#c8f135]/30 bg-[#c8f135]/5"
@@ -192,7 +192,7 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
           <div className="flex-shrink-0 w-[80px] h-[80px] rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center relative overflow-hidden">
             {tenantData?.profilePicture ? (
               <img
-                src={tenantData.profilePicture}
+                src={`http://localhost:5000${tenantData.profilePicture}`}
                 alt={fullName}
                 className="w-full h-full object-cover"
               />
@@ -218,7 +218,7 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
           <div className="flex flex-col justify-center gap-1.5 flex-1 min-w-0">
             <h2
               className="font-bebas text-[#e8e8e0] leading-none tracking-wide"
-              style={{ fontSize: "clamp(1.4rem, 2vw, 1.9rem)" }}
+              style={{ fontSize: "clamp(1.4rem, 5vw, 4.9rem)" }}
             >
               {fullName}
             </h2>
@@ -226,12 +226,12 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
             {tenantData && (
               <div className="flex flex-wrap gap-2 mt-0.5">
                 {tenantData.gender && (
-                  <span className="text-[0.58rem] tracking-[0.12em] text-[#555550] uppercase">
+                  <span className="text-[0.88rem] tracking-[0.12em] text-[#555550] uppercase">
                     {tenantData.gender}
                   </span>
                 )}
                 {tenantData.dob && (
-                  <span className="text-[0.58rem] tracking-[0.12em] text-[#555550]">
+                  <span className="text-[0.88rem] tracking-[0.12em] text-[#555550]">
                     · DOB {tenantData.dob}
                   </span>
                 )}
@@ -241,13 +241,13 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
             {/* Context pill */}
             {pgContext && (
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[0.55rem] tracking-[0.1em] text-[#555550] uppercase">
+                <span className="text-[0.85rem] tracking-[0.1em] text-[#555550] uppercase">
                   {pgContext.pgName}
                 </span>
                 <span className="text-[#2a2a2a]">·</span>
-                <span className="text-[0.55rem] text-[#555550]">Room {pgContext.roomId}</span>
+                <span className="text-[0.85rem] text-[#555550]">Room {pgContext.roomId}</span>
                 <span className="text-[#2a2a2a]">·</span>
-                <span className="text-[0.55rem] text-[#c8f135]">{fmtCurrency(pgContext.rent)}/mo</span>
+                <span className="text-[0.85rem] text-[#c8f135]">{fmtCurrency(pgContext.rent)}/mo</span>
               </div>
             )}
           </div>
@@ -303,7 +303,7 @@ const TenantDetail = ({ tenant, tenantData, pgContext, onBack }) => {
             ))}
           </div>
         ) : (
-          <p className="text-[0.65rem] text-[#2a2a2a] italic mb-2">No payment records.</p>
+          <p className="text-[0.95rem] text-[#2a2a2a] italic mb-2">No payment records.</p>
         )}
 
         {/* ── Rental history (from tenantData) ── */}

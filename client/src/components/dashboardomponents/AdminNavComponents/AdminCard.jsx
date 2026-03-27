@@ -1,5 +1,3 @@
-// Props: pass `admin` object from parent when API is wired up.
-// Falls back to placeholder values for now.
 const AdminCard = ({ admin }) => {
   const firstName   = admin?.firstName   || "Area";
   const lastName    = admin?.lastName    || "Manager";
@@ -7,7 +5,6 @@ const AdminCard = ({ admin }) => {
   const email       = admin?.email       || "emailid@gmail.com";
   const phone       = admin?.phone       || "+91 9368578171";
 
-  // Initials avatar
   const initials = `${firstName[0]}${lastName[0]}`.toUpperCase();
 
   return (

@@ -4,9 +4,9 @@ import axios from "axios";
 
 const AdminLoginComp = ({ setAdminUser }) => {
   const [formData, setFormData] = useState({ id: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [mounted,  setMounted]  = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,9 +32,16 @@ const AdminLoginComp = ({ setAdminUser }) => {
         id: Number(formData.id),
         password: formData.password,
       });
+
       const { token, admin } = res.data;
+
+      // Persist token + full admin object so App.jsx can rehydrate on refresh
       localStorage.setItem("adminToken", token);
-      if (setAdminUser) setAdminUser(admin);
+      localStorage.setItem("adminUser", JSON.stringify(admin));
+
+      // Lift state up — triggers AdminRoute to unlock /admin/dashboard
+      setAdminUser(admin);
+
       navigate("/admin/dashboard");
     } catch (err) {
       setError(
@@ -52,9 +59,8 @@ const AdminLoginComp = ({ setAdminUser }) => {
         rel="stylesheet"
       />
 
-      {/* Minimal non-Tailwind styles for things Tailwind can't do */}
       <style>{`
-        .font-bebas  { font-family: 'Bebas Neue', sans-serif; }
+        .font-bebas   { font-family: 'Bebas Neue', sans-serif; }
         .font-dm-mono { font-family: 'DM Mono', monospace; }
 
         .grid-bg {
@@ -66,7 +72,6 @@ const AdminLoginComp = ({ setAdminUser }) => {
           -webkit-mask-image: radial-gradient(ellipse at 30% 60%, black 30%, transparent 80%);
         }
 
-        /* Animated underline on focus */
         .field-line {
           position: absolute;
           bottom: 0; left: 0;
@@ -76,7 +81,6 @@ const AdminLoginComp = ({ setAdminUser }) => {
         }
         input:focus ~ .field-line { width: 100%; }
 
-        /* Hide number arrows */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
         input[type=number] { -moz-appearance: textfield; }
@@ -91,35 +95,27 @@ const AdminLoginComp = ({ setAdminUser }) => {
         @keyframes spin-loader { to { transform: rotate(360deg); } }
         .spin-loader { animation: spin-loader 0.7s linear infinite; }
 
-        @keyframes pulse-dot {
-          0%,100% { opacity: 1; }
-          50%      { opacity: 0.3; }
-        }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
         .pulse-dot { animation: pulse-dot 2s infinite; }
       `}</style>
 
       <div className="font-dm-mono min-h-screen bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-2 overflow-hidden">
 
         {/* ── Left decorative panel ── */}
-        <div
-          className={`
-            relative overflow-hidden
-            border-b border-[#1f1f1f] md:border-b-0 md:border-r
-            flex flex-col justify-end
-            p-8 md:p-12
-            min-h-[200px] md:min-h-screen
-            transition-all duration-700 ease-out
-            ${mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}
-          `}
-        >
-          {/* Dot-grid */}
+        <div className={`
+          relative overflow-hidden
+          border-b border-[#1f1f1f] md:border-b-0 md:border-r
+          flex flex-col justify-end
+          p-8 md:p-12
+          min-h-[200px] md:min-h-screen
+          transition-all duration-700 ease-out
+          ${mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}
+        `}>
           <div className="grid-bg absolute inset-0" />
-
-          {/* Diagonal accent wash */}
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[rgba(200,241,53,0.04)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[rgba(215,38,56,0.04)]" />
 
           {/* Top-left badge */}
-          <p className="absolute top-8 left-8 md:top-12 md:left-12 text-[0.6rem] tracking-[0.2em] text-[#555550] uppercase z-10">
+          <p className="absolute top-8 left-8 md:top-12 md:left-12 text-[0.9rem] tracking-[0.2em] text-[#555550] uppercase z-10">
             Zimer <span className="text-[#d72638]">// ADMIN</span>
           </p>
 
@@ -133,45 +129,42 @@ const AdminLoginComp = ({ setAdminUser }) => {
           {/* Large display heading */}
           <h2
             className="font-bebas text-[#e8e8e0] leading-[0.88] tracking-wide relative z-10"
-            style={{ fontSize: "clamp(4rem, 9vw, 9rem)" }}
+            style={{ fontSize: "clamp(4rem, 11vw, 11rem)" }}
           >
             ADMIN<br />
             <span className="text-[#d72638]">PORTAL</span><br />
           </h2>
 
-          <p className="mt-5 text-[0.65rem] tracking-[0.25em] text-[#555550] uppercase relative z-10">
+          <p className="mt-5 text-[0.95rem] tracking-[0.25em] text-[#555550] uppercase relative z-10">
             Secure access · Restricted zone
           </p>
 
-          {/* Live status */}
           <div className="flex items-center gap-2 mt-8 relative z-10">
             <span className="pulse-dot block w-1.5 h-1.5 rounded-full bg-[#d72638]" />
-            <span className="text-[0.6rem] tracking-[0.2em] text-[#555550] uppercase">
+            <span className="text-[0.9rem] tracking-[0.2em] text-[#555550] uppercase">
               System operational
             </span>
           </div>
         </div>
 
         {/* ── Right form panel ── */}
-        <div
-          className={`
-            flex flex-col justify-center items-start
-            px-8 py-12 md:px-16
-            transition-all duration-700 delay-150 ease-out
-            ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"}
-          `}
-        >
-          {/* Section header */}
+        <div className={`
+          flex flex-col justify-center items-start
+          px-8 py-12 md:px-16
+          transition-all duration-700 delay-150 ease-out
+          ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"}
+        `}>
+          {/* Header */}
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-5 h-px bg-[#d72638]" />
-              <span className="text-[0.6rem] tracking-[0.25em] text-[#555550] uppercase">
+              <span className="text-[0.9rem] tracking-[0.25em] text-[#555550] uppercase">
                 Authorised personnel only
               </span>
             </div>
             <h1
               className="font-bebas text-[#e8e8e0] tracking-wide"
-              style={{ fontSize: "clamp(2.2rem, 3.5vw, 3.2rem)" }}
+              style={{ fontSize: "clamp(2.2rem, 5.5vw, 5.2rem)" }}
             >
               SIGN IN
             </h1>
@@ -181,10 +174,8 @@ const AdminLoginComp = ({ setAdminUser }) => {
 
             {/* Admin ID */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="al-id"
-                className="text-[0.6rem] tracking-[0.22em] text-[#555550] uppercase"
-              >
+              <label htmlFor="al-id"
+                className="text-[0.9rem] tracking-[0.22em] text-[#555550] uppercase">
                 Admin ID
               </label>
               <div className="relative">
@@ -192,19 +183,11 @@ const AdminLoginComp = ({ setAdminUser }) => {
                   id="al-id"
                   type="number"
                   name="id"
-                  placeholder="e.g. 1042"
+                  placeholder="e.g. 1234"
                   value={formData.id}
                   onChange={handleChange}
                   autoComplete="off"
-                  className="
-                    w-full bg-transparent
-                    border-0 border-b border-[#1f1f1f]
-                    pt-1 pb-3
-                    text-[#e8e8e0] text-sm tracking-wide
-                    placeholder-[#555550]
-                    outline-none focus:border-transparent
-                    font-dm-mono
-                  "
+                  className="w-full bg-transparent border-0 border-b border-[#1f1f1f] pt-1 pb-3 text-[#e8e8e0] text-medium tracking-wide placeholder-[#555550] outline-none focus:border-transparent font-dm-mono"
                 />
                 <div className="field-line" />
               </div>
@@ -212,10 +195,8 @@ const AdminLoginComp = ({ setAdminUser }) => {
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="al-pass"
-                className="text-[0.6rem] tracking-[0.22em] text-[#555550] uppercase"
-              >
+              <label htmlFor="al-pass"
+                className="text-[0.9rem] tracking-[0.22em] text-[#555550] uppercase">
                 Password
               </label>
               <div className="relative">
@@ -226,23 +207,15 @@ const AdminLoginComp = ({ setAdminUser }) => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  className="
-                    w-full bg-transparent
-                    border-0 border-b border-[#1f1f1f]
-                    pt-1 pb-3
-                    text-[#e8e8e0] text-sm tracking-wide
-                    placeholder-[#555550]
-                    outline-none focus:border-transparent
-                    font-dm-mono
-                  "
+                  className="w-full bg-transparent border-0 border-b border-[#1f1f1f] pt-1 pb-3 text-[#e8e8e0] text-medium tracking-wide placeholder-[#555550] outline-none focus:border-transparent font-dm-mono"
                 />
                 <div className="field-line" />
               </div>
             </div>
 
-            {/* Error message */}
+            {/* Error */}
             {error && (
-              <div className="shake bg-red-500/5 border border-red-500/25 rounded-sm px-3 py-2.5 text-[0.7rem] tracking-wide text-red-400">
+              <div className="shake bg-red-500/5 border border-red-500/25 rounded-sm px-3 py-2.5 text-[1rem] tracking-wide text-red-400">
                 ⚠ {error}
               </div>
             )}
@@ -251,26 +224,17 @@ const AdminLoginComp = ({ setAdminUser }) => {
             <button
               type="submit"
               disabled={loading}
-              className="
-                mt-1 w-full
-                bg-[#d72638] hover:bg-[#d8ff4a]
-                disabled:opacity-50 disabled:cursor-not-allowed
-                text-[#0a0a0a] font-medium font-dm-mono
-                text-[0.7rem] tracking-[0.25em] uppercase
-                py-3.5 px-6 rounded-sm
-                transition-colors duration-200
-                flex items-center justify-center gap-2
-              "
+              className="mt-1 w-full bg-[#d72638] hover:bg-[#e8303f] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium font-dm-mono text-[1rem] tracking-[0.25em] uppercase py-3.5 px-6 rounded-sm transition-colors duration-200 flex items-center justify-center gap-2"
             >
               {loading && (
-                <span className="spin-loader block w-3 h-3 rounded-full border-2 border-black/20 border-t-black" />
+                <span className="spin-loader block w-3 h-3 rounded-full border-2 border-white/20 border-t-white" />
               )}
               {loading ? "Authenticating…" : "Access Dashboard"}
             </button>
+
           </form>
 
-          {/* Footer */}
-          <p className="mt-10 text-[0.6rem] tracking-[0.15em] text-[#555550] uppercase opacity-60">
+          <p className="mt-10 text-[0.9rem] tracking-[0.15em] text-[#555550] uppercase opacity-60">
             Zimer Platform · <span className="text-[#d72638]">Admin v1.0</span>
           </p>
         </div>

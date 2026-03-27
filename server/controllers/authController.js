@@ -500,8 +500,10 @@ exports.getUser = async (req, res) => {
       user = await Tenant.findById(userId).select("-password");
     } else if (role === "landlord") {
       user = await Landlord.findById(userId).select("-password");
-    } else {
-
+    } else if (role == "admin"){
+      user = null;
+    }
+    else{
       user = (await Tenant.findById(userId).select("-password")) ||
              (await Landlord.findById(userId).select("-password"));
     }

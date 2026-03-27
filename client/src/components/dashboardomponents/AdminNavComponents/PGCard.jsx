@@ -15,7 +15,7 @@ const PGCard = ({ pg, onClick }) => {
       <div className="flex-shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden bg-[#1a1a1a] border border-[#1f1f1f] relative">
         {coverPhoto ? (
           <img
-            src={coverPhoto}
+            src={`http://localhost:5000${coverPhoto}`}
             alt={pgName}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />

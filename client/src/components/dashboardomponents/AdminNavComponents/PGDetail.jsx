@@ -56,14 +56,14 @@ const TenantRow = ({ t, currentMonthKey, onSelectTenant }) => {
     >
       {/* Avatar */}
       <div className="flex-shrink-0 w-7 h-7 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
-        <span className="text-[0.6rem] text-[#555550] group-hover:text-[#c8f135] transition-colors duration-200">T</span>
+        <span className="text-[0.9rem] text-[#555550] group-hover:text-[#c8f135] transition-colors duration-200">T</span>
       </div>
  
       <div className="flex-1 min-w-0">
-        <p className="text-[0.65rem] text-[#e8e8e0] font-medium truncate group-hover:text-[#c8f135] transition-colors duration-200">
+        <p className="text-[0.95rem] text-[#e8e8e0] font-medium truncate group-hover:text-[#c8f135] transition-colors duration-200">
           ···{String(t.tenantId).slice(-8)}
         </p>
-        <p className="text-[0.58rem] text-[#555550]">
+        <p className="text-[0.88rem] text-[#555550]">
           Joined {fmt(t.joinDate)}
           {t.leaveDate && ` · Left ${fmt(t.leaveDate)}`}
         </p>
@@ -71,18 +71,18 @@ const TenantRow = ({ t, currentMonthKey, onSelectTenant }) => {
  
       {/* Status badges */}
       <div className="flex gap-1.5 flex-shrink-0 items-center">
-        <span className={`text-[0.52rem] tracking-[0.08em] uppercase px-1.5 py-0.5 rounded border
+        <span className={`text-[0.82rem] tracking-[0.08em] uppercase px-1.5 py-0.5 rounded border
           ${isActive ? "text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/5" : "text-[#555550] border-[#2a2a2a]"}`}>
           {isActive ? "Active" : "Left"}
         </span>
         {isActive && (
-          <span className={`text-[0.52rem] tracking-[0.08em] uppercase px-1.5 py-0.5 rounded border
+          <span className={`text-[0.82rem] tracking-[0.08em] uppercase px-1.5 py-0.5 rounded border
             ${hasPaid ? "text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/5" : "text-[#c8f135] border-[#c8f135]/30 bg-[#c8f135]/5"}`}>
             {hasPaid ? "Paid" : "Pending"}
           </span>
         )}
         {/* Click hint */}
-        <span className="text-[#2a2a2a] group-hover:text-[#c8f135] transition-colors duration-200 text-xs ml-1">→</span>
+        <span className="text-[#2a2a2a] group-hover:text-[#c8f135] transition-colors duration-200 text-medium ml-1">→</span>
       </div>
     </button>
   );
@@ -127,28 +127,28 @@ const RoomCard = ({ room, onSelectTenant }) => {
         className="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/[0.02] transition-colors duration-200 text-left"
       >
         <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center">
-          <span className="text-[0.55rem] tracking-[0.08em] text-[#555550] font-medium">
+          <span className="text-[0.85rem] tracking-[0.08em] text-[#555550] font-medium">
             {room.roomId?.slice(-3) || "—"}
           </span>
         </div>
  
         <div className="flex-1 min-w-0">
           <p className="text-[#e8e8e0] text-sm font-medium truncate">Room {room.roomId}</p>
-          <p className="text-[0.6rem] text-[#555550] mt-0.5">
+          <p className="text-[0.9rem] text-[#555550] mt-0.5">
             {activeTenants.length} active tenant{activeTenants.length !== 1 ? "s" : ""}
             {pendingCount > 0 && <span className="ml-2 text-[#c8f135]">· {pendingCount} pending rent</span>}
           </p>
         </div>
  
-        <span className={`flex-shrink-0 text-[0.55rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border ${typeClass}`}>
+        <span className={`flex-shrink-0 text-[0.85rem] tracking-[0.1em] uppercase px-2 py-0.5 rounded border ${typeClass}`}>
           {room.roomType}
         </span>
  
-        <span className="flex-shrink-0 text-[0.72rem] text-[#e8e8e0] font-medium">
+        <span className="flex-shrink-0 text-[1.02rem] text-[#e8e8e0] font-medium">
           ₹{room.rent?.toLocaleString()}<span className="text-[#555550] text-[0.55rem]">/mo</span>
         </span>
  
-        <span className={`flex-shrink-0 text-[#555550] text-xs transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▾</span>
+        <span className={`flex-shrink-0 text-[#555550] text-medium transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▾</span>
       </button>
  
       {/* Expanded */}
@@ -159,14 +159,14 @@ const RoomCard = ({ room, onSelectTenant }) => {
           <div className="grid grid-cols-2 gap-4">
             {room.security != null && (
               <div className="flex flex-col gap-0.5">
-                <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">Security deposit</span>
-                <span className="text-sm text-[#e8e8e0] font-medium">₹{room.security?.toLocaleString()}</span>
+                <span className="text-[0.85rem] tracking-[0.15em] text-[#555550] uppercase">Security deposit</span>
+                <span className="text-medium text-[#e8e8e0] font-medium">₹{room.security?.toLocaleString()}</span>
               </div>
             )}
             {room.description && (
               <div className="col-span-2 flex flex-col gap-0.5">
-                <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">Description</span>
-                <p className="text-[0.7rem] text-[#888] leading-relaxed">{room.description}</p>
+                <span className="text-[0.85rem] tracking-[0.15em] text-[#555550] uppercase">Description</span>
+                <p className="text-[1rem] text-[#888] leading-relaxed">{room.description}</p>
               </div>
             )}
           </div>
@@ -174,7 +174,7 @@ const RoomCard = ({ room, onSelectTenant }) => {
           {/* Amenities */}
           {room.amenities?.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">Amenities</span>
+              <span className="text-[0.85rem] tracking-[0.15em] text-[#555550] uppercase">Amenities</span>
               <div className="flex flex-wrap gap-1.5">
                 {room.amenities.map((a, i) => <Tag key={i} text={a} />)}
               </div>
@@ -185,7 +185,7 @@ const RoomCard = ({ room, onSelectTenant }) => {
           {room.photos?.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {room.photos.map((src, i) => (
-                <img key={i} src={src} alt={`Room photo ${i + 1}`}
+                <img key={i} src={`http://localhost:5000${src}`} alt={`Room photo ${i + 1}`}
                   className="flex-shrink-0 w-20 h-20 rounded-lg object-cover border border-[#1f1f1f]" />
               ))}
             </div>
@@ -195,10 +195,10 @@ const RoomCard = ({ room, onSelectTenant }) => {
           {room.tenants?.length > 0 && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[0.55rem] tracking-[0.15em] text-[#555550] uppercase">
+                <span className="text-[1.15rem] tracking-[0.15em] text-[#555550] uppercase">
                   Tenants ({room.tenants.length})
                 </span>
-                <span className="text-[0.52rem] text-[#2a2a2a] italic">· click to view profile</span>
+                <span className="text-[1.12rem] text-[#2a2a2a] italic">· click to view profile</span>
               </div>
               <div className="flex flex-col gap-2">
                 {room.tenants.map((t, i) => (
@@ -221,7 +221,7 @@ const RoomCard = ({ room, onSelectTenant }) => {
 
 // ── PGDetail (main export) ────────────────────────────────────────────────────
 
-const PGDetail = ({ pg, onBack }) => {
+const PGDetail = ({ pg, onBack, onSelectTenant }) => {
   if (!pg) return null;
 
   const avgRatings   = pg.averageRatings || {};
@@ -264,7 +264,7 @@ const PGDetail = ({ pg, onBack }) => {
           {/* Cover photo */}
           <div className="flex-shrink-0 w-[200px] h-[180px] rounded-xl overflow-hidden bg-[#1a1a1a] border border-[#1f1f1f]">
             {pg.coverPhoto ? (
-              <img src={pg.coverPhoto} alt={pg.pgName} className="w-full h-full object-cover" />
+              <img src={`http://localhost:5000${pg.coverPhoto}`} alt={pg.pgName} className="w-full h-full object-cover" />
             ) : (
               <div
                 className="w-full h-full flex items-center justify-center"
@@ -313,7 +313,7 @@ const PGDetail = ({ pg, onBack }) => {
               {pg.otherPhotos.map((src, i) => (
                 <img
                   key={i}
-                  src={src}
+                  src={`http://localhost:5000${src}`}
                   alt={`PG photo ${i + 1}`}
                   className="flex-shrink-0 w-28 h-20 rounded-xl object-cover border border-[#1f1f1f]"
                 />

@@ -8,7 +8,6 @@ const pgRoutes = require("./routes/pgRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-// const adminRoutes = require("./routes/adminRoutes"); // for later
 const geocodeRoutes = require("./routes/geocode");
 
 dotenv.config();

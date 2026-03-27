@@ -1,5 +1,6 @@
 const PG = require("../models/pgModel");
 const Admin = require("../models/adminModel");
+const Tenant = require("../models/tenantModel");
 const Br = require("../models/brModel");
 const ZTRS = require("../models/ztrsModel");
 const AdminNotification = require("../models/adminNotificationModel");
@@ -11,7 +12,7 @@ const jwt = require("jsonwebtoken");
 const getPGs = async (req, res) => {
   try {
     // Accept RIDs from query params or body
-    const rids = req.body.rids || req.query.rids;
+    const rids = req.query.rids || req.query["rids[]"];
 
     if (!rids || !Array.isArray(rids) || rids.length === 0) {
       return res.status(400).json({ message: "Please provide an array of RIDs." });
@@ -91,6 +92,23 @@ const getPGDetails = async (req, res) => {
   }
 };
 
+const getTenantData = async(req,res) =>{
+  try{
+    const {tenantId} = req.params;
+
+    const tenant = await Tenant.findById(tenantId);
+
+    if (!tenant){
+      return res.status(404).json({message: `Tenant could not be found`});
+    }
+
+    return res.status(200).json({tenant});
+  }catch(error){
+    console.error("Error fetching tenant data :",error);
+    return res.status(500).json({message:"Internal server error."});
+  }
+}
+
 // POST /login — authenticate admin and return JWT + user data
 // Body: { id: Number, password: String }
 const adminLogin = async (req, res) => {
@@ -113,10 +131,15 @@ const adminLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { _id: admin._id, id: admin.id, role: "admin" },
+      {id: admin.id, role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+    });
 
     const userData = {
       _id: admin._id,
@@ -248,4 +271,5 @@ module.exports = {
   updateBRResponse,
   postZTRS,
   getNotifications,
+  getTenantData,
 };
