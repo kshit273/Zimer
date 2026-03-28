@@ -168,4 +168,24 @@ pgSchema.methods.calculateAverageRatings = function () {
   this.totalReviews = count;
 };
 
+pgSchema.index(
+  {
+    pgName:      "text",
+    address:     "text",
+    description: "text",
+  },
+  {
+    weights: {
+      pgName:      10,   // name matches matter most
+      address:      5,
+      description:  1,
+    },
+    name: "pg_text_search",
+  }
+);
+
+pgSchema.index({ "rooms.rent": 1 });           // for rent range filters
+pgSchema.index({ gender: 1 });                  // for gender filter
+pgSchema.index({ plan: 1, "averageRatings.overall": -1 }); // for featured
+
 module.exports = mongoose.model("PG", pgSchema);

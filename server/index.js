@@ -9,6 +9,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const geocodeRoutes = require("./routes/geocode");
+const searchRouter = require("./routes/search");
 
 dotenv.config();
 connectDB();
@@ -30,6 +31,7 @@ app.use(cookieParser());
 
 // 🔗 All Routes
 app.use("/auth", authAndUserRoutes); // Done
+app.use("/pgs", searchRouter);
 app.use("/pgs", pgRoutes); // Done
 app.use("/notifications", notificationRoutes);
 // app.use("/payment", paymentRoutes);
