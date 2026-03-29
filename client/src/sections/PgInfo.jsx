@@ -205,13 +205,13 @@ const PgInfo = ({setToast, user}) => {
           <img
             src="/images/backArrow.png"
             alt=""
-            className="h-[30px] w-[30px] cursor-pointer hover:scale-120 duration-300"
+            className="h-[25px] w-[25px] cursor-pointer hover:scale-120 duration-300"
           />
         </button>
       </div>
       <section id="PgInfo" className="relative z-2 ">
         <div className="flex items-center justify-center">
-          <div className="grid grid-cols-5 grid-rows-2 gap-8  p-4 rounded-2xl w-[95%] h-[800px]">
+          <div className="grid grid-cols-5 grid-rows-2 gap-4  p-4 rounded-2xl w-[96%] h-[600px]">
             <div className="col-span-3 row-span-2 rounded-2xl overflow-hidden ">
               <img
                 src={`http://localhost:5000${pgData.coverPhoto}`}
@@ -231,14 +231,6 @@ const PgInfo = ({setToast, user}) => {
                   alt={`img${index + 1}`}
                   className="w-full h-full object-cover rounded-2xl"
                 />
-                {index === 3 && (
-                  <button
-                    onClick={() => setIsOverlayOpen(true)}
-                    className="absolute bottom-3 right-3 bg-white bg-opacity-80 px-4 py-2 rounded-full shadow text-sm font-medium flex items-center gap-2 cursor-pointer"
-                  >
-                    Show all photos
-                  </button>
-                )}
               </div>
             ))}
           </div>
@@ -247,13 +239,13 @@ const PgInfo = ({setToast, user}) => {
           <div className="info flex flex-col ">
             <div className="leftInfo ml-[60px] max-w-[1300px] w-full">
               <div className="main ">
-                <div className="head text-[45px] font-medium text-[#1a1a1a] mb-[5px]">
+                <div className="head text-[32px] font-medium text-[#1a1a1a] ">
                   {pgData.pgName}
                 </div>
-                <div className="address font-normal text-[22px] w-[500px] text-[#2a2a2a] ">
+                <div className="address font-normal text-[20px] w-[500px] text-[#2a2a2a] ">
                   {pgData.address}
                 </div>
-                <div className="rating mb-[40px] flex items-center gap-[10px]">
+                <div className="rating mb-[20px] flex items-center gap-[10px]">
                   <div className="stars flex items-center gap-1 py-[8px]">
                     {[...Array(5)].map((_, i) => (
                       <img
@@ -264,19 +256,19 @@ const PgInfo = ({setToast, user}) => {
                             : "/images/star-empty.png"
                         }
                         alt="star"
-                        className="w-[20px] h-[20px]"
+                        className="w-[16px] h-[16px]"
                       />
                     ))}
                   </div>
-                  <div className="ratingNumber text-[20px] text-[#4d4d4d] flex items-center justify-center pt-[5px] font-medium">
+                  <div className="ratingNumber text-[16px] text-[#4d4d4d] flex items-center justify-center pt-[5px] font-medium">
                     <p>({pgData.averageRatings?.overall || 0})</p>
                   </div>
                 </div>
-                <div className="buttons flex gap-[15px]">
+                <div className="buttons flex gap-[12px]">
                   <button
                     onClick={handleSavePG}
                     disabled={isLoading}
-                    className={`h-[60px] w-[240px] text-[20px] text-white font-medium rounded-full shadow transition-all ${
+                    className={`h-[44px] w-[180px] text-[16px] text-white font-medium rounded-full shadow transition-all ${
                       isSaved
                         ? "bg-gradient-to-r from-[#28a745] to-[#20c997]"
                         : "bg-gradient-to-r from-[#d72638] to-[#ff0084]"
@@ -289,12 +281,12 @@ const PgInfo = ({setToast, user}) => {
                   <button
                     onClick={handleShare}
                     title="Copy PG link"
-                    className="h-[60px] w-[60px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
+                    className="h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
                   >
                     <img
                       src="/images/send.png"
                       alt="share"
-                      className="h-[25px] w-[25px]"
+                      className="h-[16px] w-[16px]"
                     />
                     {copied && (
                       <span className="absolute -top-8 right-1 text-[12px] bg-black text-white px-2 py-1 rounded">
@@ -304,30 +296,30 @@ const PgInfo = ({setToast, user}) => {
                   </button>
                 </div>
               </div>
-              <div className="desc flex flex-col gap-[5px] mt-[30px]">
-                <div className="head text-[35px] font-medium">Description</div>
-                <div className="para text-[19px] text-[#6c6c6c] ">
+              <div className="desc flex flex-col gap-[2px] mt-[20px]">
+                <div className="head text-[28px] font-medium">Description</div>
+                <div className="para text-[16px] text-[#6c6c6c] ">
                   {pgData.description}
                 </div>
               </div>
               {pgData.rules && pgData.rules.length > 0 && (
-                <div className="desc flex flex-col gap-[5px] mt-[30px]">
-                  <div className="head text-[35px] font-medium ">
+                <div className="desc flex flex-col gap-[3px] mt-[20px]">
+                  <div className="head text-[28px] font-medium ">
                     Things to be kept in mind
                   </div>
-                  <div className="para flex flex-col gap-[10px]">
+                  <div className="para flex flex-col gap-[10px] ">
                     {pgData.rules.map((rule, idx) => (
                       <div className="flex gap-[10px] items-center" key={idx}>
-                        <div className="h-[10px] w-[10px] rounded-full bg-[#1a1a1a]"></div>
-                        <div className="text-[19px] text-[#6c6c6c]">{rule}</div>
+                        <div className="h-[8px] w-[8px] rounded-full bg-[#1a1a1a]"></div>
+                        <div className="text-[16px] text-[#6c6c6c]">{rule}</div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               {pgData.amenities && pgData.amenities.length > 0 && (
-  <div className="services mt-[30px]">
-    <div className="head text-[35px] font-medium">Services provided</div>
+  <div className="services mt-[20px]">
+    <div className="head text-[28px] font-medium">Services provided</div>
     {(() => {
       const displayedAmenities = pgData.amenities
         .map((amenity) => {
@@ -341,13 +333,13 @@ const PgInfo = ({setToast, user}) => {
           <img
             src={imgPath.startsWith("./") ? imgPath.replace("./", "/") : imgPath}
             alt={name}
-            className="h-[35px] w-[35px]"
+            className="h-[28px] w-[28px]"
           />
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            className="h-[35px] w-[35px] text-gray-400"
+            className="h-[28px] w-[28px] text-gray-400"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
@@ -361,9 +353,9 @@ const PgInfo = ({setToast, user}) => {
         return (
           <div className="flex flex-col gap-y-5 mt-[20px] max-w-[400px]">
             {displayedAmenities.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-[15px]">
+              <div key={idx} className="flex items-center gap-[12px]">
                 <RenderIcon imgPath={item.imgPath} name={item.name} />
-                <div className="text-[#6c6c6c] text-[19px]">{item.name}</div>
+                <div className="text-[#6c6c6c] text-[16px]">{item.name}</div>
               </div>
             ))}
           </div>
@@ -373,9 +365,9 @@ const PgInfo = ({setToast, user}) => {
       return (
         <div className="grid grid-cols-2 gap-x-10 gap-y-5 mt-[20px] max-w-[400px]">
           {displayedAmenities.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-[15px]">
+            <div key={idx} className="flex items-center gap-[12px]">
               <RenderIcon imgPath={item.imgPath} name={item.name} />
-              <div className="text-[#6c6c6c] text-[19px]">{item.name}</div>
+              <div className="text-[#6c6c6c] text-[16px]">{item.name}</div>
             </div>
           ))}
         </div>
@@ -389,9 +381,9 @@ const PgInfo = ({setToast, user}) => {
               <ShowRooms RID={RID} pgData={pgData} />
             </div>
           </div>
-          <div className="rightInfo min-w-[565px] max-w-[565px]">
+          <div className="rightInfo min-w-[485px] max-w-[485px]">
             <div className="sticky top-[150px] flex flex-col gap-[20px]">
-              <OwnerCard LID={pgData?.LID} />
+              {/* <OwnerCard LID={pgData?.LID} /> */}
               <MapComp RID={RID} />
             </div>
           </div>
@@ -404,78 +396,6 @@ const PgInfo = ({setToast, user}) => {
           <div className="h-[1.5px] w-[80vw] bg-[#a4a4a4]"></div>
         </div>
         <Footer />
-        {isOverlayOpen &&
-          ReactDOM.createPortal(
-            <div className="fixed inset-0 z-[9999999] bg-[rgba(0,0,0,0.7)] bg-transparent-90 flex items-center justify-center p-8">
-              {!zoomImg ? (
-                <div className="relative bg-[#d7d7d7] rounded-xl w-[80vw] h-[80vh] overflow-auto p-[20px] shadow-2xl  no-scrollbar">
-                  <button
-                    onClick={() => {
-                      setIsOverlayOpen(false);
-                      setZoomImg(null);
-                    }}
-                    className="absolute top-3 right-4 text-black text-2xl font-bold"
-                  >
-                    ✕
-                  </button>
-                  {pgData?.otherPhotos?.length > 0 && (
-                    <div className="grid grid-cols-3 gap-4 mt-9 auto-rows-[310px]">
-                      {[pgData.coverPhoto, ...pgData.otherPhotos].filter(Boolean).map((img, i) => (
-                        <img
-                          key={i}
-                          src={`http://localhost:5000${img}`}
-                          alt={`pg-img-${i}`}
-                          className={`w-full h-full object-cover rounded-lg cursor-pointer ${
-                            i === 0 ? "col-span-2 row-span-2" : ""
-                          }`}
-                          onClick={() => {
-                            setZoomImg(img);
-                            setZoomImgIndex(i);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4">
-                  <img
-                    src={
-                      zoomImg.startsWith("./")
-                        ? zoomImg.replace("./", "/")
-                        : zoomImg
-                    }
-                    alt="zoom"
-                    className="max-w-[85vw] max-h-[75vh] object-contain rounded-lg"
-                  />
-                  <button
-                    onClick={handlePrev}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/70 hover:bg-white text-black px-3 py-2 rounded-full shadow-md"
-                    disabled={zoomImgIndex === 0}
-                  >
-                    ←
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/70 hover:bg-white text-black px-3 py-2 rounded-full shadow-md"
-                    disabled={zoomImgIndex === (pgData.otherPhotos?.length || 0)}
-                  >
-                    →
-                  </button>
-                  <button
-                    className="text-[#d7d7d7] font-medium underline"
-                    onClick={() => {
-                      setZoomImg(null);
-                      setZoomImgIndex(null);
-                    }}
-                  >
-                    Back to all photos
-                  </button>
-                </div>
-              )}
-            </div>,
-            document.getElementById("overlay-root")
-          )}
       </section>
     </>
   );

@@ -165,7 +165,7 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
   return (
     <>
       <div>
-        <div className="head text-[35px] font-medium">Rooms</div>
+        <div className="head text-[28px] font-medium">Rooms</div>
         <div className="filters flex gap-[10px] my-[10px]">
           {sortedFilters.map(({ filter, idx, selected }) => (
             <div
@@ -174,7 +174,7 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
                 selected
                   ? "border-[1px] border-[#d72638] text-[#d72638]  py-[6px] px-[18px]"
                   : "bg-[#cbcbcb] py-[8px] px-[20px]"
-              } rounded-[20px] cursor-pointer text-[18px]`}
+              } rounded-[20px] cursor-pointer text-[14px]`}
               onClick={() => {
                 toggleIdx(idx);
 
@@ -216,7 +216,7 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-3 auto-rows-auto max-w-[850px] gap-[30px] mt-[30px]">
+        <div className="grid grid-cols-3 auto-rows-auto max-w-[620px] gap-[10px] mt-[10px]">
           {filteredRooms.map((room, idx) => {
             // Calculate average rating from tenants or use a default
             const rating = room.rating || 4.0;
@@ -232,29 +232,32 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
                         : `/images/PgInfoImgs/${RID}/${room.roomId}/mainImg.jpg`
                     }
                     alt={room.roomId}
-                    className={`w-[250px] h-[250px] object-cover rounded-[20px] cursor-pointer${
+                    className={`w-[200px] h-[200px] object-cover rounded-[20px] cursor-pointer${
                       !isAvailable ? " grayscale brightness-45 opacity-60" : ""
                     }`}
                   />
                 </div>
                 <div className="flex justify-between mt-[10px] max-w-[250px]">
                   <div className="left">
-                    <div className="roomnum text-[#1a1a1a] text-[28px] font-medium">
+                    <div className="roomnum text-[#1a1a1a] text-[16px] font-medium">
                       Room {room.roomId}
                     </div>
-                    <div className="price text-[#1a1a1a] text-[19px]">
-                      ₹{room.rent}/mo
+                    <div className="flex justify-between">
+                      <div className="price text-[#1a1a1a] text-[16px]">
+                        ₹{room.rent}
+                      </div>
+                      <div className="right flex flex-col gap-[10px]">
+                        <div className="rating flex items-center justify-end gap-[4px] text-[#464646] text-[14px]">
+                          <img
+                            src="/images/star-filled.png"
+                            alt="rating"
+                            className="w-[10px] h-[10px]"
+                          />
+                          <p>{rating.toFixed(1)}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="right flex flex-col gap-[10px]">
-                    <div className="rating flex items-center justify-end gap-[7px] text-[#464646] text-[18px]">
-                      <img
-                        src="/images/star-filled.png"
-                        alt="rating"
-                        className="w-[15px] h-[15px]"
-                      />
-                      <p>{rating.toFixed(1)}</p>
-                    </div>
+                    
                   </div>
                 </div>
               </div>
