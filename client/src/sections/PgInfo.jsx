@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-const PgInfo = ({setToast}) => {
+const PgInfo = ({setToast, user}) => {
   const { RID } = useParams();
   const navigate = useNavigate();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -22,7 +22,7 @@ const PgInfo = ({setToast}) => {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const link = window.location.href; // current full URL (or use `${window.location.origin}/pg/${RID}`)
+    const link = window.location.href; 
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(link);

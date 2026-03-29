@@ -283,6 +283,13 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
                     { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
                   ]}
                 />
+                <DropdownComp
+                  heading="General"
+                  data={[
+                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
+                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
+                  ]}
+                />
               </div>
             </div>
 

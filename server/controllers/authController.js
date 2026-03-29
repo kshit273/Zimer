@@ -2,6 +2,7 @@
 const jwt = require("jsonwebtoken");
 const Landlord = require("../models/landlordModel");
 const Tenant = require("../models/tenantModel");
+const Br = require("../models/Br");
 const bcrypt = require("bcrypt");
 const pgModel = require("../models/pgModel");
 const crypto = require("crypto");
@@ -270,6 +271,34 @@ exports.landlordSignup = async (req, res) => {
   } catch (err) {
     console.error("Signup Error:", err);
     res.status(500).json({ error: "Signup failed" });
+  }
+};
+
+exports.postBR = async (req, res) => {
+  try {
+    const { sender, receiver, RID, pgName, senderEmail, senderContact } = req.body;
+
+    if (!sender || !receiver || !RID || !pgName || !senderEmail || !senderContact) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const newBR = new Br({
+      sender,
+      receiver,
+      RID,
+      pgName,
+      senderEmail,
+      senderContact,
+    });
+
+    await newBR.save();
+
+    return res.status(201).json({ message: "Booking request sent successfully", data: newBR });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "A booking request with this email or contact already exists" });
+    }
+    return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 

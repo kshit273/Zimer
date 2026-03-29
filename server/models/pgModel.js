@@ -93,6 +93,12 @@ const pgSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Manager
+    AID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+
     // 📌 PG Details
     gender: { type: String, enum: ["boys", "girls", "both"], required: true },
     rooms: [roomSchema],

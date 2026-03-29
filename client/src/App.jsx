@@ -151,7 +151,7 @@ function App() {
       <Routes>
         <Route path="/"           element={<Home />} />
         <Route path="/search/*"   element={<Search setToast={showToast} />} />
-        <Route path="/pg/:RID"    element={<PgInfo setToast={showToast} />} />
+        <Route path="/pg/:RID"    element={<PgInfo setToast={showToast} user={user} />} />
         <Route path="/faq"        element={<FAQ />} />
 
         <Route

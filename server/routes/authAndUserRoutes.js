@@ -16,7 +16,8 @@ const {
   verifyOtp,
   resetPassword,
   postSavedPGs,
-  getLandlordData
+  getLandlordData,
+  postBR,
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -25,7 +26,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 // Auth routes
 router.post("/landlord/signup", upload.single("profilePicture"), landlordSignup);
 router.post("/tenant/signup", upload.single("profilePicture"), tenantSignup);
-// router.post("/admin/login", adminLogin)
 router.post("/login", login);
 router.post("/logout", logout);
 // router.get("/verify-token", verifyToken);
@@ -39,6 +39,7 @@ router.put(
 // router.post("/forgot-password/verify-otp",verifyOtp)
 // router.post("/forgot-password/reset",resetPassword)
 router.get("/me", authMiddleware, getUser);
+router.post("/br", authMiddleware, postBR);
 router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);

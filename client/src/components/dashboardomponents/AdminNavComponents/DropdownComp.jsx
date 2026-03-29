@@ -8,16 +8,19 @@ const TYPE_COLOR = {
   Booking: "text-[#c8f135]  border-[#c8f135]/20  bg-[#c8f135]/5",
   Join:    "text-[#4ade80]  border-[#4ade80]/20  bg-[#4ade80]/5",
   Leave:   "text-[#f87171]  border-[#f87171]/20  bg-[#f87171]/5",
+  General:   "text-[#800080]  border-[#800080]/20  bg-[#800080]/5",
 };
 const BADGE_COLOR = {
   Booking: "bg-[#c8f135]  text-[#0a0a0a]",
   Join:    "bg-[#4ade80]  text-[#0a0a0a]",
   Leave:   "bg-[#f87171]  text-[#0a0a0a]",
+  General:   "bg-[#800080]  text-[#0a0a0a]",
 };
 const DOT_COLOR = {
   Booking: "bg-[#c8f135]",
   Join:    "bg-[#4ade80]",
   Leave:   "bg-[#f87171]",
+  General:   "bg-[#800080]",
 };
 
 const DropdownComp = ({ heading, data }) => {
