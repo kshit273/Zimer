@@ -131,7 +131,7 @@ const adminLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      {id: admin.id, role: "admin" },
+      {_id:admin._id, id: admin.id, role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -167,7 +167,7 @@ const getBRNotifications = async (req, res) => {
     const adminId = req.user._id;
 
     const brs = await Br.find({ receiver: adminId })
-      .populate("sender", "firstName lastName email phone")
+      .populate("sender", "firstName lastName")
       .sort({ reqTime: -1 });
 
     return res.status(200).json({ brs });

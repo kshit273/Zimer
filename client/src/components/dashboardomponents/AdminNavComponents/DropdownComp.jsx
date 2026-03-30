@@ -23,21 +23,27 @@ const DOT_COLOR = {
   General:   "bg-[#800080]",
 };
 
-const DropdownComp = ({ heading, data }) => {
+const DropdownComp = ({ heading, data, onBRResponse }) => {
   const [open, setOpen]     = useState(false);
   const [isRead, setIsRead] = useState(false);
 
-  const unreadCount = Array.isArray(data) ? data.length : 0;
+  const unreadCount = Array.isArray(data)
+  ? heading === "Booking"
+    ? data.filter((item) => item.resTime === null).length  
+    : data.length
+  : 0;
 
   useEffect(() => {
-    if (unreadCount < 1) setIsRead(true);
-  }, [unreadCount]);
+  if (unreadCount < 1) setIsRead(true);
+  else setIsRead(false); 
+}, [unreadCount]);
 
-  const handleToggle = () => {
-    setOpen((prev) => !prev);
-    setIsRead(true);
-  };
-
+const handleToggle = () => {
+  setOpen((prev) => !prev);
+  if (heading !== "Booking") {
+    setIsRead(true); 
+  }
+};
   const handleJoinRequestAccept  = () => {};
   const handleJoinRequestReject  = () => {};
   const handleLeaveRequestAccept = () => {};
@@ -64,7 +70,11 @@ const DropdownComp = ({ heading, data }) => {
             {heading} requests
           </p>
           <p className="text-[0.75rem] text-[#555550] mt-0.5">
-            {!isRead
+            {heading === "Booking"
+              ? unreadCount > 0
+                ? `${unreadCount} awaiting response`
+                : `All requests responded`
+              : !isRead
               ? `${unreadCount} pending request${unreadCount !== 1 ? "s" : ""}`
               : `No pending ${heading.toLowerCase()} requests`}
           </p>
@@ -89,8 +99,15 @@ const DropdownComp = ({ heading, data }) => {
           {heading === "Booking" &&
             data.map((item, i) => (
               <BRNotification key={i}
-                name={item.name} contact={item.contact} email={item.email}
-                reqTime={item.reqTime} RID={item.RID} pgName={item.pgName}
+                name={`${item.sender.firstName} ${item.sender.lastName}`} contact={item.senderContact} email={item.senderEmail} brId={item._id} resTime={item.resTime} onBRResponse={onBRResponse}
+                reqTime={new Date(item.reqTime).toLocaleString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })} RID={item.RID} pgName={item.pgName}
               />
             ))}
           {heading === "Join" &&

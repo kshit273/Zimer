@@ -143,7 +143,7 @@ const PgInfo = ({setToast, user}) => {
 
 const handleBookingRequest = async () => {
   if (user?.role !== "tenant") {
-    setToast({ message: "This feature is only for the tenant accounts.", type: "error" });
+    setToast("This feature is only for the tenant accounts.", "error");
     return;
   }
 
@@ -158,10 +158,7 @@ const handleBookingRequest = async () => {
         senderEmail: user.email,
         senderContact: user.phone,
       },
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      }
+      { withCredentials: true, headers: { "Content-Type": "application/json" } }
     );
 
     if (response.status === 201) {
@@ -170,16 +167,16 @@ const handleBookingRequest = async () => {
           ? "Thank you for booking our team will contact you within 3 hours"
           : "Thank you for booking our team will contact you within 24 hours";
 
-      setToast({ message, type: "success" });
+      setToast(message, "success");
     }
   } catch (error) {
     if (error.response?.status === 409) {
-      setToast({ message: "Booking request already exists", type: "error" });
+      setToast("Booking request already exists", "error");
     } else if (error.response?.status === 401) {
-      setToast({ message: "Please login to send a booking request", type: "error" });
+      setToast("Please login to send a booking request", "error");
       navigate("/login");
     } else {
-      setToast({ message: error.response?.data?.message || "Failed to send booking request", type: "error" });
+      setToast(error.response?.data?.message || "Failed to send booking request", "error");
     }
   }
 };

@@ -23,6 +23,10 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
   const [pgDetail,    setPgDetail]    = useState(null);         // from /admin/:pgId
   const [tenantData,  setTenantData]  = useState(null);         // from /admin/tenant/:tenantId
 
+  const [brData,        setBrData]        = useState([]);
+  const [brLoading,     setBrLoading]     = useState(false);
+  const [brError,       setBrError]       = useState(null);
+
   // ── Loading / error states ──
   const [pgListLoading,     setPgListLoading]     = useState(false);
   const [pgDetailLoading,   setPgDetailLoading]   = useState(false);
@@ -96,6 +100,37 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
       setTenantDataLoading(false);
     }
   };
+
+  useEffect(() => {
+  const fetchBRData = async () => {
+    setBrLoading(true);
+    setBrError(null);
+    try {
+      const res = await adminAxios.get("/admin/br");
+      setBrData(res.data.brs || []);
+    } catch (err) {
+      setBrError(err?.response?.data?.message || "Failed to load booking requests.");
+    } finally {
+      setBrLoading(false);
+    }
+  };
+
+  fetchBRData();
+}, []);
+
+const handleBRResponse = async (brId, response) => {
+  try {
+    const res = await adminAxios.put("/admin/br", { brId, response });
+    // Update brData locally so resTime reflects immediately without refetch
+    setBrData((prev) =>
+      prev.map((br) =>
+        br._id === brId ? { ...br, response, resTime: res.data.br.resTime } : br
+      )
+    );
+  } catch (err) {
+    console.error("Failed to update BR response:", err);
+  }
+};
 
   // ── Back handlers ────────────────────────────────────────────────────────────
   const handleBackFromPG = () => {
@@ -263,11 +298,10 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
               <div className="flex flex-col gap-3 fade-up fade-up-d3">
                 <DropdownComp
                   heading="Booking"
-                  data={[
-                    { name: "Peter Beniwal",  contact: "+91 9368578171", email: "petermjben@gmail.com",   reqTime: "04:13 pm 12 Feb,2026", RID: "ROORAM49c80", pgName: "Arora PG" },
-                    { name: "Jesse Pinkman",  contact: "+91 9368578172", email: "jessepinkman@gmail.com", reqTime: "04:13 pm 12 Feb,2026", RID: "DEHDIT49c80", pgName: "Maya PG" },
-                    { name: "Walter White",   contact: "+91 9368578173", email: "walterhwhite@gmail.com", reqTime: "04:13 pm 12 Feb,2026", RID: "DEHUIT49c80", pgName: "Parihars home" },
-                  ]}
+                  data={brData}
+                  loading={brLoading}
+                  error={brError}
+                  onBRResponse={handleBRResponse}
                 />
                 <DropdownComp
                   heading="Join"

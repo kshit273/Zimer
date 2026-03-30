@@ -15,7 +15,6 @@ const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
   const [activeIdxs, setActiveIdxs] = useState([]);
   const [showPriceOverlay, setShowPriceOverlay] = useState(false);
   const [selectedPriceIdx, setSelectedPriceIdx] = useState(null);
-  const [selectedRoom, setSelectedRoom] = useState(null);
   
   // API data states
   const [pgData, setPgData] = useState(propPgData);
@@ -130,20 +129,6 @@ const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
     );
   }
 
-  useEffect(() => {
-    if (selectedRoom !== null) {
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.dataset.scrollY = scrollY;
-    } else {
-      const scrollY = document.body.dataset.scrollY || "0";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      window.scrollTo(0, parseInt(scrollY));
-    }
-  }, [selectedRoom]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
@@ -218,7 +203,7 @@ const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
         <div className="grid grid-cols-1 auto-rows-auto max-w-[1120px] gap-[10px] mt-[10px]">
           {filteredRooms.map((room, idx) => {
             return (
-              <div key={room.roomId || idx} onClick={() => setSelectedRoom(idx)} className="flex gap-4">
+              <div key={room.roomId || idx} className="flex gap-4">
                 <div className="">
                   <img
                     src={
