@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import ReactDOM from "react-dom";
-import PgRoomComp from "../components/PgRoomComp";
 import axios from "axios";
+import RoomFeatures from "./RoomFeatures.jsx";
 
-const ShowRooms = ({ RID, pgData: propPgData = null }) => {
+const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
   const filters = ["Price", "Single room", "Shared room", "Available"];
 
   const priceRange = [
@@ -216,14 +215,10 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-3 auto-rows-auto max-w-[620px] gap-[10px] mt-[10px]">
+        <div className="grid grid-cols-1 auto-rows-auto max-w-[1120px] gap-[10px] mt-[10px]">
           {filteredRooms.map((room, idx) => {
-            // Calculate average rating from tenants or use a default
-            const rating = room.rating || 4.0;
-            const isAvailable = room.availableFrom && new Date(room.availableFrom) <= new Date();
-            
             return (
-              <div key={room.roomId || idx} onClick={() => setSelectedRoom(idx)}>
+              <div key={room.roomId || idx} onClick={() => setSelectedRoom(idx)} className="flex gap-4">
                 <div className="">
                   <img
                     src={
@@ -232,32 +227,33 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
                         : `/images/PgInfoImgs/${RID}/${room.roomId}/mainImg.jpg`
                     }
                     alt={room.roomId}
-                    className={`w-[200px] h-[200px] object-cover rounded-[20px] cursor-pointer${
-                      !isAvailable ? " grayscale brightness-45 opacity-60" : ""
-                    }`}
+                    className={`w-[200px] h-[200px] object-cover rounded-[20px] cursor-pointer`}
                   />
                 </div>
-                <div className="flex justify-between mt-[10px] max-w-[250px]">
-                  <div className="left">
+                <div className="flex justify-between  max-w-[650px]">
+                  <div className="left py-1">
+                    <div className="roomnum flex justify-between text-[#1a1a1a] text-[17px] font-medium">
+                      <div>Room {room.roomId}</div>
+                    </div>
+                    <div className="roomnum text-[#1a1a1a] text-[16px] font-normal h-[75px]">
+                      {room.description}
+                    </div>
                     <div className="roomnum text-[#1a1a1a] text-[16px] font-medium">
-                      Room {room.roomId}
+                      <RoomFeatures features={room.amenities} />
                     </div>
-                    <div className="flex justify-between">
-                      <div className="price text-[#1a1a1a] text-[16px]">
-                        ₹{room.rent}
-                      </div>
-                      <div className="right flex flex-col gap-[10px]">
-                        <div className="rating flex items-center justify-end gap-[4px] text-[#464646] text-[14px]">
-                          <img
-                            src="/images/star-filled.png"
-                            alt="rating"
-                            className="w-[10px] h-[10px]"
-                          />
-                          <p>{rating.toFixed(1)}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <div className="">
+                            <span className="text-transparent bg-clip-text bg-[#1a1a1a] border-1 border-[#d6d6d6] rounded-full py-2 px-4 font-medium text-[14px]">
+                              ₹{room.rent} per month
+                            </span>
                         </div>
+                        <button
+                          className={` h-[40px] bg-gradient-to-r from-[#d72638] to-[#ff007f] text-white font-medium text-[14px] px-8 rounded-full shadow-md  transition-transform duration-300`}
+                          onClick = {() => onBookingRequest()}
+                        >
+                          Book now
+                        </button>
                       </div>
-                    </div>
-                    
                   </div>
                 </div>
               </div>
@@ -265,16 +261,6 @@ const ShowRooms = ({ RID, pgData: propPgData = null }) => {
           })}
         </div>
       </div>
-
-      {selectedRoom !== null &&
-        ReactDOM.createPortal(
-          <PgRoomComp
-            room={filteredRooms[selectedRoom]}
-            RID={RID}
-            onClose={() => setSelectedRoom(null)}
-          />,
-          document.getElementById("overlay-root")
-        )}
     </>
   );
 };
