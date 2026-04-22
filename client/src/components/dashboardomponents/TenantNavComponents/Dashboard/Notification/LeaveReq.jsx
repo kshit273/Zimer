@@ -35,9 +35,9 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
           
           {/* Additional details */}
           <div className="mt-2 space-y-1">
-            {/* <p className="text-[13px] text-[#5c5c5c]">
-              <span className="font-medium">Room:</span> {data.metadata?.roomNumber || "N/A"}
-            </p> */}
+            <p className="text-[13px] text-[#5c5c5c]">
+              <span className="font-medium">Room:</span> {data.metadata?.roomId || "N/A"}
+            </p>
             <p className="text-[13px] text-[#5c5c5c]">
               <span className="font-medium">Move-out Date:</span> {moveOutDate}
             </p>
@@ -50,7 +50,7 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
         </div>
 
         {/* Action buttons - only show if status is pending */}
-        {data.status === "pending" && (
+        {(data.status === "pending" || data.status === "pending_ztrs") && (
           <div className="flex gap-2">
             <button 
               onClick={onAccept}
@@ -75,8 +75,17 @@ const LeaveReq = ({ data, onAccept, onReject }) => {
           </div>
         )}
 
+        {/* Status indicator for pending_ztrs requests */}
+        {data.status === "pending_ztrs" && (
+          <div className="flex items-center gap-2">
+            <span className="text-[14px] font-medium text-[#e6a817]">
+              ⏳ Pending
+            </span>
+          </div>
+        )}
+
         {/* Status indicator for processed requests */}
-        {data.status !== "pending" && (
+        {data.status !== "pending" && data.status !== "pending_ztrs" && (
           <div className="flex items-center gap-2">
             <span className={`text-[14px] font-medium ${
               data.status === "accepted" ? "text-[#49c800]" : "text-[#d72638]"

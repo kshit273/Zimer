@@ -15,6 +15,7 @@ const {
   sendOtp,
   verifyOtp,
   resetPassword,
+  getZTRS,
   postSavedPGs,
   getLandlordData,
   postBR,
@@ -42,6 +43,7 @@ router.put(
 router.get("/me", authMiddleware, getUser);
 router.post("/br", authMiddleware, postBR);
 router.post("/report", authMiddleware, postReport);
+router.get("/ztrs", authMiddleware, getZTRS);
 router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);

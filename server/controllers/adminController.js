@@ -266,8 +266,8 @@ const postZTRS = async (req, res) => {
       // Append new entry to the timeline
       ztrsDoc.timeline.push({ RID, reason, ztrs });
 
-      // Recalculate finalScore as sum of all ztrs entries
-      ztrsDoc.finalScore = ztrsDoc.timeline.reduce((sum, entry) => sum + entry.ztrs, 0);
+      // Recalculate finalScore as average of all ztrs entries
+      ztrsDoc.finalScore = ztrsDoc.timeline.reduce((sum, entry) => sum + entry.ztrs, 0) / ztrsDoc.timeline.length;
     }
 
     await ztrsDoc.save();

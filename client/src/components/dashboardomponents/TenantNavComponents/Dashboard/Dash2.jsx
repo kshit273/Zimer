@@ -1,5 +1,6 @@
 // Dash2.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PGAbout from "./PGAbout";
 import MonthlyRentStatus from "./MonthlyRentStatus";
 import ZTRS from "./ZTRS";
@@ -20,12 +21,38 @@ const calculateSequentialPaidMonths = (joinDate, payments) => {
 };
 
 const Dash2 = ({ formData, pgData, loading, error, residingPG, postReport }) => {
+  const [ztrsData, setZtrsData] = useState({ finalScore: null, timeline: [] });
+  const [ztrsLoading, setZtrsLoading] = useState(true);
+
   const joinDate = pgData?.joinFrom
     ? new Date(pgData.joinFrom).toISOString().split("T")[0]
     : null;
 
   // Calculate sequential paid months
   const paidMonths = calculateSequentialPaidMonths(joinDate, pgData?.payments);
+
+  // Fetch ZTRS data
+  useEffect(() => {
+    const fetchZTRS = async () => {
+      try {
+        setZtrsLoading(true);
+        const res = await axios.get("http://localhost:5000/auth/ztrs", {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          setZtrsData({
+            finalScore: res.data.finalScore,
+            timeline: res.data.timeline || [],
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch ZTRS:", err);
+      } finally {
+        setZtrsLoading(false);
+      }     
+    };
+    fetchZTRS();
+  }, []);
 
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-10">
@@ -49,7 +76,11 @@ const Dash2 = ({ formData, pgData, loading, error, residingPG, postReport }) => 
       </div>
 
       <div>
-        <ZTRS percentage={56} />
+        <ZTRS
+          finalScore={ztrsData.finalScore}
+          timeline={ztrsData.timeline}
+          loading={ztrsLoading}
+        />
       </div>
     </div>
   );

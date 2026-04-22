@@ -304,6 +304,52 @@ exports.postBR = async (req, res) => {
   }
 };
 
+exports.getZTRS = async (req, res) => {
+  try {
+    const tenantId = req.user.id;
+
+    const ZTRS = require("../models/ztrsModel");
+
+    const ztrsDoc = await ZTRS.findOne({ tenantId });
+
+    
+
+    if (!ztrsDoc) {
+      return res.status(200).json({
+        success: true,
+        finalScore: null,
+        timeline: [],
+        message: "No ZTRS record found for this tenant",
+      });
+    }
+
+    // Enrich timeline entries with PG names
+    const enrichedTimeline = await Promise.all(
+      ztrsDoc.timeline.map(async (entry) => {
+        const pg = await PG.findOne({ RID: entry.RID }).select("pgName");
+        return {
+          RID: entry.RID,
+          pgName: pg?.pgName || "Unknown PG",
+          reason: entry.reason,
+          ztrs: entry.ztrs,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      finalScore: ztrsDoc.finalScore,
+      timeline: enrichedTimeline,
+    });
+  } catch (error) {
+    console.error("getZTRS error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch ZTRS data",
+    });
+  }
+}
+
 //Done
 exports.tenantSignup = async (req, res) => {
   try {
