@@ -4,6 +4,7 @@ const Landlord = require("../models/landlordModel");
 const Tenant = require("../models/tenantModel");
 const AdminNotification = require("../models/adminNotificationModel");
 const Br = require("../models/brModel");
+const PG = require("../models/pgModel");
 const bcrypt = require("bcrypt");
 const pgModel = require("../models/pgModel");
 const crypto = require("crypto");
@@ -522,9 +523,6 @@ exports.postReport = async (req, res) => {
   try {
     const { pgId } = req.body;
     const senderId = req.user._id;
-
-    console.log(pgId);
-    console.log('Teri ma ki chut')
     if (!pgId) {
       return res.status(400).json({
         success: false,

@@ -188,13 +188,13 @@ const handleBRResponse = async (brId, response) => {
 const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) => {
   try {
     await adminAxios.post("/admin/ztrs", { tenantId, RID, reason, ztrs, notificationId });
-    // Remove the notification from local state
     setLrData((prev) => prev.filter((item) => item._id !== notificationId));
+    return { success: true };
   } catch (err) {
     console.error("Failed to submit ZTRS:", err);
+    return { success: false, error: err?.response?.data?.message || "Failed to submit ZTRS" };
   }
 };
-
   // ── Back handlers ────────────────────────────────────────────────────────────
   const handleBackFromPG = () => {
     setSelectedPG(null);

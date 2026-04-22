@@ -329,9 +329,8 @@ exports.acceptLeaveRequest = async (req, res) => {
     // Find the notification and populate sender
     const notification = await Notification.findById(notificationId).populate('sender');
 
-    console.log(notification);
-
-    if (!notification) {
+    const notification = await Notification.findById(notificationId).populate('sender');
+    if (!notification) {    if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }
 

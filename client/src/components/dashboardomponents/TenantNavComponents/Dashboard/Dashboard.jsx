@@ -6,8 +6,6 @@ import Dash3 from "./Dash3";
 
 const Dashboard = ({ formData, pgData, loading, error, residingPG, setToast }) => {
 
-  console.log(pgData.RID)
-
   const postReport = async () => {
     try {
       await axios.post(
@@ -15,10 +13,9 @@ const Dashboard = ({ formData, pgData, loading, error, residingPG, setToast }) =
         { pgId: pgData.RID },
         { withCredentials: true }
       );
-      setToast("Report submitted successfully.","Success");
+      setToast("Report submitted successfully.", "success");
     } catch (err) {
-      setToast("Failed to submit report. Please try again.","error");
-    }
+      setToast("Failed to submit report. Please try again.","error");    }
   };
 
   return (
