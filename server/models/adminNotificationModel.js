@@ -22,7 +22,6 @@ const adminNotificationSchema = new mongoose.Schema(
       required: true,
     },
     metadata: {
-      roomId: String,
       tenantName: String,
       tenantEmail: String,
       tenantPhone: String,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingPG }) => {
+const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingPG, postReport }) => {
   const [ownerName, setOwnerName] = useState(pgData?.Ownername || "not available");
 
   useEffect(() => {
@@ -135,7 +135,10 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
                 {pgData.pgName || "PG Name Not Available"}
               </p>
               {formData.role === "tenant" && (
-                <div className="w-[35px] h-[35px] bg-[#cdcdcd] rounded-full p-2.5">
+                <div
+                  className="w-[35px] h-[35px] bg-[#cdcdcd] rounded-full p-2.5 cursor-pointer"
+                  onClick={() => postReport()}   
+                >
                   <img src="../images/report.png" alt="Report" />
                 </div>
               )}
@@ -149,7 +152,7 @@ const PGAbout = ({ handlePGSelection, formData, pgData, error, length, residingP
               <div className="flex gap-5">
                 <p>PG owner</p>
                 <p className="font-light">
-                  {ownerName || (formData.role === 'landlord' ? `${formData.firstName} ${formData.lastName}` : 'not available')}
+                  {ownerName || (formData.role === 'landlord' ? ownerName : 'not available')}
                 </p>
               </div>
               

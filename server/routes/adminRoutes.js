@@ -3,7 +3,6 @@ const router = express.Router();
 const auth = require("../middleware/authMiddleware");
 const isAdmin = require("../middleware/isAdminMiddleware");
 const {
-  getDashboard,
   getPGs,
   getPGDetails,
   adminLogin,
@@ -12,6 +11,7 @@ const {
   postZTRS,
   getNotifications,
   getTenantData,
+  getJRNotification,
 } = require("../controllers/adminController");
 
 // Public route — no auth needed for login
@@ -22,6 +22,8 @@ router.get("/pgs", auth, isAdmin, getPGs);
 
 router.get("/br", auth, isAdmin, getBRNotifications);
 router.put("/br", auth, isAdmin, updateBRResponse);
+
+router.get("/jr",auth,isAdmin, getJRNotification);
 
 router.post("/ztrs", auth, isAdmin, postZTRS);
 

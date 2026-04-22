@@ -18,6 +18,7 @@ const {
   postSavedPGs,
   getLandlordData,
   postBR,
+  postReport,
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -40,6 +41,7 @@ router.put(
 // router.post("/forgot-password/reset",resetPassword)
 router.get("/me", authMiddleware, getUser);
 router.post("/br", authMiddleware, postBR);
+router.post("/report", authMiddleware, postReport);
 router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);

@@ -302,7 +302,7 @@ exports.createLeaveRequest = async (req, res) => {
       message: `${tenant.firstName} ${tenant.lastName} has requested to leave room ${roomNumber}`,
       status: "pending",
       metadata: {
-        roomNumber,
+        roomId : roomNumber,
         tenantName: `${tenant.firstName} ${tenant.lastName}`,
         reason,
         moveOutDate,
@@ -329,6 +329,8 @@ exports.acceptLeaveRequest = async (req, res) => {
     // Find the notification and populate sender
     const notification = await Notification.findById(notificationId).populate('sender');
 
+    console.log(notification);
+
     if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }
@@ -354,7 +356,7 @@ exports.acceptLeaveRequest = async (req, res) => {
     }
 
     // Find the room and remove tenant
-    const room = pg.rooms.find(r => r.roomId === notification.metadata.roomNumber);
+    const room = pg.rooms.find(r => r.roomId === notification.metadata.roomId);
     
     if (!room) {
       return res.status(404).json({ error: "Room not found" });
@@ -395,8 +397,8 @@ exports.acceptLeaveRequest = async (req, res) => {
       await tenant.save();
     }
 
-    // Update notification status
-    notification.status = "accepted";
+    // Update notification status to pending_ztrs (admin must submit ZTRS before final acceptance)
+    notification.status = "pending_ztrs";
     await notification.save();
 
     // Create a confirmation notification for the tenant
@@ -409,7 +411,7 @@ exports.acceptLeaveRequest = async (req, res) => {
       }],
       pg: pg.RID,
       message: `Your leave request for room ${notification.metadata.roomNumber} at ${pg.pgName} has been accepted. We wish you all the best!`,
-      status: "unread",
+      status: "sent",
     });
 
     res.json({
@@ -471,19 +473,24 @@ exports.getNotifications = async (req, res) => {
     const userId = req.user.id;
     const { type, status, pgId } = req.query;
 
-    const query = {
-      $or: [
-        { 
-          sender: userId,
-          type: { $ne: "join_request" }
-        },
-        { "recipients.recipientId": userId }
-      ]
-    };
-
-    if (type) query.type = type;
-    if (status) query.status = status;
-    if (pgId) query.pg = pgId; // pgId is now RID string
+    // If all three filters are provided, skip sender/recipient check (admin use case)
+    let query;
+    if (type && status && pgId) {
+      query = { type, status, pg: pgId };
+    } else {
+      query = {
+        $or: [
+          { 
+            sender: userId,
+            type: { $ne: "join_request" }
+          },
+          { "recipients.recipientId": userId }
+        ]
+      };
+      if (type) query.type = type;
+      if (status) query.status = status;
+      if (pgId) query.pg = pgId;
+    }
 
     const notifications = await Notification.find(query)
       .populate("sender", "firstName lastName email")

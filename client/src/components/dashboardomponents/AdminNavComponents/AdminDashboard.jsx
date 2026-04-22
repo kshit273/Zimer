@@ -27,6 +27,14 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
   const [brLoading,     setBrLoading]     = useState(false);
   const [brError,       setBrError]       = useState(null);
 
+  const [jrData,        setJrData]        = useState([]);
+  const [jrLoading,     setJrLoading]     = useState(false);
+  const [jrError,       setJrError]       = useState(null);
+
+  const [lrData,        setLrData]        = useState([]);
+  const [lrLoading,     setLrLoading]     = useState(false);
+  const [lrError,       setLrError]       = useState(null);
+
   // ── Loading / error states ──
   const [pgListLoading,     setPgListLoading]     = useState(false);
   const [pgDetailLoading,   setPgDetailLoading]   = useState(false);
@@ -118,6 +126,51 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
   fetchBRData();
 }, []);
 
+  // ── Fetch Join Request notifications ──
+  useEffect(() => {
+    const fetchJRData = async () => {
+      setJrLoading(true);
+      setJrError(null);
+      try {
+        const res = await adminAxios.get("/admin/jr");
+        setJrData(res.data.jrs || []);
+      } catch (err) {
+        setJrError(err?.response?.data?.message || "Failed to load join requests.");
+      } finally {
+        setJrLoading(false);
+      }
+    };
+
+    fetchJRData();
+  }, []);
+
+  // ── Fetch Leave Request notifications (pending_ztrs) ──
+  useEffect(() => {
+    if (!adminUser?.managedPGs?.length) return;
+
+    const fetchLRData = async () => {
+      setLrLoading(true);
+      setLrError(null);
+      try {
+        // Fetch pending_ztrs leave notifications for each managed PG and merge
+        const requests = adminUser.managedPGs.map((rid) =>
+          adminAxios.get("/notifications/", {
+            params: { type: "leave_request", status: "pending_ztrs", pgId: rid },
+          })
+        );
+        const responses = await Promise.all(requests);
+        const merged = responses.flatMap((res) => res.data.notifications || []);
+        setLrData(merged);
+      } catch (err) {
+        setLrError(err?.response?.data?.message || "Failed to load leave requests.");
+      } finally {
+        setLrLoading(false);
+      }
+    };
+
+    fetchLRData();
+  }, [adminUser?.managedPGs]);
+
 const handleBRResponse = async (brId, response) => {
   try {
     const res = await adminAxios.put("/admin/br", { brId, response });
@@ -129,6 +182,16 @@ const handleBRResponse = async (brId, response) => {
     );
   } catch (err) {
     console.error("Failed to update BR response:", err);
+  }
+};
+
+const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) => {
+  try {
+    await adminAxios.post("/admin/ztrs", { tenantId, RID, reason, ztrs, notificationId });
+    // Remove the notification from local state
+    setLrData((prev) => prev.filter((item) => item._id !== notificationId));
+  } catch (err) {
+    console.error("Failed to submit ZTRS:", err);
   }
 };
 
@@ -305,17 +368,16 @@ const handleBRResponse = async (brId, response) => {
                 />
                 <DropdownComp
                   heading="Join"
-                  data={[
-                    { tenantEmail: "tenant@gmail.com", tenantPhone: "+91 9368578171", RID: "DEHPREe5be03", roomId: "1000026309", message: "Kshitij Sharma has requested to join room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveInDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                    { tenantEmail: "tenant@gmail.com", tenantPhone: "+91 9368578171", RID: "DEHPREe5be03", roomId: "1000026309", message: "Kshitij Sharma has requested to join room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveInDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                  ]}
+                  data={jrData}
+                  loading={jrLoading}
+                  error={jrError}
                 />
                 <DropdownComp
                   heading="Leave"
-                  data={[
-                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                  ]}
+                  data={lrData}
+                  loading={lrLoading}
+                  error={lrError}
+                  onZTRSSubmit={handleZTRSUpdation}
                 />
                 <DropdownComp
                   heading="General"

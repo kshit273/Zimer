@@ -4,6 +4,7 @@ const Tenant = require("../models/tenantModel");
 const Br = require("../models/brModel");
 const ZTRS = require("../models/ztrsModel");
 const AdminNotification = require("../models/adminNotificationModel");
+const Notification = require("../models/notificationModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -209,11 +210,42 @@ const updateBRResponse = async (req, res) => {
   }
 };
 
+const getJRNotification = async (req, res) => {
+  try {
+    const adminId = req.user._id;
+
+    // 1. Find the admin to get their managedPGs
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found." });
+    }
+
+    const { managedPGs } = admin;
+    if (!managedPGs || managedPGs.length === 0) {
+      return res.status(200).json({ jrs: [] });
+    }
+
+    // 2. Fetch pending join_request notifications whose pg is in managedPGs
+    const jrs = await Notification.find({
+      type: "join_request",
+      status: "pending",
+      pg: { $in: managedPGs },
+    })
+      .populate("sender", "firstName lastName")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ jrs });
+  } catch (error) {
+    console.error("getJRNotification error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // POST /ztrs — create or update ZTRS for a tenant
 // Body: { tenantId: String, RID: String, reason: String, ztrs: Number }
 const postZTRS = async (req, res) => {
   try {
-    const { tenantId, RID, reason, ztrs } = req.body;
+    const { tenantId, RID, reason, ztrs, notificationId } = req.body;
 
     if (!tenantId || !RID || !reason || ztrs === undefined) {
       return res
@@ -239,6 +271,11 @@ const postZTRS = async (req, res) => {
     }
 
     await ztrsDoc.save();
+
+    // Update the leave notification status to accepted
+    if (notificationId) {
+      await Notification.findByIdAndUpdate(notificationId, { status: "accepted" });
+    }
 
     return res.status(201).json({ message: "ZTRS posted successfully.", ztrs: ztrsDoc });
   } catch (error) {
@@ -272,4 +309,5 @@ module.exports = {
   postZTRS,
   getNotifications,
   getTenantData,
+  getJRNotification,
 };

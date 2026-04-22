@@ -42,7 +42,7 @@ const notificationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected","sent"],
+      enum: ["pending", "accepted", "rejected","sent","pending_ztrs"],
       default: function () {
         if (this.type === "announcement") return "sent";
         if (this.type === "join_request" || this.type === "leave_request")

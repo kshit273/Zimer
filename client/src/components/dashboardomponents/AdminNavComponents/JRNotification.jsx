@@ -1,4 +1,4 @@
-const JRNotification = ({ data, onAccept, onReject }) => {
+const JRNotification = ({ data }) => {
   const dateTime = new Date(data.createdAt);
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
@@ -31,10 +31,10 @@ const JRNotification = ({ data, onAccept, onReject }) => {
       {/* Detail grid */}
       <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
         {[
-          ["PG",        data.RID        || "N/A"],
-          ["Room",      data.roomId     || "N/A"],
-          ["Email",     data.tenantEmail|| "N/A"],
-          ["Phone",     data.tenantPhone|| "N/A"],
+          ["PG",        data.pg                     || "N/A"],
+          ["Room",      data.metadata?.roomId       || "N/A"],
+          ["Email",     data.metadata?.tenantEmail  || "N/A"],
+          ["Phone",     data.metadata?.tenantPhone  || "N/A"],
           ["Move-in",   moveInDate],
         ].map(([label, value]) => (
           <>
@@ -46,28 +46,6 @@ const JRNotification = ({ data, onAccept, onReject }) => {
 
       {/* Divider */}
       <div className="h-px bg-[#1f1f1f]" />
-
-      {/* Actions / status */}
-      {data.status === "pending" ? (
-        <div className="flex gap-2">
-          <button
-            onClick={onAccept}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[0.72rem] tracking-[0.12em] uppercase border border-[#4ade80]/30 text-[#4ade80] hover:bg-[#4ade80]/5 transition-colors duration-200 cursor-pointer"
-          >
-            ✓ Accept
-          </button>
-          <button
-            onClick={onReject}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[0.72rem] tracking-[0.12em] uppercase border border-[#f87171]/30 text-[#f87171] hover:bg-[#f87171]/5 transition-colors duration-200 cursor-pointer"
-          >
-            ✕ Reject
-          </button>
-        </div>
-      ) : (
-        <p className={`text-[0.75rem] font-medium ${data.status === "accepted" ? "text-[#4ade80]" : "text-[#f87171]"}`}>
-          {data.status === "accepted" ? "✓ Accepted" : "✕ Rejected"}
-        </p>
-      )}
 
       {/* Timestamp */}
       <div className="flex justify-between text-[0.68rem] text-[#3a3a3a] pt-1 border-t border-[#1f1f1f]">

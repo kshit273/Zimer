@@ -19,7 +19,7 @@ const calculateSequentialPaidMonths = (joinDate, payments) => {
   return paidMonths;
 };
 
-const Dash2 = ({ formData, pgData, loading, error, residingPG }) => {
+const Dash2 = ({ formData, pgData, loading, error, residingPG, postReport }) => {
   const joinDate = pgData?.joinFrom
     ? new Date(pgData.joinFrom).toISOString().split("T")[0]
     : null;
@@ -36,6 +36,7 @@ const Dash2 = ({ formData, pgData, loading, error, residingPG }) => {
           loading={loading} 
           error={error}
           residingPG={residingPG}
+          postReport={postReport}
         />
       </div>
 

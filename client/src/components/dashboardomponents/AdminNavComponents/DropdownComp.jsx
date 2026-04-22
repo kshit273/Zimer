@@ -23,7 +23,7 @@ const DOT_COLOR = {
   General:   "bg-[#800080]",
 };
 
-const DropdownComp = ({ heading, data, onBRResponse }) => {
+const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit }) => {
   const [open, setOpen]     = useState(false);
   const [isRead, setIsRead] = useState(false);
 
@@ -44,10 +44,7 @@ const handleToggle = () => {
     setIsRead(true); 
   }
 };
-  const handleJoinRequestAccept  = () => {};
-  const handleJoinRequestReject  = () => {};
-  const handleLeaveRequestAccept = () => {};
-  const handleLeaveRequestReject = () => {};
+
 
   const accentClass = TYPE_COLOR[heading]  || TYPE_COLOR.Booking;
   const badgeClass  = BADGE_COLOR[heading] || BADGE_COLOR.Booking;
@@ -112,14 +109,12 @@ const handleToggle = () => {
             ))}
           {heading === "Join" &&
             data.map((item, i) => (
-              <JRNotification key={i} data={item}
-                onAccept={handleJoinRequestAccept} onReject={handleJoinRequestReject}
-              />
+              <JRNotification key={i} data={item}/>
             ))}
           {heading === "Leave" &&
             data.map((item, i) => (
               <LRNotification key={i} data={item}
-                onAccept={handleLeaveRequestAccept} onReject={handleLeaveRequestReject}
+                onAccept={onZTRSSubmit}
               />
             ))}
         </div>
