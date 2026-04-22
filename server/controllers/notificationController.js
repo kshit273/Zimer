@@ -329,7 +329,6 @@ exports.acceptLeaveRequest = async (req, res) => {
     // Find the notification and populate sender
     const notification = await Notification.findById(notificationId).populate('sender');
 
-    const notification = await Notification.findById(notificationId).populate('sender');
     if (!notification) {    if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }
@@ -417,7 +416,7 @@ exports.acceptLeaveRequest = async (req, res) => {
       success: true,
       message: "Leave request accepted and tenant removed from room",
     });
-  } catch (error) {
+  }} catch (error) {
     console.error("Accept leave request error:", error);
     res.status(500).json({ error: "Failed to accept leave request" });
   }
