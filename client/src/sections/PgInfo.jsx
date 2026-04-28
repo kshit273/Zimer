@@ -316,24 +316,24 @@ const handleBookingRequest = async () => {
                     <p>({pgData.averageRatings?.overall || 0})</p>
                   </div>
                 </div>
-                <div className="buttons flex gap-[12px]">
+                <div className="buttons flex gap-[12px] items-center">
                   <button
                     onClick={handleSavePG}
-                    disabled={isLoading}
+                    disabled={isLoading || !user}
                     className={`h-[44px] w-[180px] text-[16px] text-white font-medium rounded-full shadow transition-all ${
                       isSaved
                         ? "bg-gradient-to-r from-[#28a745] to-[#20c997]"
                         : "bg-gradient-to-r from-[#d72638] to-[#ff0084]"
                     } ${
-                      isLoading ? "opacity-50 cursor-not-allowed" : ""
-                    } hover:scale-105`}
+                      isLoading || !user ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                    }`}
                   >
                     {isLoading ? "Processing..." : isSaved ? "Saved" : "Save for later"}
                   </button>
                   <button
                     onClick={handleShare}
                     title="Copy PG link"
-                    className="h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
+                    className="h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative hover:scale-105"
                   >
                     <img
                       src="/images/send.png"
@@ -348,8 +348,11 @@ const handleBookingRequest = async () => {
                   </button>
                   <button
                     onClick={postReport}
+                    disabled={!user}
                     title="Report PG"
-                    className="h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
+                    className={`h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative ${
+                      !user ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                    }`}
                   >
                     <img
                       src="/images/report.png"
@@ -357,6 +360,11 @@ const handleBookingRequest = async () => {
                       className="h-[16px] w-[16px]"
                     />
                   </button>
+                  {!user && (
+                    <span className="text-[14px] text-[#d72638] font-medium ml-2">
+                      Login to access the features
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="desc flex flex-col gap-[2px] mt-[20px]">
@@ -441,7 +449,7 @@ const handleBookingRequest = async () => {
             </div>
 
             <div className="rooms ml-[60px] mt-[30px]">
-              <ShowRooms RID={RID} pgData={pgData} onBookingRequest={handleBookingRequest}/>
+              <ShowRooms RID={RID} pgData={pgData} onBookingRequest={handleBookingRequest} user={user} />
             </div>
           </div>
           <div className="rightInfo min-w-[485px] max-w-[485px]">

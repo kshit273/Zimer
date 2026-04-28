@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import RoomFeatures from "./RoomFeatures.jsx";
 
-const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
+const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest, user }) => {
   const filters = ["Price", "Single room", "Shared room", "Available"];
 
   const priceRange = [
@@ -233,11 +233,19 @@ const ShowRooms = ({ RID, pgData: propPgData = null, onBookingRequest }) => {
                             </span>
                         </div>
                         <button
-                          className={` h-[40px] bg-gradient-to-r from-[#d72638] to-[#ff007f] text-white font-medium text-[14px] px-8 rounded-full shadow-md  transition-transform duration-300`}
-                          onClick = {() => onBookingRequest()}
+                          disabled={!user}
+                          className={`h-[40px] bg-gradient-to-r from-[#d72638] to-[#ff007f] text-white font-medium text-[14px] px-8 rounded-full shadow-md transition-transform duration-300 ${
+                            !user ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                          }`}
+                          onClick={() => onBookingRequest()}
                         >
                           Book now
                         </button>
+                        {!user && (
+                          <span className="text-[13px] text-[#d72638] font-medium">
+                            Login to access the features
+                          </span>
+                        )}
                       </div>
                   </div>
                 </div>

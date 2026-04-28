@@ -41,13 +41,13 @@ router.put(
 // router.post("/forgot-password/verify-otp",verifyOtp)
 // router.post("/forgot-password/reset",resetPassword)
 router.get("/me", authMiddleware, getUser);
-router.post("/br", authMiddleware, postBR);
+router.post("/br", authMiddleware, postBR); 
 router.post("/report", authMiddleware, postReport);
 router.get("/ztrs", authMiddleware, getZTRS);
 router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);
-router.post("/saved-pgs", authMiddleware, postSavedPGs);
+router.post("/saved-pgs", authMiddleware, postSavedPGs); 
 router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs); 
 router.post("/landlord-data",authMiddleware, getLandlordData); 
 
