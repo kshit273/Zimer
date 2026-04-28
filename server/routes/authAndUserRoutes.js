@@ -20,6 +20,7 @@ const {
   getLandlordData,
   postBR,
   postReport,
+  getReviewersBatch,
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -46,6 +47,7 @@ router.post("/report", authMiddleware, postReport);
 router.get("/ztrs", authMiddleware, getZTRS);
 router.post("/clear-tenant-pg", authMiddleware, clearTenantPG);
 router.post("/tenants-batch",authMiddleware, getTenantsBatch); 
+router.post("/reviewers-batch", getReviewersBatch); 
 router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.post("/saved-pgs", authMiddleware, postSavedPGs); 
 router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs); 

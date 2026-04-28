@@ -760,6 +760,45 @@ exports.getTenantsBatch = async (req, res) => {
   }
 };
 
+exports.getReviewersBatch = async (req, res) => {
+  try {
+    const { tenantIds } = req.body;
+
+    // Validate input
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "tenantIds array is required and cannot be empty"
+      });
+    }
+
+    // Fetch basic details of tenants by IDs
+    const tenants = await Tenant.find({
+      _id: { $in: tenantIds }
+    }).select('firstName lastName profilePicture');
+
+    const tenantsResponse = tenants.map(tenant => ({
+      _id: tenant._id,
+      firstName: tenant.firstName,
+      lastName: tenant.lastName,
+      profilePicture: tenant.profilePicture
+    }));
+
+    res.status(200).json({
+      success: true,
+      tenants: tenantsResponse,
+    });
+
+  } catch (error) {
+    console.error("Error fetching reviewers in batch:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch reviewers data",
+      error: error.message
+    });
+  }
+};
+
 //Done
 exports.getSavedPGs = async (req, res) => {
   try {

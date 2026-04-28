@@ -24,7 +24,7 @@ const PgReview = ({ RID, pgData }) => {
       try {
         setLoadingUsers(true);
         const response = await axios.post(
-          "http://localhost:5000/auth/tenants-batch",
+          "http://localhost:5000/auth/reviewers-batch",
           { tenantIds: userIds },
           { withCredentials: true }
         );
