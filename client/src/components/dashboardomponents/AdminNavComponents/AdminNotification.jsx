@@ -11,7 +11,11 @@ const AdminNotification = ({ data }) => {
   });
 
   return (
-    <div className="bg-[#1a1a1a] p-4 rounded-xl border border-[#333] flex justify-between items-center">
+    <div 
+      className={`bg-[#1a1a1a] p-4 rounded-xl border flex justify-between items-center ${
+        data.important ? "border-[#d72638]" : "border-[#333]"
+      }`}
+    >
       <div className="flex-1 pr-4">
         <p className="text-[14px] text-[#e8e8e0]">{data.message}</p>
       </div>

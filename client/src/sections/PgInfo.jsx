@@ -43,6 +43,18 @@ const PgInfo = ({setToast, user}) => {
     }
   };
 
+  const postReport = async () => {
+    try {
+      await axios.post(
+        "http://localhost:5000/auth/report",
+        { pgId: pgData.RID },
+        { withCredentials: true }
+      );
+      setToast("Report submitted successfully.", "success");
+    } catch (err) {
+      setToast("Failed to submit report. Please try again.","error");    }
+  };
+
   // API data states
   const [pgData, setPgData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -333,6 +345,17 @@ const handleBookingRequest = async () => {
                         Copied!
                       </span>
                     )}
+                  </button>
+                  <button
+                    onClick={postReport}
+                    title="Report PG"
+                    className="h-[44px] w-[44px] bg-[#d9d9d9] rounded-full flex items-center justify-center relative"
+                  >
+                    <img
+                      src="/images/report.png"
+                      alt="report"
+                      className="h-[16px] w-[16px]"
+                    />
                   </button>
                 </div>
               </div>

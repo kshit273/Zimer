@@ -27,8 +27,8 @@ router.put("/:pgId/reviews/:reviewId", authMiddleware, updateReview)
 // PG routes
 router.get("/", getAllPGs);
 router.get("/:pgId",authMiddleware, getPGById);
-router.get("/show-data/:pgId",authMiddleware, getPGByIdToShow);
-router.post("/", upload.any(), authMiddleware, createPG); // -------------
+router.get("/show-data/:pgId", getPGByIdToShow);
+router.post("/", upload.any(), authMiddleware, createPG); 
 router.post("/create-pg", upload.any(), authMiddleware, sendCreatePGRequest);
 router.put("/:id",authMiddleware, updatePG);
 router.put("/:id/photos", upload.any(),authMiddleware, updatePGPhotos);

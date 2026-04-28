@@ -565,10 +565,11 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+//Done
 exports.postReport = async (req, res) => {
   try {
     const { pgId } = req.body;
-    const senderId = req.user._id;
+    const senderId = req.user.id;
     if (!pgId) {
       return res.status(400).json({
         success: false,

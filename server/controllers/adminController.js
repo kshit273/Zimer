@@ -290,11 +290,26 @@ const getNotifications = async (req, res) => {
   try {
     const adminId = req.user._id;
 
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found." });
+    }
+    const managedPGs = admin.managedPGs || [];
+
     const notifications = await AdminNotification.find({ recipient: adminId })
       .populate("sender", "firstName lastName email phone")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return res.status(200).json({ notifications });
+    const result = notifications.map((notif) => {
+      const isImportant = notif.pg && managedPGs.includes(notif.pg);
+      return {
+        ...notif,
+        important: !!isImportant,
+      };
+    });
+
+    return res.status(200).json({ notifications: result });
   } catch (error) {
     console.error("getNotifications error:", error);
     return res.status(500).json({ message: "Internal server error." });
