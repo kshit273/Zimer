@@ -21,6 +21,7 @@ const {
   postBR,
   postReport,
   getReviewersBatch,
+  upgradePlanRequest,
 } = require("../controllers/authController");
 
 const upload = require("../middleware/upload");
@@ -52,5 +53,6 @@ router.get("/saved-pgs", authMiddleware, getSavedPGs);
 router.post("/saved-pgs", authMiddleware, postSavedPGs); 
 router.put("/update-landlord-pgs",authMiddleware, updateLandlordPGs); 
 router.post("/landlord-data",authMiddleware, getLandlordData); 
+router.post("/upgrade-plan", authMiddleware, upgradePlanRequest);
 
 module.exports = router;

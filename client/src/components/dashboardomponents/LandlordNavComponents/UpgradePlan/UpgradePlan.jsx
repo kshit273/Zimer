@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, X, ChevronDown } from "lucide-react";
 import { basicList, popularList, premiumList, plans } from "../../../../constants/Abt";
+import axios from "axios";
 
 const faqs = [
   {
@@ -92,6 +93,26 @@ const faqs = [
 const UpgradePlan = ({currentPlan}) => {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
+  const handleUpgrade = async (planTitle) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/auth/upgrade-plan",
+        { newPlan: planTitle.toLowerCase() },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        alert(response.data.message || "Upgrade request sent successfully to admin.");
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Failed to send upgrade request.");
+      }
+    }
+  };
+
   const toggleFAQ = (index) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
@@ -177,6 +198,7 @@ const UpgradePlan = ({currentPlan}) => {
 
                 {/* Upgrade Button */}
                 {plan.title !== 'Basic' ? <button
+                  onClick={() => handleUpgrade(plan.title)}
   className="text-[16px] w-full mt-8 py-3 rounded-full font-semibold transition-opacity hover:opacity-90"
   style={{
     backgroundColor: currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1) === plan.title ? '#d72638' : plan.secBg,

@@ -239,6 +239,17 @@ const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) =
     return { success: false, error: err?.response?.data?.message || "Failed to submit ZTRS" };
   }
 };
+
+const handleNotificationRead = async (id) => {
+  try {
+    await adminAxios.put(`/admin/notifications/${id}/read`);
+    setNotifData((prev) =>
+      prev.map((notif) => (notif._id === id ? { ...notif, status: "read" } : notif))
+    );
+  } catch (err) {
+    console.error("Failed to mark notification as read:", err);
+  }
+};
   // ── Back handlers ────────────────────────────────────────────────────────────
   const handleBackFromPG = () => {
     setSelectedPG(null);
@@ -434,6 +445,7 @@ const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) =
                   data={notifData}
                   loading={notifLoading}
                   error={notifError}
+                  onNotificationRead={handleNotificationRead}
                 />
               </div>
             </div>

@@ -263,6 +263,21 @@ exports.updatePG = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ error: "PG not found" });
     }
+
+    try {
+      const AdminNotification = require("../models/adminNotificationModel");
+      const updatedFields = Object.keys(req.body).join(", ");
+      const notification = new AdminNotification({
+        sender: req.user.id,
+        recipient: updated.AID,
+        pg: updated.RID,
+        message: `Landlord of PG (${updated.RID}) updated the details , (${updatedFields}).`,
+      });
+      await notification.save();
+    } catch (notifErr) {
+      console.error("Failed to create admin notification on PG update:", notifErr);
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: "Failed to update PG" });

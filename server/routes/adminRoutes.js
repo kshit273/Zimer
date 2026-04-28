@@ -12,7 +12,8 @@ const {
   getNotifications,
   getTenantData,
   getJRNotification,
-  getRequestNotifications
+  getRequestNotifications,
+  markNotificationRead
 } = require("../controllers/adminController");
 
 // Public route — no auth needed for login
@@ -29,6 +30,7 @@ router.get("/jr",auth,isAdmin, getJRNotification);
 router.post("/ztrs", auth, isAdmin, postZTRS);
 
 router.get("/notifications", auth, isAdmin, getNotifications);
+router.put("/notifications/:id/read", auth, isAdmin, markNotificationRead);
 
 router.get("/request-notifications", auth, isAdmin, getRequestNotifications);
 

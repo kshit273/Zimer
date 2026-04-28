@@ -26,6 +26,11 @@ const adminNotificationSchema = new mongoose.Schema(
       tenantEmail: String,
       tenantPhone: String,
     },
+    status: {
+      type: String,
+      enum: ['read', 'unread'],
+      default: 'unread'
+    },
   },
   {
     timestamps: true,

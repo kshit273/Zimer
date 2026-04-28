@@ -316,6 +316,31 @@ const getNotifications = async (req, res) => {
   }
 };
 
+// PUT /notifications/:id/read — mark notification as read
+const markNotificationRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const notification = await AdminNotification.findById(id);
+    
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found." });
+    }
+    
+    // Ensure only the intended admin can update
+    if (notification.recipient.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized to update this notification." });
+    }
+
+    notification.status = "read";
+    await notification.save();
+
+    return res.status(200).json({ message: "Notification marked as read.", notification });
+  } catch (error) {
+    console.error("markNotificationRead error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // GET /request-notifications — get all CPR notifications for the logged-in admin
 const getRequestNotifications = async (req, res) => {
   try {
@@ -343,4 +368,5 @@ module.exports = {
   getTenantData,
   getJRNotification,
   getRequestNotifications,
+  markNotificationRead,
 };

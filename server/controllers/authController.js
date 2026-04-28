@@ -1049,6 +1049,51 @@ exports.getLandlordData = async (req, res) => {
   }
 };
 
+exports.upgradePlanRequest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    if (role !== "landlord") {
+      return res.status(403).json({ success: false, message: "Only landlords can upgrade plans." });
+    }
+
+    const landlord = await Landlord.findById(userId);
+    if (!landlord) {
+      return res.status(404).json({ success: false, message: "Landlord not found." });
+    }
+
+    const pgs = await PG.find({ LID: userId });
+    if (!pgs || pgs.length === 0) {
+      return res.status(400).json({ success: false, message: "Please register a PG first before upgrading your plan." });
+    }
+
+    const pg = pgs[0];
+    const { newPlan } = req.body;
+
+    const message = `Landlord ${landlord.firstName} ${landlord.lastName} of pg:${pg.RID} has requested a plan upgrade to ${newPlan}.`;
+
+    const notification = new AdminNotification({
+      sender: userId,
+      recipient: pg.AID,
+      pg: pg.RID,
+      message,
+      metadata: {
+        tenantName: `${landlord.firstName} ${landlord.lastName}`,
+        tenantEmail: landlord.email,
+        tenantPhone: landlord.phone,
+      },
+    });
+
+    await notification.save();
+
+    return res.status(200).json({ success: true, message: "Upgrade request sent successfully to admin." });
+  } catch (error) {
+    console.error("upgradePlanRequest error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
 //Done
 exports.clearTenantPG = async (req, res) => {
   try {

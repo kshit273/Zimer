@@ -31,13 +31,15 @@ const DOT_COLOR = {
   Notifications: "bg-[#eab308]",
 };
 
-const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit }) => {
+const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit, onNotificationRead }) => {
   const [open, setOpen]     = useState(false);
   const [isRead, setIsRead] = useState(false);
 
   const unreadCount = Array.isArray(data)
   ? heading === "Booking"
     ? data.filter((item) => item.resTime === null).length  
+    : (heading === "PG create" || heading === "Join")
+    ? data.filter((item) => item.status !== "accepted").length
     : data.length
   : 0;
 
@@ -131,7 +133,7 @@ const handleToggle = () => {
             ))}
           {heading === "Notifications" &&
             data.map((item, i) => (
-              <AdminNotification key={i} data={item} />
+              <AdminNotification key={i} data={item} onRead={onNotificationRead} />
             ))}
         </div>
       )}
