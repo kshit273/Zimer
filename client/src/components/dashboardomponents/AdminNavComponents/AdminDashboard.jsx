@@ -35,6 +35,14 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
   const [lrLoading,     setLrLoading]     = useState(false);
   const [lrError,       setLrError]       = useState(null);
 
+  const [reqData,       setReqData]       = useState([]);
+  const [reqLoading,    setReqLoading]    = useState(false);
+  const [reqError,      setReqError]      = useState(null);
+
+  const [notifData,     setNotifData]     = useState([]);
+  const [notifLoading,  setNotifLoading]  = useState(false);
+  const [notifError,    setNotifError]    = useState(null);
+
   // ── Loading / error states ──
   const [pgListLoading,     setPgListLoading]     = useState(false);
   const [pgDetailLoading,   setPgDetailLoading]   = useState(false);
@@ -170,6 +178,42 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
 
     fetchLRData();
   }, [adminUser?.managedPGs]);
+
+  // ── Fetch CPR Notifications (Requests) ──
+  useEffect(() => {
+    const fetchReqData = async () => {
+      setReqLoading(true);
+      setReqError(null);
+      try {
+        const res = await adminAxios.get("/admin/request-notifications");
+        setReqData(res.data.notifications || []);
+      } catch (err) {
+        setReqError(err?.response?.data?.message || "Failed to load requests.");
+      } finally {
+        setReqLoading(false);
+      }
+    };
+
+    fetchReqData();
+  }, []);
+
+  // ── Fetch General Notifications ──
+  useEffect(() => {
+    const fetchNotifData = async () => {
+      setNotifLoading(true);
+      setNotifError(null);
+      try {
+        const res = await adminAxios.get("/admin/notifications");
+        setNotifData(res.data.notifications || []);
+      } catch (err) {
+        setNotifError(err?.response?.data?.message || "Failed to load notifications.");
+      } finally {
+        setNotifLoading(false);
+      }
+    };
+
+    fetchNotifData();
+  }, []);
 
 const handleBRResponse = async (brId, response) => {
   try {
@@ -380,11 +424,16 @@ const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) =
                   onZTRSSubmit={handleZTRSUpdation}
                 />
                 <DropdownComp
-                  heading="General"
-                  data={[
-                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                    { RID: "DEHPREe5be03", message: "Kshitij Sharma has requested to leave room 1769934860787", status: "pending", metadata: { tenantName: "Kshitij Sharma", moveOutDate: "2026-02-15T09:07:30.285+00:00", reason: "blah blah blah" }, createdAt: "2026-02-15T09:07:30.484+00:00" },
-                  ]}
+                  heading="PG create"
+                  data={reqData}
+                  loading={reqLoading}
+                  error={reqError}
+                />
+                <DropdownComp
+                  heading="Notifications"
+                  data={notifData}
+                  loading={notifLoading}
+                  error={notifError}
                 />
               </div>
             </div>

@@ -5,6 +5,7 @@ const Br = require("../models/brModel");
 const ZTRS = require("../models/ztrsModel");
 const AdminNotification = require("../models/adminNotificationModel");
 const Notification = require("../models/notificationModel");
+const CPRNotification = require("../models/cprNotificationModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -300,6 +301,22 @@ const getNotifications = async (req, res) => {
   }
 };
 
+// GET /request-notifications — get all CPR notifications for the logged-in admin
+const getRequestNotifications = async (req, res) => {
+  try {
+    const adminId = req.user._id;
+
+    const cprNotifications = await CPRNotification.find({ recipient: adminId })
+      .populate("sender", "firstName lastName email phone")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ notifications: cprNotifications });
+  } catch (error) {
+    console.error("getRequestNotifications error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 module.exports = {
   getPGs,
   getPGDetails,
@@ -310,4 +327,5 @@ module.exports = {
   getNotifications,
   getTenantData,
   getJRNotification,
+  getRequestNotifications,
 };

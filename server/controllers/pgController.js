@@ -4,6 +4,9 @@ const { generateRID } = require("../middleware/ridService");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const Admin = require("../models/adminModel");
+const Landlord = require("../models/landlordModel");
+const CPRNotification = require("../models/cprNotificationModel");
 
 // Done
 exports.getAllPGs = async (req, res) => {
@@ -141,38 +144,106 @@ const transformFormData = (formData, LID, files = {}) => {
 // Done
 exports.createPG = async (req, res) => {
   try {
-
-    if(req.user.role !== 'landlord'){
-      return res.status(401).json({error : "Unauthorized"});
+    if (req.user.role !== 'admin') {
+      return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
+    const { pgData, city, areaCode, notificationId, landlordId } = req.body;
+
+    if (!city || !areaCode) {
+      return res.status(400).json({ error: "City and area code are required" });
+    }
+
+    const rid = await generateRID(city, areaCode);
+
+    const newPG = new PG({
+      ...pgData,
+      RID: rid,
+      AID: req.user._id, // Set the Admin ID
+      LID: landlordId
+    });
+
+    await newPG.save();
+
+    // Add RID to Landlord's ownedPGs
+    await Landlord.findByIdAndUpdate(landlordId, { $push: { ownedPGs: rid } });
+
+    // Add RID to Admin's areaPGs
+    await Admin.findByIdAndUpdate(req.user._id, { $push: { areaPGs: rid } });
+
+    // Update notification status
+    await CPRNotification.findByIdAndUpdate(notificationId, { status: "accepted" });
+
+    res.status(201).json(newPG);
+  } catch (err) {
+    console.error("Full error:", err);
+    res.status(400).json({ error: "Failed to create PG", details: err.message });
+  }
+};
+
+exports.sendCreatePGRequest = async (req, res) => {
+  try {
+    if (req.user.role !== 'landlord') {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const formData = req.body;
-    
+
     // Parse JSON strings
     if (typeof formData.address === "string") {
       formData.address = JSON.parse(formData.address);
     }
-    
+
     const { address } = formData;
 
     if (!address || !address.city || !address.areaCode) {
       return res.status(400).json({ error: "City and area are required" });
     }
 
-    const pgData = transformFormData(formData, req.user.id, req.files);
-    
-    const rid = await generateRID(address.city, address.areaCode);
+    // Get the landlord to extract metadata
+    const landlord = await Landlord.findById(req.user.id);
+    if (!landlord) {
+      return res.status(404).json({ error: "Landlord not found" });
+    }
 
-    const newPG = new PG({
-      ...pgData,
-      RID: rid,
+    // Transform form data using existing function
+    const pgData = transformFormData(formData, req.user.id, req.files);
+
+    // Find an eligible admin: matching city in managedArea, areaPGs array length < 50
+    // If the areaPGs array does not exist or is empty, its size is 0
+    const admin = await Admin.findOne({
+      managedArea: address.city,
+      $expr: { $lt: [{ $size: { $ifNull: ["$areaPGs", []] } }, 50] }
     });
 
-    await newPG.save();
-    res.status(201).json(newPG);
+    if (!admin) {
+      return res.status(404).json({ error: "No eligible admin found for this city at the moment" });
+    }
+
+    const message = `${landlord.firstName} ${landlord.lastName || ''}`.trim() + ` has sent a request to create PG on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`;
+
+    // Create the notification
+    const notification = new CPRNotification({
+      sender: landlord._id,
+      recipient: admin._id,
+      formData: pgData,
+      message,
+      metadata: {
+        senderName: `${landlord.firstName} ${landlord.lastName || ''}`.trim(),
+        senderEmail: landlord.email,
+        senderPhone: landlord.phone,
+        city: address.city,
+        areaCode: address.areaCode
+      },
+    });
+
+    await notification.save();
+
+    res.status(201).json({ message: "Request to create PG sent successfully to admin." });
+
   } catch (err) {
     console.error("Full error:", err);
-    res.status(400).json({ error: "Failed to create PG", details: err.message });
+    res.status(400).json({ error: "Failed to send PG creation request", details: err.message });
   }
 };
 

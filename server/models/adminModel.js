@@ -11,7 +11,8 @@ const adminSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     managedPGs: [{ type: String }],
-    managedArea:{type: String, required: true, trim: true}
+    managedArea:{type: String, required: true, trim: true},
+    areaPGs: [{ type: String }],
   },
   { timestamps: true }
 );

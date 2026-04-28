@@ -222,45 +222,20 @@ const RegisterPG = ({setUser,user}) => {
       fd.append("address", JSON.stringify(formData.address));
       fd.append("rooms", JSON.stringify(formData.rooms));
 
-      // 📌 Register the PG
-      const res = await axios.post("http://localhost:5000/pgs/", fd, {
+      // 📌 Send Request to Create PG
+      const res = await axios.post("http://localhost:5000/pgs/create-pg", fd, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true // Important for authentication
       });
       
-      // 📌 Update user's ownedPGs array with the new RID
-      try {
-        
-        const currentOwnedPGs = user.ownedPGs || [];
-        
-        // Update user with new PG RID
-        const updateRes = await axios.put(
-          "http://localhost:5000/auth/update-landlord-pgs",
-          {
-            ownedPGs: [...currentOwnedPGs, res.data.RID]
-          },
-          { withCredentials: true }
-        );
-        
-        
-        // Update the user state if setUser is available
-        if (setUser) {
-          setUser(updateRes.data.user);
-        }
-        
-      } catch (updateErr) {
-        console.error("Failed to update user's owned PGs:", updateErr);
-        // PG is registered but user update failed - you might want to handle this
-        setError("PG registered but failed to update your profile. Please contact support.");
-      }
-      
       setError("");
-      setSuccess(`Your PG has been registered: ${res.data.RID}`);
+      setSuccess("Your request to create the PG has been successfully sent to the admin for approval.");
       
     } catch (err) {
-      console.error("Registration failed", err);
+      console.error("Registration request failed", err);
       setSuccess("");
-      setError("Failed to register PG. Please try again.");
+      const errorMessage = err.response?.data?.error || "Failed to send PG creation request. Please try again.";
+      setError(errorMessage);
     }
   };
 
@@ -708,7 +683,10 @@ const fullAddress = addressParts.join(", ");
       {/* Submit */}
       <button
         type="submit"
-        className="bg-[#d72638] text-[#e8e8e8] p-3 rounded-lg font-medium hover:bg-[#9b1b30] duration-200"
+        disabled={!!success}
+        className={`p-3 rounded-lg font-medium duration-200 text-[#e8e8e8] ${
+          success ? "bg-gray-400 cursor-not-allowed" : "bg-[#d72638] hover:bg-[#9b1b30]"
+        }`}
       >
         Save and Continue
       </button>

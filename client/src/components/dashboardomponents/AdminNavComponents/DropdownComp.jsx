@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import BRNotification from "./BRNotification";
 import JRNotification from "./JRNotification";
 import LRNotification from "./LRNotification";
+import AdminCPRNotification from "./AdminCPRNotification";
+import AdminNotification from "./AdminNotification";
 
 // Accent colours per heading type
 const TYPE_COLOR = {
@@ -9,18 +11,24 @@ const TYPE_COLOR = {
   Join:    "text-[#4ade80]  border-[#4ade80]/20  bg-[#4ade80]/5",
   Leave:   "text-[#f87171]  border-[#f87171]/20  bg-[#f87171]/5",
   General:   "text-[#800080]  border-[#800080]/20  bg-[#800080]/5",
+  Requests:   "text-[#3b82f6]  border-[#3b82f6]/20  bg-[#3b82f6]/5",
+  Notifications:   "text-[#eab308]  border-[#eab308]/20  bg-[#eab308]/5",
 };
 const BADGE_COLOR = {
   Booking: "bg-[#c8f135]  text-[#0a0a0a]",
   Join:    "bg-[#4ade80]  text-[#0a0a0a]",
   Leave:   "bg-[#f87171]  text-[#0a0a0a]",
   General:   "bg-[#800080]  text-[#0a0a0a]",
+  Requests:  "bg-[#3b82f6]  text-[#0a0a0a]",
+  Notifications: "bg-[#eab308]  text-[#0a0a0a]",
 };
 const DOT_COLOR = {
   Booking: "bg-[#c8f135]",
   Join:    "bg-[#4ade80]",
   Leave:   "bg-[#f87171]",
   General:   "bg-[#800080]",
+  Requests:  "bg-[#3b82f6]",
+  Notifications: "bg-[#eab308]",
 };
 
 const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit }) => {
@@ -64,7 +72,7 @@ const handleToggle = () => {
         {/* Labels */}
         <div className="flex-1 min-w-0">
           <p className="text-[0.85rem] font-medium tracking-[0.1em] text-[#e8e8e0] uppercase">
-            {heading} requests
+            {heading === "Notifications" ? heading : `${heading} requests`}
           </p>
           <p className="text-[0.75rem] text-[#555550] mt-0.5">
             {heading === "Booking"
@@ -116,6 +124,14 @@ const handleToggle = () => {
               <LRNotification key={i} data={item}
                 onAccept={onZTRSSubmit}
               />
+            ))}
+          {heading === "PG create" &&
+            data.map((item, i) => (
+              <AdminCPRNotification key={i} data={item} />
+            ))}
+          {heading === "Notifications" &&
+            data.map((item, i) => (
+              <AdminNotification key={i} data={item} />
             ))}
         </div>
       )}
