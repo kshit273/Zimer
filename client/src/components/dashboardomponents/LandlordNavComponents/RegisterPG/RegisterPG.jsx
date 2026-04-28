@@ -5,7 +5,7 @@ import Loader from "./Loader";
 import Checkbox from "../../TenantNavComponents/LeavePG/Checkbox";
 import MapPreview from "./MapPreview"
 import AreaDropDown from "./AreaDropDown";
-import { cityAreaMap } from"../../../../utils/areaCodes"
+import { findCityAreasByPincode } from"../../../../utils/areaCodes"
 import axios from "axios";
 
 const RegisterPG = ({setUser,user}) => {
@@ -37,7 +37,7 @@ const RegisterPG = ({setUser,user}) => {
     allowPromo: false,
     coverPhoto: null, 
     otherPhotos: [], 
-    location: null,
+    location: null, // saved from map click: [lat, lng]
 });
   const [rooms, setRooms] = useState([]);
   const [availableAreas, setAvailableAreas] = useState([]);
@@ -152,10 +152,11 @@ const RegisterPG = ({setUser,user}) => {
       !formData.address.line1 ||
       !formData.address.areaCode ||
       !formData.coverPhoto ||
-      !formData.pgType 
+      !formData.pgType ||
+      !formData.location
     ) {
       setSuccess("");
-      setError("Please fill all mandatory fields: Name, Description, Address, PG Type, Cover Photo");
+      setError("Please fill all mandatory fields: Name, Description, Address, PG Type, Cover Photo, and select location on the map");
       return;
     }
 
@@ -221,6 +222,7 @@ const RegisterPG = ({setUser,user}) => {
 
       fd.append("address", JSON.stringify(formData.address));
       fd.append("rooms", JSON.stringify(formData.rooms));
+      fd.append("location", JSON.stringify(formData.location));
 
       // 📌 Send Request to Create PG
       const res = await axios.post("http://localhost:5000/pgs/create-pg", fd, {
@@ -402,17 +404,18 @@ const fullAddress = addressParts.join(", ");
               address: { ...prev.address, pin: pin }
             }));
 
-            if (cityAreaMap[pin]) {
+            const match = findCityAreasByPincode(pin);
+            if (match) {
               // Valid pin → auto-fill city & areas
               setFormData(prev => ({
                 ...prev,
                 address: {
                   ...prev.address,
-                  city: cityAreaMap[pin].city,
+                  city: match.city,
                   areaCode: "" // reset selected area
                 }
               }));
-              setAvailableAreas(cityAreaMap[pin].areas);
+              setAvailableAreas(match.areas);
             } else {
               // Invalid pin → reset city & areas
               setFormData(prev => ({

@@ -4,7 +4,7 @@ import SignupForm2 from "./SignupForm2";
 import SignupForm1 from "./signupForm1";
 import SignupForm3 from "./SignupForm3";
 
-const SignupComp = ({ redirectTo, onShowLogin, setUser, onSubmit }) => {
+const SignupComp = ({ redirectTo, onShowLogin, setUser, onSubmit, setToast }) => {
   const [signupStep, setSignupStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -55,6 +55,7 @@ const SignupComp = ({ redirectTo, onShowLogin, setUser, onSubmit }) => {
               handleSubmit={handleSubmit}
               formData={formData}
               setFormData={setFormData}
+              setToast={setToast}
             />
           ) : null}
         </div>

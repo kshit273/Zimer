@@ -1,6 +1,12 @@
-export const cityAreaMap = {
-  "201301": { 
+// City/area configuration.
+// Many cities have multiple pincodes. We support both explicit pincodes and inclusive ranges.
+export const cityAreaConfigs = [
+  {
     city: "Noida / Greater Noida",
+    pincodes: [
+      "201301","201302","201303","201304","201305","201306","201307","201308","201309",
+      "201310","201311","201312","201313","201314","201315","201316","201317","201318",
+    ],
     areas: [
       { code: "SEC", name: "Sector 62" },
       { code: "S18", name: "Sector 18" },
@@ -19,8 +25,9 @@ export const cityAreaMap = {
       { code: "FIL", name: "Film City Noida" },
     ],
   },
-  "122001": {
+  {
     city: "Gurgaon",
+    pincodeRanges: [{ from: "122001", to: "122018" }],
     areas: [
       { code: "DLF", name: "Cyber City / DLF Ph 1 to 5" },
       { code: "MGR", name: "MG Road / Golf Course Road" },
@@ -39,8 +46,9 @@ export const cityAreaMap = {
       { code: "PAT", name: "Pataudi Road" },
     ],
   },
-  "248003": {
+  {
     city: "Dehradun",
+    pincodeRanges: [{ from: "248001", to: "248999" }],
     areas: [
       { code: "DIT", name: "DIT University area" },
       { code: "GRA", name: "Graphic Era University zone" },
@@ -59,8 +67,9 @@ export const cityAreaMap = {
       { code: "CLE", name: "Clement Town" },
     ],
   },
-  "110001": {
+  {
     city: "Delhi",
+    pincodeRanges: [{ from: "110001", to: "110099" }],
     areas: [
       { code: "KAM", name: "North Campus / Kamla Nagar (DU)" },
       { code: "HUD", name: "Hudson Lane" },
@@ -79,8 +88,9 @@ export const cityAreaMap = {
       { code: "DWA", name: "Dwarka" },
     ],
   },
-  "201002": {
+  {
     city: "Ghaziabad",
+    pincodeRanges: [{ from: "201001", to: "201199" }],
     areas: [
       { code: "RAJ", name: "Raj Nagar Extension" },
       { code: "KAV", name: "Kavi Nagar" },
@@ -99,8 +109,9 @@ export const cityAreaMap = {
       { code: "CRO", name: "Crossings Republik" },
     ],
   },
-  "121001": {
+  {
     city: "Faridabad",
+    pincodeRanges: [{ from: "121001", to: "121199" }],
     areas: [
       { code: "S15", name: "Sector 15" },
       { code: "S16", name: "Sector 16" },
@@ -119,8 +130,9 @@ export const cityAreaMap = {
       { code: "S09", name: "Sector 9" },
     ],
   },
-  "247667": {
+  {
     city: "Roorkee",
+    pincodeRanges: [{ from: "247667", to: "247699" }],
     areas: [
       { code: "IIT", name: "IIT Roorkee Campus & Adjacent Areas" },
       { code: "SOL", name: "Solani Kunj" },
@@ -139,8 +151,9 @@ export const cityAreaMap = {
       { code: "HAR", name: "Haridwar Road" },
     ],
   },
-  "249401": {
+  {
     city: "Haridwar",
+    pincodeRanges: [{ from: "249401", to: "249499" }],
     areas: [
       { code: "GUR", name: "Gurukula Kangri University Area" },
       { code: "BAH", name: "Bahadrabad" },
@@ -159,5 +172,35 @@ export const cityAreaMap = {
       { code: "IND", name: "Industrial Estate Area" },
     ],
   },
+];
+
+const normalizePin = (pin) => String(pin || "").trim();
+
+const inRange = (pin, from, to) => {
+  const p = normalizePin(pin);
+  const f = normalizePin(from);
+  const t = normalizePin(to);
+  if (!/^\d{6}$/.test(p) || !/^\d{6}$/.test(f) || !/^\d{6}$/.test(t)) return false;
+  const pn = Number(p);
+  return pn >= Number(f) && pn <= Number(t);
+};
+
+export const findCityAreasByPincode = (pin) => {
+  const p = normalizePin(pin);
+  if (!/^\d{6}$/.test(p)) return null;
+
+  for (const cfg of cityAreaConfigs) {
+    if (Array.isArray(cfg.pincodes) && cfg.pincodes.includes(p)) {
+      return { city: cfg.city, areas: cfg.areas };
+    }
+    if (Array.isArray(cfg.pincodeRanges)) {
+      for (const r of cfg.pincodeRanges) {
+        if (inRange(p, r.from, r.to)) {
+          return { city: cfg.city, areas: cfg.areas };
+        }
+      }
+    }
+  }
+  return null;
 };
 

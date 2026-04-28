@@ -130,6 +130,25 @@ const pgSchema = new mongoose.Schema(
       enum: ["basic", "popular", "premium"],
       default: "basic",
     },
+
+    // 📍 PG Location (saved from map click during registration)
+    // GeoJSON Point: coordinates are [lng, lat]
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        validate: {
+          validator: function (arr) {
+            return !arr || (Array.isArray(arr) && arr.length === 2);
+          },
+          message: "Location coordinates must be [lng, lat]",
+        },
+      },
+    },
   },
   { timestamps: true }
 );
@@ -193,5 +212,6 @@ pgSchema.index(
 pgSchema.index({ "rooms.rent": 1 });           // for rent range filters
 pgSchema.index({ gender: 1 });                  // for gender filter
 pgSchema.index({ plan: 1, "averageRatings.overall": -1 }); // for featured
+pgSchema.index({ location: "2dsphere" });        // for geo queries
 
 module.exports = mongoose.model("PG", pgSchema);

@@ -40,6 +40,8 @@ const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit, onNotificatio
     ? data.filter((item) => item.resTime === null).length  
     : (heading === "PG create" || heading === "Join")
     ? data.filter((item) => item.status !== "accepted").length
+    : heading === "Notifications"
+    ? data.filter((item) => item.status !== "read").length
     : data.length
   : 0;
 

@@ -89,16 +89,6 @@ const FindRoom = ({ setActiveRID }) => {
     }
   };
 
-  if (loading) {
-    return (
-      <section id="about" className="relative z-2 pt-[100px]">
-        <div className="w-full flex justify-center items-center min-h-[400px]">
-          <p className="text-2xl text-gray-600">Loading rooms...</p>
-        </div>
-      </section>
-    );
-  }
-
   const {
     verified = [],
     dehradun = [],
@@ -126,64 +116,80 @@ const FindRoom = ({ setActiveRID }) => {
             </div>
           </div>
 
-          {/* ── Sliders — all data comes from backend now ── */}
-          {verified.length > 0 && (
-            <RoomSlider
-              list={verified}
-              heading="Verified by Zimer"
-              onRoomClick={handleRoomClick}
-              desc="Stay stress-free with PGs officially verified for quality, comfort, and trust."
-            />
-          )}
+          {/* ── Sliders or Loading Skeletons ── */}
+          {loading ? (
+            /* Skeleton Sliders */
+            [1, 2, 3].map((idx) => (
+              <div key={idx} className="w-full px-8 mt-12 overflow-hidden">
+                <div className="h-8 w-64 bg-[#a3a3a3] rounded animate-pulse mb-6"></div>
+                <div className="flex gap-6 overflow-hidden">
+                  {[1, 2, 3, 4, 5].map((card) => (
+                    <div key={card} className="w-72 h-80 flex-shrink-0 bg-[#a3a3a3] rounded-[20px] animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <>
+              {verified.length > 0 && (
+                <RoomSlider
+                  list={verified}
+                  heading="Verified by Zimer"
+                  onRoomClick={handleRoomClick}
+                  desc="Stay stress-free with PGs officially verified for quality, comfort, and trust."
+                />
+              )}
 
-          {dehradun.length > 0 && (
-            <RoomSlider
-              list={dehradun}
-              heading="Rooms in Dehradun"
-              cityName="Dehradun"
-              onRoomClick={handleRoomClick}
-              desc="Explore handpicked rooms in Dehradun, perfect for techies, interns, and students."
-            />
-          )}
+              {dehradun.length > 0 && (
+                <RoomSlider
+                  list={dehradun}
+                  heading="Rooms in Dehradun"
+                  cityName="Dehradun"
+                  onRoomClick={handleRoomClick}
+                  desc="Explore handpicked rooms in Dehradun, perfect for techies, interns, and students."
+                />
+              )}
 
-          {roorkee.length > 0 && (
-            <RoomSlider
-              list={roorkee}
-              heading="Rooms in Roorkee"
-              cityName="Roorkee"
-              onRoomClick={handleRoomClick}
-              desc="Explore handpicked rooms in Roorkee, perfect for techies, interns, and students."
-            />
-          )}
+              {roorkee.length > 0 && (
+                <RoomSlider
+                  list={roorkee}
+                  heading="Rooms in Roorkee"
+                  cityName="Roorkee"
+                  onRoomClick={handleRoomClick}
+                  desc="Explore handpicked rooms in Roorkee, perfect for techies, interns, and students."
+                />
+              )}
 
-          {delhi.length > 0 && (
-            <RoomSlider
-              list={delhi}
-              heading="Rooms in Delhi"
-              cityName="Delhi"
-              onRoomClick={handleRoomClick}
-              desc="Explore handpicked rooms in Delhi, perfect for techies, interns, and students."
-            />
-          )}
+              {delhi.length > 0 && (
+                <RoomSlider
+                  list={delhi}
+                  heading="Rooms in Delhi"
+                  cityName="Delhi"
+                  onRoomClick={handleRoomClick}
+                  desc="Explore handpicked rooms in Delhi, perfect for techies, interns, and students."
+                />
+              )}
 
-          {girls.length > 0 && (
-            <RoomSlider
-              list={girls}
-              heading="Rooms for Girls"
-              cityName="Girls"
-              onRoomClick={handleRoomClick}
-              desc="Safe, secure, and convenient PGs tailored for girl students and working women."
-            />
-          )}
+              {girls.length > 0 && (
+                <RoomSlider
+                  list={girls}
+                  heading="Rooms for Girls"
+                  cityName="Girls"
+                  onRoomClick={handleRoomClick}
+                  desc="Safe, secure, and convenient PGs tailored for girl students and working women."
+                />
+              )}
 
-          {boys.length > 0 && (
-            <RoomSlider
-              list={boys}
-              heading="Rooms for Boys"
-              cityName="Boys"
-              onRoomClick={handleRoomClick}
-              desc="Safe, secure, and convenient PGs tailored for boy students and working men."
-            />
+              {boys.length > 0 && (
+                <RoomSlider
+                  list={boys}
+                  heading="Rooms for Boys"
+                  cityName="Boys"
+                  onRoomClick={handleRoomClick}
+                  desc="Safe, secure, and convenient PGs tailored for boy students and working men."
+                />
+              )}
+            </>
           )}
 
         </div>

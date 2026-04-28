@@ -38,10 +38,15 @@ const Userlogin = ({ setUser, setToast }) => {
         });
       }
 
-      setToast('logged in successfully'); // Set toast message
+      setToast?.("Signed up successfully", "success");
       return { user: res.data.user }; 
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Signup failed. Please try again.";
+      setToast?.(msg, "error");
       return false;
     }
   };
@@ -56,11 +61,16 @@ const Userlogin = ({ setUser, setToast }) => {
         { withCredentials: true }
       );
       setUser(res.data.user);
-      setToast('logged in successfully'); // Set toast message
+      setToast?.("Logged in successfully", "success");
       navigate(`/`);
 
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Login failed. Please check your credentials.";
+      setToast?.(msg, "error");
     }
   };
   return (
@@ -90,6 +100,7 @@ const Userlogin = ({ setUser, setToast }) => {
               onShowSignup={handleShowSignup}
               setUser={setUser}
               onSubmit={handleLogin}
+              setToast={setToast}
             />
           ) : (
             <SignupComp
@@ -97,6 +108,7 @@ const Userlogin = ({ setUser, setToast }) => {
               onShowLogin={handleShowLogin}
               setUser={setUser}
               onSubmit={handleSignup}
+              setToast={setToast}
             />
           )}
         </div>

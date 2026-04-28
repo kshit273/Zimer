@@ -1,10 +1,43 @@
+import { useState } from "react";
+import axios from "axios";
+
 const PGCard = ({ pg, onClick }) => {
+  const [toast, setToast] = useState(null);
   const pgName      = pg?.pgName           || "Ajanta PG";
   const address     = pg?.address          || "C33J+88Q Maya PG, Bagryal Village, Near DIT College, Dehradun";
   const coverPhoto  = pg?.coverPhoto       || null;
   const emptyRooms  = pg?.emptyRoomsCount  ?? "—";
   const pendingRent = pg?.pendingRentCount ?? "—";
   const RID         = pg?.RID              || "N/A";
+
+  const handleInviteLink = async (e, PGID) => {
+    e.stopPropagation(); // Prevent clicking the card
+    const API_BASE = "http://localhost:5000";
+    try {
+      const res = await axios.post(
+        `${API_BASE}/pgs/generate-tenant-token`,
+        { PGID },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true
+        }
+      );
+
+      const data = res.data;
+      if (data.inviteLink) {
+        await navigator.clipboard.writeText(data.inviteLink);
+        setToast("Link copied!");
+        setTimeout(() => setToast(null), 3000);
+      } else {
+        setToast("Error");
+        setTimeout(() => setToast(null), 3000);
+      }
+    } catch (error) {
+      console.error(error);
+      setToast("Failed to copy link");
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
 
   return (
     <div
@@ -33,12 +66,22 @@ const PGCard = ({ pg, onClick }) => {
         )}
 
         {/* RID pill */}
-        <div className="absolute bottom-2 left-2 right-2">
+        <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1 justify-between items-center">
           <div className="bg-[#0a0a0a]/90 backdrop-blur-sm px-1.5 py-0.5 rounded-sm text-center">
             <span className="text-[0.7rem] tracking-[0.12em] text-[#555550] uppercase truncate block">
               {RID}
             </span>
           </div>
+          
+          <button
+            onClick={(e) => handleInviteLink(e, RID)}
+            className="bg-[#0a0a0a]/90 backdrop-blur-sm px-2 py-0.5 rounded-sm hover:bg-[#d72638] transition-colors relative"
+            title="Copy Invite Link"
+          >
+            <span className="text-[0.6rem] tracking-[0.12em] text-[#e8e8e0] uppercase truncate block">
+              {toast ? toast : "Invite"}
+            </span>
+          </button>
         </div>
       </div>
 

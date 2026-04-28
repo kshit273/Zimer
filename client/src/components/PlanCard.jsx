@@ -110,24 +110,6 @@ const PlanCard = ({ title, price, list, priBg, secBg, line }) => {
           ))}
         </div>
       </div>
-      <div
-        className={`flex items-center justify-center ${
-          isMedScreen ? `pt-[30px]` : isSmallScreen ? `pt-[15px]` : `pt-[55px]`
-        } `}
-      >
-        <button
-          style={{ background: secBg, color: priBg }}
-          className={`${
-            isMedScreen
-              ? `h-[50px] w-[180px] text-[17px]`
-              : isSmallScreen
-              ? `h-[25px] w-[90px] text-[9px]`
-              : `h-[65px] w-[210px] text-[20px]`
-          } transform rounded-full  font-medium hover:scale-105 transition duration-500`}
-        >
-          Choose plan
-        </button>
-      </div>
     </div>
   );
 };

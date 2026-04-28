@@ -455,7 +455,7 @@ const handleBookingRequest = async () => {
           <div className="rightInfo min-w-[485px] max-w-[485px]">
             <div className="sticky top-[150px] flex flex-col gap-[20px]">
               {/* <OwnerCard LID={pgData?.LID} /> */}
-              <MapComp RID={RID} />
+              <MapComp plan={pgData?.plan} location={pgData?.location} />
             </div>
           </div>
         </div>

@@ -45,7 +45,7 @@ const MapPreview = ({ address, pincode, onLocationSelect, onAddressSelect }) => 
         });
       }
 
-      // Add click listener - this is the ONLY way to place a pin
+      // Add click listener 
       if (!clickListenerRef.current) {
         clickListenerRef.current = mapInstance.current.addListener("click", (e) => {
           const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() };

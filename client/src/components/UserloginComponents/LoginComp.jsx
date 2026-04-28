@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const LoginComp = ({ onSubmit, onShowSignup, setUser }) => {
+const LoginComp = ({ onSubmit, onShowSignup, setUser, setToast }) => {
   // local state for inputs
   const [formData, setFormData] = useState({
     email: "",
@@ -29,13 +29,18 @@ const LoginComp = ({ onSubmit, onShowSignup, setUser }) => {
   };
 
   // handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      onSubmit(formData);
+      await onSubmit(formData);
       return true;
-    } catch {
-      console.error("Error during signup submission");
+    } catch (err) {
+      console.error("Error during login submission", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Login failed. Please try again.";
+      setToast?.(msg, "error");
     }
   };
 

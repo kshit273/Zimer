@@ -89,6 +89,36 @@ const transformFormData = (formData, LID, files = {}) => {
     }
   }
 
+  // Parse location (lat/lng) if provided
+  // Client sends JSON stringified value (either [lat,lng] or {lat,lng})
+  let location = formData.location;
+  if (typeof location === "string") {
+    try {
+      location = JSON.parse(location);
+    } catch (err) {
+      location = null;
+    }
+  }
+
+  const toGeoPoint = (loc) => {
+    if (!loc) return undefined;
+    // [lat, lng]
+    if (Array.isArray(loc) && loc.length === 2) {
+      const lat = Number(loc[0]);
+      const lng = Number(loc[1]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return undefined;
+      return { type: "Point", coordinates: [lng, lat] };
+    }
+    // {lat, lng}
+    if (typeof loc === "object" && loc !== null) {
+      const lat = Number(loc.lat);
+      const lng = Number(loc.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return undefined;
+      return { type: "Point", coordinates: [lng, lat] };
+    }
+    return undefined;
+  };
+
   return {
     RID: "",
     pgName: formData.pgName,
@@ -138,6 +168,7 @@ const transformFormData = (formData, LID, files = {}) => {
     selfCookingAllowed: formData.selfCooking === 'true',
     tiffinServiceAvailable: formData.tiffin === 'true',
     plan: "basic",
+    location: toGeoPoint(location),
   };
 };
 
@@ -411,19 +442,30 @@ exports.removeTenantsFromRoom = async (req, res) => {
 exports.generateToken = async (req, res) => {
   try {
     const { PGID, roomId } = req.body;
-    const userId = req.user.id;
-
+    const userId = req.user.id || req.user._id;
 
     // fetch PG using RID
     const pg = await PG.findOne({ RID: PGID });
     if (!pg) return res.status(404).json({ error: "PG not found" });
 
-    if (pg.LID.toString() !== userId){
+    const isAdmin = req.user.role === "admin";
+    if (!isAdmin && pg.LID.toString() !== userId.toString()){
       return res.status(400).json({error:"User not authorized"});
     }
 
-    const room = pg.rooms.find(r => r.roomId === roomId);
-    if (!room) return res.status(404).json({ error: "Room not found" });
+    let room;
+    if (roomId) {
+      room = pg.rooms.find(r => r.roomId === roomId);
+      if (!room) return res.status(404).json({ error: "Room not found" });
+    } else {
+      room = pg.rooms.find(r => {
+        let cap = r.roomType === "single" ? 1 : r.roomType === "double" ? 2 : r.roomType === "triple" ? 3 : r.roomType === "quad" ? 4 : Infinity;
+        return r.tenants.length < cap;
+      });
+      if (!room) return res.status(400).json({ error: "No available rooms in this PG" });
+    }
+
+    const targetRoomId = room.roomId;
 
     // calculate capacity
     let capacity;
@@ -445,7 +487,7 @@ exports.generateToken = async (req, res) => {
     const invite = new Invite({
       token,
       PGID: pg.RID,
-      roomId,
+      roomId: targetRoomId,
       maxJoins,
       expiresAt: new Date(Date.now() + 7*24*60*60*1000), // 7 days
     });
