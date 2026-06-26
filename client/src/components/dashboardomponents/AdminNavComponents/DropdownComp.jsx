@@ -4,6 +4,7 @@ import JRNotification from "./JRNotification";
 import LRNotification from "./LRNotification";
 import AdminCPRNotification from "./AdminCPRNotification";
 import AdminNotification from "./AdminNotification";
+import KRNotification from "./KRNotification";
 
 // Accent colours per heading type
 const TYPE_COLOR = {
@@ -13,6 +14,7 @@ const TYPE_COLOR = {
   General:   "text-[#800080]  border-[#800080]/20  bg-[#800080]/5",
   Requests:   "text-[#3b82f6]  border-[#3b82f6]/20  bg-[#3b82f6]/5",
   Notifications:   "text-[#eab308]  border-[#eab308]/20  bg-[#eab308]/5",
+  Kick: "text-[#60a5fa]  border-[#60a5fa]/20  bg-[#60a5fa]/5",
 };
 const BADGE_COLOR = {
   Booking: "bg-[#c8f135]  text-[#0a0a0a]",
@@ -21,6 +23,7 @@ const BADGE_COLOR = {
   General:   "bg-[#800080]  text-[#0a0a0a]",
   Requests:  "bg-[#3b82f6]  text-[#0a0a0a]",
   Notifications: "bg-[#eab308]  text-[#0a0a0a]",
+  Kick: "bg-[#60a5fa]  text-[#0a0a0a]",
 };
 const DOT_COLOR = {
   Booking: "bg-[#c8f135]",
@@ -29,9 +32,10 @@ const DOT_COLOR = {
   General:   "bg-[#800080]",
   Requests:  "bg-[#3b82f6]",
   Notifications: "bg-[#eab308]",
+   Kick: "bg-[#60a5fa]",
 };
 
-const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit, onNotificationRead }) => {
+const DropdownComp = ({ heading, data, onBRResponse, onZTRSSubmit, onNotificationRead, onKRAccept }) => {
   const [open, setOpen]     = useState(false);
   const [isRead, setIsRead] = useState(false);
 
@@ -136,6 +140,10 @@ const handleToggle = () => {
           {heading === "Notifications" &&
             data.map((item, i) => (
               <AdminNotification key={i} data={item} onRead={onNotificationRead} />
+            ))}
+          {heading === "Kick" &&
+            data.map((item, i) => (
+              <KRNotification key={i} data={item} onAccept={onKRAccept} />
             ))}
         </div>
       )}

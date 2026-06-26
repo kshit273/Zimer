@@ -2,6 +2,7 @@ import React from "react";
 
 const RoomsHistoryTemp = ({ data }) => {
   let formattedDate = "Unknown Date"; // default fallback
+  let formattedDate2 = "Unknown Date"; // default fallback
 
   if (data?.joinDate) {
     const newDate = new Date(data.joinDate);
@@ -14,6 +15,24 @@ const RoomsHistoryTemp = ({ data }) => {
 
       // Format date nicely (e.g., "22 October 2025")
       formattedDate = dateTime.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+  }
+
+    if (data?.leaveDate) {
+    const newDate2 = new Date(data.leaveDate);
+
+    // Check if it's a valid date
+    if (!isNaN(newDate2.getTime())) {
+      const basicFormattedDate2 = newDate2.toISOString().split("T")[0];
+      const basicFormattedTime2 = newDate2.toTimeString().split(" ")[0];
+      const dateTime2 = new Date(`${basicFormattedDate2}T${basicFormattedTime2}`);
+
+      // Format date nicely (e.g., "22 October 2025")
+      formattedDate2 = dateTime2.toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -42,26 +61,26 @@ const RoomsHistoryTemp = ({ data }) => {
           <div className="w-[450px]">
             <p className="text-[#5c5c5c] text-[18px]">{data.address}</p>
           </div>
-          <div className="">
+          {/* <div className="">
             <p className="text-[#5c5c5c] text-[18px] font-medium">Owned by {data.landlordFirstName + " " +  data.landlordLastName}</p>
-          </div>
-          <div className="flex gap-2">
+          </div> */}
+          {/* <div className="flex gap-2">
             <button className="px-6 py-2 bg-gradient-to-r from-[#d72638] to-[#ff0084] text-[15px] text-white font-normal rounded-full">
               Message
             </button>
-            {/* <button className="p-2 border-[1px] border-[#1a1a1a] rounded-full">
+            <button className="p-2 border-[1px] border-[#1a1a1a] rounded-full">
               <img
                 src="../images/call.png"
                 alt=""
                 className="h-[20px] w-[20px]"
               />
-            </button> */}
-          </div>
+            </button>
+          </div> */}
         </div>
       </div>
       <div className="flex flex-col items-start justify-end">
         <div className="p-4 pb-0 pl-0 rounded-full text-[#464646]">
-          Joined from {formattedDate}
+          Joined from {formattedDate} <b>and</b> Left on {formattedDate2}
         </div>
       </div>
     </div>

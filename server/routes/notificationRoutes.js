@@ -8,7 +8,10 @@ const {
   getNotifications,
   updateNotificationStatus,
   acceptJoinRequest,
-  acceptLeaveRequest, 
+  acceptLeaveRequest,
+  acceptKickRequest,
+  createKickRequest,
+  getKickRequests, 
 } = require("../controllers/notificationController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -23,6 +26,9 @@ router.post('/join-request/:notificationId/accept', authMiddleware, acceptJoinRe
 router.post('/leave-request/:notificationId/accept', authMiddleware, acceptLeaveRequest);
 router.post('/join-request', authMiddleware, createJoinRequest);
 router.patch('/:notificationId/status', authMiddleware, updateNotificationStatus);
+router.post("/kick-request", authMiddleware, createKickRequest);
+router.get("/kick-request", authMiddleware, getKickRequests);
+router.put("/kick-request/:notificationId/accept", authMiddleware, acceptKickRequest);
 // router.post("/pg-edit", authMiddleware, pgEditNotification);
 // router.post("/report-pg", authMiddleware, pgReportNotification);
 

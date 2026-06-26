@@ -35,6 +35,10 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
   const [lrLoading,     setLrLoading]     = useState(false);
   const [lrError,       setLrError]       = useState(null);
 
+  const [krData,     setKrData]     = useState([]);
+  const [krLoading,  setKrLoading]  = useState(false);
+  const [krError,    setKrError]    = useState(null);
+
   const [reqData,       setReqData]       = useState([]);
   const [reqLoading,    setReqLoading]    = useState(false);
   const [reqError,      setReqError]      = useState(null);
@@ -152,6 +156,23 @@ const AdminDashboard = ({ adminUser, setAdminUser }) => {
     fetchJRData();
   }, []);
 
+  useEffect(() => {
+  const fetchKRData = async () => {
+    setKrLoading(true);
+    setKrError(null);
+    try {
+      const res = await adminAxios.get("/notifications/kick-requests");
+      setKrData(res.data.notifications || []);
+    } catch (err) {
+      setKrError(err?.response?.data?.message || "Failed to load kick requests.");
+    } finally {
+      setKrLoading(false);
+    }
+  };
+
+  fetchKRData();
+  }, []);
+
   // ── Fetch Leave Request notifications (pending_ztrs) ──
   useEffect(() => {
     if (!adminUser?.managedPGs?.length) return;
@@ -237,6 +258,22 @@ const handleZTRSUpdation = async (tenantId, RID, reason, ztrs, notificationId) =
   } catch (err) {
     console.error("Failed to submit ZTRS:", err);
     return { success: false, error: err?.response?.data?.message || "Failed to submit ZTRS" };
+  }
+};
+
+const handleKRAccept = async (tenantIds, RID, reason, ztrs, notificationId) => {
+  try {
+    // Submit ZTRS for each tenant being kicked
+    for (const tenantId of tenantIds) {
+      await adminAxios.post("/admin/ztrs", { tenantId, RID, reason, ztrs, notificationId });
+    }
+    // Accept the kick request — this triggers actual tenant removal
+    await adminAxios.put(`/notifications/kick-request/${notificationId}/accept`);
+    setKrData((prev) => prev.filter((item) => item._id !== notificationId));
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to accept kick request:", err);
+    return { success: false, error: err?.response?.data?.message || "Failed to accept kick request" };
   }
 };
 
@@ -440,6 +477,13 @@ const handleNotificationRead = async (id) => {
                   loading={reqLoading}
                   error={reqError}
                 />
+                <DropdownComp
+  heading="Kick"
+  data={krData}
+  loading={krLoading}
+  error={krError}
+  onKRAccept={handleKRAccept}
+/>
                 <DropdownComp
                   heading="Notifications"
                   data={notifData}

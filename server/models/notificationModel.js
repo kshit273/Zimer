@@ -5,20 +5,21 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["announcement", "join_request", "leave_request", "rent_paid"],
+      enum: ["announcement", "join_request", "leave_request", "rent_paid", "kick_request"],
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: 'senderModel', 
+      refPath: 'senderModel',
     },
     senderModel: {
       type: String,
       required: true,
-      enum: ['Tenant', 'Landlord'], 
+      enum: ['Tenant', 'Landlord'],
       default: function() {
         if (this.type === 'announcement') return 'Landlord';
         if (this.type === 'join_request' || this.type === 'leave_request') return 'Tenant';
+        if (this.type === 'kick_request') return 'Landlord';
         return 'Landlord';
       }
     },
@@ -26,13 +27,23 @@ const notificationSchema = new mongoose.Schema(
       {
         recipientId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Tenant",
           required: true,
+          refPath: 'recipients.recipientModel',
+        },
+        recipientModel: {
+          type: String,
+          required: true,
+          enum: ['Tenant', 'Admin'],
+          default: 'Tenant',
+        },
+        isRead: {
+          type: Boolean,
+          default: false,
         },
       },
     ],
     pg: {
-      type: String,  
+      type: String,
       ref: "PG",
       required: true,
     },
@@ -42,10 +53,10 @@ const notificationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected","sent","pending_ztrs"],
+      enum: ["pending", "accepted", "rejected", "sent", "pending_ztrs"],
       default: function () {
         if (this.type === "announcement") return "sent";
-        if (this.type === "join_request" || this.type === "leave_request")
+        if (this.type === "join_request" || this.type === "leave_request" || this.type === "kick_request")
           return "pending";
         return "sent";
       },
@@ -61,6 +72,8 @@ const notificationSchema = new mongoose.Schema(
       moveOutDate: Date,
       inviteToken: String,
       reason: String,
+      tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" },
+      tenantIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }],
     },
   },
   {
@@ -68,7 +81,6 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
-// Index for efficient queries
 notificationSchema.index({ "recipients.recipientId": 1, createdAt: -1 });
 notificationSchema.index({ pg: 1, type: 1, createdAt: -1 });
 notificationSchema.index({ sender: 1, type: 1, status: 1 });

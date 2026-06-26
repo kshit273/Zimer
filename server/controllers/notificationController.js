@@ -422,6 +422,161 @@ exports.acceptLeaveRequest = async (req, res) => {
   }
 };
 
+// create kick request
+exports.createKickRequest = async (req, res) => {
+  try {
+    const { pgId, roomNumber, tenantIds, reason, moveOutDate } = req.body;
+    const landlordId = req.user.id;
+
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({ error: "tenantIds must be a non-empty array" });
+    }
+
+    const pg = await PG.findOne({ RID: pgId });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    if (pg.LID.toString() !== landlordId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const tenants = await Tenant.find({ _id: { $in: tenantIds } });
+    const tenantNames = tenants.map(t => `${t.firstName} ${t.lastName}`).join(", ");
+
+    const notification = await Notification.create({
+      type: "kick_request",
+      sender: landlordId,
+      senderModel: "Landlord",
+      recipients: [{
+        recipientId: pg.AID,
+        recipientModel: "Admin",
+        isRead: false,
+      }],
+      pg: pg.RID,
+      message: `Landlord has requested to remove ${tenantNames || tenantIds.length + " tenant(s)"} from room ${roomNumber} at ${pg.pgName}`,
+      status: "pending",
+      metadata: {
+        roomId: roomNumber,
+        tenantIds,
+        reason,
+        moveOutDate,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Kick request sent to admin",
+      notification,
+    });
+  } catch (error) {
+    console.error("Create kick request error:", error);
+    res.status(500).json({ error: "Failed to create kick request" });
+  }
+};
+
+// get kick requests for admin
+exports.getKickRequests = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+
+    const notifications = await Notification.find({
+      type: "kick_request",
+      status: "pending",
+      "recipients.recipientId": adminId,
+    }).sort({ createdAt: -1 });
+
+    res.json({ success: true, notifications });
+  } catch (error) {
+    console.error("Get kick requests error:", error);
+    res.status(500).json({ error: "Failed to fetch kick requests" });
+  }
+};
+
+// accept kick request
+exports.acceptKickRequest = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const adminId = req.user.id;
+
+    const notification = await Notification.findById(notificationId);
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found" });
+    }
+
+    if (notification.type !== "kick_request") {
+      return res.status(400).json({ error: "Invalid notification type" });
+    }
+
+    const pg = await PG.findOne({ RID: notification.pg });
+    if (!pg) {
+      return res.status(404).json({ error: "PG not found" });
+    }
+
+    if (pg.AID.toString() !== adminId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    if (notification.status !== "pending") {
+      return res.status(400).json({ error: "Kick request already processed" });
+    }
+
+    const room = pg.rooms.find(r => r.roomId === notification.metadata.roomId);
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    const tenantIds = notification.metadata.tenantIds || [];
+
+    // Remove tenants from room
+    room.tenants = room.tenants.filter(
+      tenant => !tenantIds.some(id => id.toString() === tenant.tenantId.toString())
+    );
+    await pg.save();
+
+    // Clear currentPG / rental history for each tenant, and notify them
+    for (const tenantId of tenantIds) {
+      const tenant = await Tenant.findById(tenantId);
+      if (tenant && tenant.currentPG === pg.RID) {
+        const historyIndex = tenant.rentalHistory.findIndex(
+          history => history.RID === pg.RID && !history.leftOn
+        );
+        if (historyIndex !== -1) {
+          tenant.rentalHistory[historyIndex].leftOn = new Date();
+        }
+        tenant.currentPG = null;
+        await tenant.save();
+      }
+
+      await Notification.create({
+        type: "announcement",
+        sender: pg.LID,
+        senderModel: "Landlord",
+        recipients: [{
+          recipientId: tenantId,
+          recipientModel: "Tenant",
+          isRead: false,
+        }],
+        pg: pg.RID,
+        message: `You have been removed from room ${notification.metadata.roomId} at ${pg.pgName}.`,
+        status: "sent",
+      });
+    }
+
+    notification.status = "accepted";
+    await notification.save();
+
+    res.json({
+      success: true,
+      message: "Kick request accepted and tenant(s) removed from room",
+    });
+  } catch (error) {
+    console.error("Accept kick request error:", error);
+    res.status(500).json({ error: "Failed to accept kick request" });
+  }
+};
+
 // Create rent payment notification
 exports.createRentPaymentNotification = async (req, res) => {
   try {

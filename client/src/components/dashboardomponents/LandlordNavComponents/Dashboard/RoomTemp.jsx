@@ -88,7 +88,7 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
     setSelectedTenants([]);
   };
 
-  const handleRemoveConfirm = async () => {
+const handleRemoveConfirm = async () => {
     if (selectedTenants.length === 0) {
       setToast("Please select at least one tenant to remove", "error");
       return;
@@ -98,49 +98,36 @@ const RoomTemp = ({ roomId, roomType, tenants = [], rent, amenities = [], securi
     const API_BASE = "http://localhost:5000";
 
     try {
-      // Step 1: Clear currentPG from User model
-      const userResponse = await fetch(`${API_BASE}/auth/clear-tenant-pg`, {
+      const kickResponse = await fetch(`${API_BASE}/notifications/kick-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          tenantIds: selectedTenants
+          pgId: PGID,
+          roomNumber: roomId,
+          tenantIds: selectedTenants,
+          reason: "Landlord kicked out",
+          moveOutDate: new Date(),
         }),
       });
 
-      if (!userResponse.ok) {
-        const errorData = await userResponse.json();
-        throw new Error(errorData.error || "Failed to clear tenant PG data");
+      if (!kickResponse.ok) {
+        const errorData = await kickResponse.json();
+        throw new Error(errorData.error || "Failed to create kick request");
       }
 
-      // Step 2: Remove tenants from PG room
-      const pgResponse = await fetch(`${API_BASE}/pgs/remove-tenants`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          PGID,
-          roomId,
-          tenantIds: selectedTenants
-        }),
-      });
+      const kickData = await kickResponse.json();
+      setToast(kickData.message || "Kick request sent to admin", "success");
 
-      if (!pgResponse.ok) {
-        const errorData = await pgResponse.json();
-        throw new Error(errorData.error || "Failed to remove tenants from room");
-      }
-
-      const pgData = await pgResponse.json();
-      setToast(pgData.message || "Tenants removed successfully", "success");
-      
       setShowRemoveModal(false);
       setSelectedTenants([]);
-      
-      // Trigger parent component to reload data
+
       if (onRoomUpdate) {
         onRoomUpdate();
       }
     } catch (error) {
-      console.error("Error removing tenants:", error);
-      setToast("Failed to remove tenants: " + error.message, "error");
+      console.error("Error creating kick request:", error);
+      setToast("Failed to create kick request: " + error.message, "error");
     } finally {
       setIsRemoving(false);
     }

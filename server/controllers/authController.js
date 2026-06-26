@@ -1106,45 +1106,53 @@ exports.clearTenantPG = async (req, res) => {
       });
     }
 
-    const landlordId = req.user.id; // Get landlord ID from authMiddleware
+    const landlordId = req.user.id;
 
-    // Fetch tenants to validate their currentPG
     const tenants = await Tenant.find({
       _id: { $in: tenantIds },
-      currentPG: { $exists: true, $ne: null }, // Ensure currentPG exists
-    }).select("currentPG");
+      currentPG: { $exists: true, $ne: null },
+    });
 
-    // Filter tenants whose currentPG belongs to the landlord
     const validTenantIds = [];
+
     for (const tenant of tenants) {
-      const pg = await pgModel.findOne({ RID: tenant.currentPG, LID: landlordId });
-      if (pg) {
-        validTenantIds.push(tenant._id);
-      }
-    }
-
-    if (validTenantIds.length === 0) {
-      return res.status(403).json({
-        success: false,
-        message: "No tenants found with PGs owned by the current landlord",
+      const pg = await pgModel.findOne({
+        RID: tenant.currentPG,
+        LID: landlordId,
       });
-    }
 
-    // Update tenants to clear their currentPG field
-    const result = await Tenant.updateMany(
-      { _id: { $in: validTenantIds } },
-      { $unset: { currentPG: "" } }
-    );
+      if (!pg) continue;
+
+      // Update leftOn in rental history
+      const historyIndex = tenant.rentalHistory.findIndex(
+        (history) =>
+          history.RID === tenant.currentPG &&
+          (!history.leftOn || history.leftOn === null)
+      );
+
+      if (historyIndex !== -1) {
+        tenant.rentalHistory[historyIndex].leftOn = new Date();
+      }
+
+      // Remove current PG and landlord
+      tenant.currentPG = undefined;
+      tenant.currentLandlord = undefined;
+
+      await tenant.save();
+
+      validTenantIds.push(tenant._id);
+    }
 
     res.status(200).json({
       success: true,
-      message: `${result.nModified} tenants' current PG cleared successfully`,
+      message: `${validTenantIds.length} tenants removed successfully`,
     });
   } catch (error) {
-    console.error("Error clearing tenants' current PG:", error);
+    console.error("Error clearing tenants:", error);
+
     res.status(500).json({
       success: false,
-      message: "Failed to clear tenants' current PG. Please try again later.",
+      message: "Failed to clear tenants. Please try again later.",
     });
   }
 };

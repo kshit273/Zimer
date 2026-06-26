@@ -19,7 +19,7 @@ const tenantSchema = new mongoose.Schema(
         roomId: { type: String, required: true },
         rent: { type: Number, required: true },
         joinedFrom: { type: Date, required: true },
-        leftOn: { type: Date, required: true },
+        leftOn: { type: Date, default: null },
       },
     ],
     currentPG: { type: String },

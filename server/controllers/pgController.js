@@ -39,7 +39,7 @@ exports.getPGByIdToShow = async (req, res) => {
   try {
     const pg = await PG.findOne({ RID: req.params.pgId }).select("-rooms.tenants"); 
     if (!pg) return res.status(404).json({ error: "PG not found" });
-
+    console.log("Pg found:",pg);
     res.json(pg);
   } catch (err) {
     res.status(500).json({ error: "Error getting PG" });
@@ -399,7 +399,7 @@ exports.removeTenantsFromRoom = async (req, res) => {
       return res.status(404).json({ error: "PG not found" });
     }
 
-    if (pg.LID !== userId){
+    if (pg.LID.toString() !== userId.toString()){
       return res.status(400).json({error:"User not authorized"});
     }
 
@@ -705,6 +705,7 @@ exports.getTenantPGData = async (req, res) => {
         break;
       }
     }
+
 
     if (!userRoomData || !userTenantData) {
       return res.status(404).json({ error: "Tenant data not found in PG" });

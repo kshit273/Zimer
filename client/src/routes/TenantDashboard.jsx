@@ -39,6 +39,7 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
     profilePicture: user?.profilePicture || "",
     password: "",
     currentPG: user?.currentPG || "", 
+    rentalHistory: user?.rentalHistory || [],
     currentLandlord: user?.currentLandlord || "",
     savedPGs: user?.savedPGs || [],
   });
@@ -152,46 +153,46 @@ const TenantDashboard = ({ user, setUser, setToast }) => {
 
   useEffect(() => {
     const fetchRentalHistory = async () => {
-      if (!rentalHistory || rentalHistory.length === 0 || typeof rentalHistory[0] !== 'string') {
-        return; // Exit if no RIDs or already processed
+      if (!formData.rentalHistory || formData.rentalHistory.length === 0) {
+        return; 
       }
       
       try {
         // Fetch all PG data for the rental history RIDs
-        const pgPromises = rentalHistory.map(rid => 
-          axios.get(`http://localhost:5000/pgs/${rid}`, { withCredentials: true })
+        const pgPromises = formData.rentalHistory.map(rid => 
+          axios.get(`http://localhost:5000/pgs/show-data/${rid.RID}`, { withCredentials: true })
         );
         
         const pgResponses = await Promise.all(pgPromises);
         
         // Extract PG data and landlord IDs
         const pgsData = pgResponses.map(res => res.data);
-        const landlordIds = pgsData.map(pg => pg.LID);
+        // const landlordIds = pgsData.map(pg => pg.LID);
         
         // Fetch landlord data for all PGs
-        const landlordsResponse = await axios.post(
-          "http://localhost:5000/auth/tenants-batch",
-          { tenantIds: landlordIds },
-          { withCredentials: true }
-        );
+        // const landlordsResponse = await axios.post(
+        //   "http://localhost:5000/auth/tenants-batch",
+        //   { tenantIds: landlordIds },
+        //   { withCredentials: true }
+        // );
         
-        const { tenants: landlords } = landlordsResponse.data;
-        // console.log(landlords)
+        // const { tenants: landlords } = landlordsResponse.data;
         
         // Combine PG data with landlord data
         const completeRentalHistory = pgsData.map((pg,i) => {
           // Find the matching landlord by comparing LID with landlord's _id
-          const landlord = landlords.find(l => l._id === pg.LID || l._id === pg.LID.toString());
+          // const landlord = landlords.find(l => l._id === pg.LID || l._id === pg.LID.toString());
           
           return {
             RID: pg.RID,
             pgName: pg.pgName,
             address: pg.address,
             coverPhoto: pg.coverPhoto,
-            landlordFirstName: landlord?.firstName || "",
-            landlordLastName: landlord?.lastName || "",
-            landlordPhone: landlord?.phone || "",
-            joinDate: joinAndLeaveDates[i].joinedFrom || "not available"
+            // landlordFirstName: landlord?.firstName || "",
+            // landlordLastName: landlord?.lastName || "",
+            // landlordPhone: landlord?.phone || "",
+            joinDate: formData.rentalHistory[i].joinedFrom || "not available",
+            leaveDate: formData.rentalHistory[i].leftOn || "not yet",
           };
         });
         

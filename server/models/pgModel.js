@@ -141,6 +141,7 @@ const pgSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number],
+        default: [0,0],
         validate: {
           validator: function (arr) {
             return !arr || (Array.isArray(arr) && arr.length === 2);
